@@ -1,0 +1,135 @@
+// import 'dart:ffi';
+// import 'dart:io';
+
+// import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:gymshood/main.dart';
+import 'package:gymshood/pages/TabBarPages.dart/AboutTabBar.dart';
+import 'package:gymshood/pages/TabBarPages.dart/equipmentTabBar.dart';
+import 'package:gymshood/pages/TabBarPages.dart/photostabbar.dart';
+import 'package:gymshood/pages/TabBarPages.dart/reviewsTabBar.dart';
+import 'package:gymshood/pages/TabBarPages.dart/videoTabbar.dart';
+
+class ProfilePage extends StatefulWidget {
+  const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage>  with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  // late String? _image;
+  @override
+  void initState() {
+    _tabController = TabController(length: 5, vsync: this);
+    _tabController.index=0;
+    super.initState();
+  }
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+  Widget _buildTab(String label){
+    return Tab(
+      child: Text(label,style: TextStyle(letterSpacing: 1 , ),),
+    );
+  }
+  @override
+  Widget build(BuildContext context) {
+    mq=MediaQuery.of(context).size;
+    return Scaffold(
+       appBar: AppBar(
+        backgroundColor: Theme.of(context).primaryColor,
+        title: 
+        Text("Profile" , style:
+         TextStyle(color: Colors.white),),
+         centerTitle: true,
+      ),
+      backgroundColor: Colors.white,
+      body: Column(
+        spacing: mq.height*0.01,
+        children: [
+          SizedBox(height: mq.height*0.01,),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          ClipRRect(
+                          borderRadius: BorderRadius.circular(mq.height* .1),
+                          child: 
+                            Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.grey)
+                              ),
+                              child: Icon(CupertinoIcons.person , size: mq.height*0.1,)
+                              ),
+                          ),
+                        ],
+                      ),
+                    
+                  Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("GYM NAME", 
+                          style: 
+                          TextStyle(
+                            color: Colors.black , fontWeight: FontWeight.bold , fontSize: mq.height*0.025),),
+                      ],
+                    ), Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("Gym slogan" , style: TextStyle(),),
+                      ],
+                    ),
+                    Padding(
+                      padding:  EdgeInsets.only(left: mq.width*0.1),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Icon(Icons.star , color: Colors.amber,),
+                          Text("4.5"),
+                          SizedBox(width: mq.width*0.45,),
+                          Text("16 Followers"),
+                        ],
+                      ),
+                    ),
+                  Container(
+                    color: Theme.of(context).primaryColor,
+                    child: TabBar(
+                      controller: _tabController,
+                      tabs: [
+                        _buildTab("PHOTO"),
+                        _buildTab("VIDEO"),
+                        _buildTab("EQUIPMENT"),
+                        _buildTab("REVIEWS"),
+                        _buildTab("ABOUT")
+
+                      ],
+                      isScrollable: true,
+                      labelColor: Colors.white,
+                      unselectedLabelColor: Colors.grey,
+                      indicatorColor: Colors.white,
+                      ),
+                  ),
+            Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                PhotosTabBar(),
+                VideoTabBar(),
+                EquipmentTabBar(),
+                ReviewsTabBar(),
+                AboutTabBar()
+                
+              ],
+            ),
+          ),
+                ],
+              ),
+      );
+  }
+}
