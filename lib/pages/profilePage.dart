@@ -92,7 +92,7 @@ class _ProfilePageState extends State<ProfilePage>  with SingleTickerProviderSta
                         children: [
                           Icon(Icons.star , color: Colors.amber,),
                           Text("4.5"),
-                          SizedBox(width: mq.width*0.45,),
+                          SizedBox(width: mq.width*0.75,),
                           Text("16 Followers"),
                         ],
                       ),

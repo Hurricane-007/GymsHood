@@ -19,7 +19,8 @@ class AuthEventLogIn extends AuthEvent{
 class AuthEventRegister extends AuthEvent {
   final String email;
   final String password;
-  const  AuthEventRegister({required this.email, required this.password});
+  final String name;
+  const  AuthEventRegister({required this.email, required this.password,required this.name});
 }
 
 class AuthEventForgotPassword extends AuthEvent{
