@@ -39,7 +39,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       if(response == "Successfull"){
         emit(AuthStateLoggedOut(error: null));
        }else{
-        emit(AuthStateVerifyOtp(error: response));
+        emit(AuthStateNeedsVerification());
        }
     },);
     // on<AuthEventInitialize>((event, emit) async{

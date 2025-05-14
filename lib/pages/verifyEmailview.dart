@@ -4,10 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gymshood/Utilities/Dialogs/error_dialog.dart';
+import 'package:gymshood/Utilities/generic/argument.dart';
 import 'package:gymshood/main.dart';
 import 'package:gymshood/sevices/Auth/bloc/auth_bloc.dart';
+import 'package:gymshood/sevices/Auth/bloc/auth_event.dart';
 // import 'package:gymshood/sevices/Auth/bloc/auth_event.dart';
 import 'package:gymshood/sevices/Auth/bloc/auth_state.dart';
+import 'package:gymshood/sevices/Auth/server_provider.dart';
 // import 'package:gymshood/sevices/Auth/server_provider.dart';
 
 class VerifyEmailView extends StatefulWidget {
@@ -59,6 +62,7 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
   @override
   Widget build(BuildContext context) {
     mq = MediaQuery.of(context).size;
+    final email = context.getArgument<String>();
     return BlocListener<AuthBloc  , AuthState>(
       listener: (context, state) {
         if(state is AuthStateVerifyOtp){
@@ -135,9 +139,14 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
                         onPressed: () async{
                           //logic is ok we need function for backend
                           if(_canResend == true){
-                            _startCountDown();
+                            //otp ka mail bhejo
+                             _startCountDown();
+                            final provider = ServerProvider();
+                           await provider.sendverificationemail(email: email!);
+                           
                           }else{
-                            // context.read<AuthBloc>().add(AuthEventVerifyOtp(otp: otp.text, email: email));
+                            //verify karo
+                            context.read<AuthBloc>().add(AuthEventVerifyOtp(otp: otp.text, email: email!));
                           }
                         },
                         style: TextButton.styleFrom(

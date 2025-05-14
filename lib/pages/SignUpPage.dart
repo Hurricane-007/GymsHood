@@ -53,8 +53,8 @@ class _SignUpPageState extends State<SignUpPage> {
           developer.log(state.error!);
           await showErrorDialog(context, state.error!);
         } else if (state is AuthStateErrors) {
-          developer.log(state.error!);
-          await showErrorDialog(context, state.error!);
+          developer.log(state.error);
+          await showErrorDialog(context, state.error);
         } else if (state is AuthStateNeedsVerification) {
           Navigator.push(
               context,

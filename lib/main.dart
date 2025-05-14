@@ -13,7 +13,7 @@ import 'package:gymshood/sevices/Auth/bloc/auth_bloc.dart';
 import 'package:gymshood/sevices/Auth/bloc/auth_event.dart';
 import 'package:gymshood/sevices/Auth/bloc/auth_state.dart';
 import 'package:gymshood/sevices/Auth/server_provider.dart';
-import 'dart:developer' as developer;
+// import 'dart:developer' as developer;
 late Size mq;
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,16 +51,11 @@ class HomePage extends StatelessWidget {
       }else if(state is AuthStateLoggedOut){
         return const LoginPage();
       }else if(state is AuthStateNeedsVerification){
-        // developer.log("state is verifyemail");
         return const VerifyEmailView();
       }else if(state is AuthStateRegistering){
         return const SignUpPage();
-      }else if (state is AuthStateVerifyOtp){
-        // developer.log("state is verifyemail");
-        return const VerifyEmailView();
       }
       else if(state is AuthStateResetPassword){
-        // developer.log("state is verifyemail");
        return const ResetPasswordPage();
       }else if(state is AuthStateLoggedIn){
         return const BottomNavigation();

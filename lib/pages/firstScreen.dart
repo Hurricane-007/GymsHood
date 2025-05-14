@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+// import 'package:google_sign_in/google_sign_in.dart';
 import 'package:gymshood/Utilities/Dialogs/error_dialog.dart';
 import 'package:gymshood/main.dart';
 import 'package:gymshood/pages/SignUpPage.dart';
 import 'package:gymshood/pages/loginPage.dart';
-import 'package:gymshood/sevices/Auth/auth_exceptions.dart';
+// import 'package:gymshood/sevices/Auth/auth_exceptions.dart';
 import 'package:gymshood/sevices/Auth/bloc/auth_bloc.dart';
 import 'package:gymshood/sevices/Auth/bloc/auth_event.dart';
 import 'package:gymshood/sevices/Auth/bloc/auth_state.dart';
@@ -19,26 +19,26 @@ class FirstScreen extends StatefulWidget {
 }
 
 class _FirstScreenState extends State<FirstScreen> {
-  _handleGoogleSignInButton(){
-    _signInWithGoogle();
-  }
+  // _handleGoogleSignInButton(){
+  //   _signInWithGoogle();
+  // }
 
 
-final GoogleSignIn _googleSignIn = GoogleSignIn(
-  scopes: <String>[
-  'email',
-  'https://www.googleapis.com/auth/contacts.readonly',
-],
-);
+// final GoogleSignIn _googleSignIn = GoogleSignIn(
+//   scopes: <String>[
+//   'email',
+//   'https://www.googleapis.com/auth/contacts.readonly',
+// ],
+// );
  
 
-Future<void> _signInWithGoogle() async {
-  try {
-    await _googleSignIn.signIn();
-  } catch (_) {
-    throw GenericAuthException();
-  }
-}
+// Future<void> _signInWithGoogle() async {
+//   try {
+//     await _googleSignIn.signIn();
+//   } catch (_) {
+//     throw GenericAuthException();
+//   }
+// }
 
 
 

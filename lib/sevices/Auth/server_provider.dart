@@ -1,4 +1,6 @@
 
+// import 'dart:ffi';
+
 import 'package:dio/dio.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
@@ -55,7 +57,18 @@ class ServerProvider {
         // developer.log(e.toString());
       }
     }
-
+ 
+    Future<void> sendverificationemail({required String email})async{
+              await _dio.post(
+                '$baseUrl/send-otp',
+                data: {
+                  'email':email
+                },
+                options: Options(
+                  headers: {'Content-Type': 'application/json'}
+                )
+              );
+    }
 
     Future<String> verifyOTP({required String otp , required String email})
     async{
