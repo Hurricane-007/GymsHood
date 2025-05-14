@@ -10,17 +10,29 @@ class AuthEventInitialize extends AuthEvent{
   const AuthEventInitialize();
 }
 
-class AuthEventLogIn extends AuthEvent{
-  final String email;
-  final String password;
-  const AuthEventLogIn(this.email,  this.password);
-}
-
 class AuthEventRegister extends AuthEvent {
   final String email;
   final String password;
   final String name;
   const  AuthEventRegister({required this.email, required this.password,required this.name});
+}
+
+class AuthEventVerifyOtp extends AuthEvent{
+  final String otp;
+  final String email;
+  const AuthEventVerifyOtp({required this.otp, required this.email});
+}
+
+class AuthEventGoogleLogIn extends AuthEvent{
+
+  const AuthEventGoogleLogIn();
+
+}
+
+class AuthEventLogIn extends AuthEvent{
+  final String email;
+  final String password;
+  const AuthEventLogIn( {required this.email,  required this.password});
 }
 
 class AuthEventForgotPassword extends AuthEvent{
@@ -32,22 +44,9 @@ class AuthEventLogOut extends AuthEvent{
    const AuthEventLogOut();
 }
 
-class AuthEventShouldRegister extends AuthEvent{
-  const AuthEventShouldRegister();
-}
-
-class AuthEventSendEmailVerification extends AuthEvent {
-  const AuthEventSendEmailVerification();
-}
-
-class AuthEventFirstScreen extends AuthEvent{
-  const AuthEventFirstScreen();
-}
-class AuthEventSplashScreen extends AuthEvent{
-  const AuthEventSplashScreen();
-}
-class AuthEventGoogleLogIn extends AuthEvent{
-  final Exception? exception;
-  const AuthEventGoogleLogIn({required this.exception});
+class AuthEventUpdatePassword extends AuthEvent{
+  final String password;
+  final String confirmPassword;
+  const AuthEventUpdatePassword({required this.password, required this.confirmPassword});
 
 }

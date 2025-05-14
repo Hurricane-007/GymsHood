@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 
 @immutable
 class Authuser {
-   final String name;
-  final String role;
-  final String email;
-  final String phnumber;
-  final String pHash;
-  final String regDate;
-  final int walletBalance;
+  final String? name;
+  final String? role;
+  final String? email;
+  final String? phnumber;
+  final String? pHash;
+  final String? regDate;
+  final int? walletBalance;
 
  const Authuser(
   {required this.name,

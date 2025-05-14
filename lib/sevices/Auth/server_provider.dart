@@ -6,67 +6,119 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:gymshood/sevices/Auth/AuthUser.dart';
 import 'dart:developer' as developer;
 
+// import 'package:gymshood/sevices/Auth/bloc/auth_state.dart';
+
 
 
 
 class ServerProvider {
-    final String baseUrl = 'http://192.168.79.37:3000/api/v1/user';
+    final String baseUrl ='http://10.0.2.2:3000/api/v1/user';
     final Dio _dio = Dio();
     final cookieJar = CookieJar();
     ServerProvider(){
       _dio.interceptors.add(CookieManager(cookieJar));
     }
 
-    Future<void> register ( String name , String email , String password )
+    Future<String> register( String name , String email , String password )
     async{
+
+      try{
+      
       final response = await _dio.post(
         '$baseUrl/register',
         data: {
           'name' : name,
           'email' : email,
           'password': password
-        }
+        },
+        options: Options(headers: {'Content-Type': 'application/json'})
       );
       if(response.statusCode == 200){
-          developer.log("registered successfully");
+         
+          return "Successfull";
       }
       else{
-        developer.log("cannot be registered");
+        final message = response.data['message'];
+        developer.log(message);
+        return message?.toString() ?? 'unknown error';
+      }}on DioException catch(e){
+          if (e.response != null) {
+    developer.log('Error response: ${e.response?.data}');
+    return e.response?.data['message'] ?? 'Bad request';
+  } else {
+    developer.log('Dio error: ${e.message}');
+    return 'Network error';
+  }
+      }
+      catch(e){
+        return e.toString();
+        // developer.log(e.toString());
       }
     }
 
-    Future<void> verifyOTP({required String otp})async{
+
+    Future<String> verifyOTP({required String otp , required String email})
+    async{
+      try{
       final response = await _dio.post(
         '$baseUrl/verify-otp',
-        data: {'otp' : otp}
+        data: {'otp' : otp , 'email' : email},
+        options: Options(headers: {'Content-Type': 'application/json'})
       );
+    
       if(response.statusCode == 200){
-        developer.log("Account verified Succesfully");
+        return "Successfull";
       }
-      else if(response.statusCode == 404){
-        developer.log("Invalid Otp");
+      else{
+        final message = response.data['message'];
+        developer.log(message);
+        return message?.toString() ?? 'unknown error';
       }
-      else if(response.statusCode == 400){
-        developer.log("Otp Expired");
-      }
+    }on DioException catch(e){
+          if (e.response != null) {
+    developer.log('Error response: ${e.response?.data}');
+    return e.response?.data['message'] ?? 'Bad request';
+  } else {
+    developer.log('Dio error: ${e.message}');
+    return 'Network error';
+  }
+    } catch(e){
+      return e.toString();
     }
 
-    Future<void> login({required String email , required String password })async{
+    }
+
+    Future<String> login({required String email , required String password })async{
+      try{
       final response = await _dio.post("$baseUrl/login" , data: {
         'email' : email,
         'password':password,
-      });
+      }, 
+      options: Options(headers: {'Content-Type': 'application/json'}));
       if(response.statusCode == 200){
-        developer.log("User loggined succesfully");
+       return "Succesfull";
+      }else{
+        final message = response.data['message'];
+        developer.log(message);
+        return message?.toString() ?? 'unknown error';
       }
-      else if(response.statusCode == 400){
-        developer.log("Invalid Email or password");
-      }
+    }on DioException catch(e){
+          if (e.response != null) {
+    developer.log('Error response: ${e.response?.data}');
+    return e.response?.data['message'] ?? 'Bad request';
+  } else {
+    developer.log('Dio error: ${e.message}');
+    return 'Network error';
+  }
+    } catch(e){
+      return e.toString();
+    }
     }
 
 
 
-        Future<void> googleLogIn({required token})async{
+      Future<String> googleLogIn({required token})async{
+        try{
       final response = await _dio.post("$baseUrl/google-login" ,
        data: {
        {'token' : token},
@@ -77,24 +129,35 @@ class ServerProvider {
       )
       );
       if(response.statusCode == 200){
-        developer.log("User loggined succesfully");
+        return "Successfull";
       }else{
-        developer.log("some error occurred");
+        final message = response.data['message'];
+        developer.log(message);
+        return message?.toString() ?? 'unknown error';
       }
+    }on DioException catch(e){
+          if (e.response != null) {
+    developer.log('Error response: ${e.response?.data}');
+    return e.response?.data['message'] ?? 'Bad request';
+  } else {
+    developer.log('Dio error: ${e.message}');
+    return 'Network error';
+  }
+    } catch(e){
+      return e.toString();
     }
-    
+      }
 
-    final GoogleSignIn _googleSignIn = GoogleSignIn(
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
   scopes: ['email', 'profile'],
 );
 
-Future<void> signInWithGoogle() async {
+Future<String> signInWithGoogle() async {
   try {
     final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
     if (googleUser == null) {
-      developer.log("Sign in aborted by user");
-      return;
+      return "user is null";
     }
 
     final GoogleSignInAuthentication googleAuth =
@@ -103,47 +166,51 @@ Future<void> signInWithGoogle() async {
     final token = googleAuth.idToken;
 
     if (token == null) {
-      developer.log("Failed to get ID Token");
-      return;
+      return "Failed to get ID Token";
     }else{
-      await googleLogIn(token: token);
+      final String response = await googleLogIn(token: token);
+      return response;
     }
-
-    
   } catch (error) {
-    developer.log("Google Sign-In error: $error");
+    return "Google Sign-In error: $error";
   }
 }
 
-Future<void> logOut()async{
+Future<String> logOut()async{
   final response = await _dio.post('/logOut',
    options: Options(
         headers: {'Content-Type': 'application/json'},
       ),
   );
   if(response.statusCode==200){
-    developer.log("Logged Out succesfully");
+    return 'Successfull';
+  }else{
+    return response.data['message'];
   }
 }
 
 Future<Authuser> getUser()async{
-  final response = await _dio.post(
+  final response = await _dio.get(
     '/profile',
     options: Options(headers: {'Content-Type': 'application/json'})
   );
-  final user = response.data['user'];
+final user = response.data['user'];
 final Authuser authuser =   Authuser.fromJson(user);
 return authuser;
 }
 
-Future<String> forgotPassword({required String email})async{
+Future<String> forgotPassword({required String? email})async{
   final response = await _dio.post(
     '$baseUrl/forgot-password',
     data: {
       'email' : email
     }
   );
-  return response.data['message'];
+  if(response.statusCode==200){
+    return response.data['message'];
+  }else{
+    return 'An error Occurred';
+  }
 }
 
 Future <String> resetPassword({required String token , required String password , required String confirmPassword})async{
@@ -154,7 +221,11 @@ Future <String> resetPassword({required String token , required String password 
       'confirmPassword' : confirmPassword
     }  );
 
+    if(response.statusCode==200){
+    return 'Successfull';
+  }else{
     return response.data['message'];
+  }
 
 }
 
@@ -166,8 +237,11 @@ final response = await _dio.put(
     'confirmPassword' : confirmPassword
   }
 );
-
-return response.data['message'];
+if(response.statusCode==200){
+    return 'Successfull';
+  }else{
+    return response.data['message'];
+  }
 }
 
 
