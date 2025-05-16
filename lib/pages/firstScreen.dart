@@ -91,7 +91,7 @@ class _FirstScreenState extends State<FirstScreen> {
                         height: 55,
                         width: mq.width*0.6,
                         child: TextButton(onPressed: (){
-                         Navigator.push(context, MaterialPageRoute(builder: (context) => const SignUpPage(),));
+                         context.read<AuthBloc>().add(Autheventjustgotosignup());
                         },
                          style: TextButton.styleFrom(
                           
@@ -122,7 +122,7 @@ class _FirstScreenState extends State<FirstScreen> {
                         height: 55,
                         width: mq.width*0.6,
                         child: TextButton(onPressed: (){
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginPage(),));
+                          context.read<AuthBloc>().add(Autheventjustgotologin());
                         },
                      
                          style: TextButton.styleFrom(

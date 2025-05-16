@@ -17,6 +17,17 @@ class AuthEventRegister extends AuthEvent {
   const  AuthEventRegister({required this.email, required this.password,required this.name});
 }
 
+class AutheventFirstScreen extends AuthEvent{
+  const AutheventFirstScreen();
+}
+
+class Autheventjustgotosignup extends AuthEvent{
+  const Autheventjustgotosignup();
+}
+class Autheventjustgotologin extends AuthEvent{
+  const Autheventjustgotologin();
+}
+
 class AuthEventVerifyOtp extends AuthEvent{
   final String otp;
   final String email;

@@ -8,22 +8,27 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:gymshood/sevices/Auth/AuthUser.dart';
 import 'dart:developer' as developer;
 
+import 'package:gymshood/sevices/Auth/auth_provider.dart';
+
 // import 'package:gymshood/sevices/Auth/bloc/auth_state.dart';
 
 
 
 
-class ServerProvider {
+class ServerProvider implements AuthProvider {
     final String baseUrl ='http://10.0.2.2:3000/api/v1/user';
     final Dio _dio = Dio();
     final cookieJar = CookieJar();
+    
     ServerProvider(){
+      developer.log('called constructor');
       _dio.interceptors.add(CookieManager(cookieJar));
+      // _dio.options.extra = {'withCredentials': true};
+      
     }
-
+@override
     Future<String> register( String name , String email , String password )
     async{
-
       try{
       
       final response = await _dio.post(
@@ -35,8 +40,8 @@ class ServerProvider {
         },
         options: Options(headers: {'Content-Type': 'application/json'})
       );
+      // developer.log('aagaya idhar');
       if(response.statusCode == 200){
-         
           return "Successfull";
       }
       else{
@@ -57,7 +62,7 @@ class ServerProvider {
         // developer.log(e.toString());
       }
     }
- 
+    @override
     Future<void> sendverificationemail({required String email})async{
               await _dio.post(
                 '$baseUrl/send-otp',
@@ -69,30 +74,32 @@ class ServerProvider {
                 )
               );
     }
-
+@override
     Future<String> verifyOTP({required String otp , required String email})
     async{
       try{
+        developer.log('main aagaya');
       final response = await _dio.post(
         '$baseUrl/verify-otp',
         data: {'otp' : otp , 'email' : email},
         options: Options(headers: {'Content-Type': 'application/json'})
       );
-    
       if(response.statusCode == 200){
+        
         return "Successfull";
       }
       else{
         final message = response.data['message'];
-        developer.log(message);
+        // developer.log(message);
         return message?.toString() ?? 'unknown error';
       }
     }on DioException catch(e){
           if (e.response != null) {
-    developer.log('Error response: ${e.response?.data}');
+    // developer.log('Error response: ${e.response?.data['message']}');
+
     return e.response?.data['message'] ?? 'Bad request';
   } else {
-    developer.log('Dio error: ${e.message}');
+    // developer.log('Dio error: ${e.message}');
     return 'Network error';
   }
     } catch(e){
@@ -100,16 +107,27 @@ class ServerProvider {
     }
 
     }
-
+@override
     Future<String> login({required String email , required String password })async{
       try{
       final response = await _dio.post("$baseUrl/login" , data: {
         'email' : email,
         'password':password,
       }, 
-      options: Options(headers: {'Content-Type': 'application/json'}));
+      options: Options(headers: {'Content-Type': 'application/json'},
+      extra: {'withCredentials': true}
+      )
+      );
+      developer.log('📬 Headers: ${response.headers}');
+      final cookies = await cookieJar.loadForRequest(Uri.parse(baseUrl));
+
+cookies.forEach((cookie) {
+  developer.log('🍪 Stored cookie: ${cookie.name}=${cookie.value}');
+}
+
+);
       if(response.statusCode == 200){
-       return "Succesfull";
+       return "Successfull";
       }else{
         final message = response.data['message'];
         developer.log(message);
@@ -129,7 +147,7 @@ class ServerProvider {
     }
 
 
-
+@override
       Future<String> googleLogIn({required token})async{
         try{
       final response = await _dio.post("$baseUrl/google-login" ,
@@ -164,7 +182,7 @@ class ServerProvider {
   final GoogleSignIn _googleSignIn = GoogleSignIn(
   scopes: ['email', 'profile'],
 );
-
+@override
 Future<String> signInWithGoogle() async {
   try {
     final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
@@ -188,7 +206,7 @@ Future<String> signInWithGoogle() async {
     return "Google Sign-In error: $error";
   }
 }
-
+@override
 Future<String> logOut()async{
   final response = await _dio.post('/logOut',
    options: Options(
@@ -201,15 +219,35 @@ Future<String> logOut()async{
     return response.data['message'];
   }
 }
-
-Future<Authuser> getUser()async{
-  final response = await _dio.get(
-    '/profile',
-    options: Options(headers: {'Content-Type': 'application/json'})
+@override
+Future<Authuser?> getUser()async{
+try{
+      final cookies = await cookieJar.loadForRequest(Uri.parse(baseUrl));
+      developer.log('➡️ Will send cookies: $cookies');
+    final response = await _dio.get(
+    '$baseUrl/profile',
+    options: Options(headers: {'Content-Type': 'application/json'},
+    extra: {'withCredentials': true},)
   );
+
+  developer.log('✅ get called');
 final user = response.data['user'];
+
 final Authuser authuser =   Authuser.fromJson(user);
-return authuser;
+developer.log(user.name);
+return authuser;}
+on DioException catch(e){
+          if (e.response != null) {
+
+    developer.log('Error response: ${e.response?.data}');
+    return null;
+  } else {
+    developer.log('Dio error: ${e.message}');
+    return null;
+  }
+    } catch(e){
+      return null ;
+    }
 }
 
 Future<String> forgotPassword({required String? email})async{
@@ -225,7 +263,7 @@ Future<String> forgotPassword({required String? email})async{
     return 'An error Occurred';
   }
 }
-
+@override
 Future <String> resetPassword({required String token , required String password , required String confirmPassword})async{
   final response = await _dio.put(
     '$baseUrl/reset-password/$token',
@@ -241,7 +279,7 @@ Future <String> resetPassword({required String token , required String password 
   }
 
 }
-
+@override
 Future<String> updatePassword({required String newPassword , required String confirmPassword})async{
 final response = await _dio.put(
   '/update-password',

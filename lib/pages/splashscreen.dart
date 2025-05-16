@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 // import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gymshood/main.dart';
 import 'package:gymshood/pages/firstScreen.dart';
+import 'package:gymshood/sevices/Auth/bloc/auth_bloc.dart';
+import 'package:gymshood/sevices/Auth/bloc/auth_event.dart';
 // import 'package:gymshood/sevices/Auth/bloc/auth_bloc.dart';
 // import 'package:gymshood/sevices/Auth/bloc/auth_event.dart';
 
@@ -20,10 +23,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
    _navigateToNextScreen() async{
     Future.delayed(const Duration(seconds: 2), (){
-      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(builder: (context) => FirstScreen()),
-                        (Route<dynamic> route) => false,);
+      context.read<AuthBloc>().add(AutheventFirstScreen());
   });
    }
 

@@ -10,6 +10,9 @@ import 'package:gymshood/pages/TabBarPages.dart/equipmentTabBar.dart';
 import 'package:gymshood/pages/TabBarPages.dart/photostabbar.dart';
 import 'package:gymshood/pages/TabBarPages.dart/reviewsTabBar.dart';
 import 'package:gymshood/pages/TabBarPages.dart/videoTabbar.dart';
+import 'package:gymshood/sevices/Auth/AuthUser.dart';
+import 'package:gymshood/sevices/Auth/auth_service.dart';
+import 'package:gymshood/sevices/Auth/server_provider.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -20,10 +23,19 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage>  with SingleTickerProviderStateMixin {
   late TabController _tabController;
+ late final Authuser? authuser;
+ String? name = 'Gym name';
+   Future<void> _getuser()async{
+        authuser = await AuthService.server().getUser();
+        if(authuser!=null){
+          name = authuser!.name!;
+        }
+   }
   // late String? _image;
   @override
   void initState() {
     _tabController = TabController(length: 5, vsync: this);
+    _getuser();
     _tabController.index=0;
     super.initState();
   }
@@ -39,6 +51,7 @@ class _ProfilePageState extends State<ProfilePage>  with SingleTickerProviderSta
   }
   @override
   Widget build(BuildContext context) {
+    
     mq=MediaQuery.of(context).size;
     return Scaffold(
        appBar: AppBar(
@@ -74,7 +87,8 @@ class _ProfilePageState extends State<ProfilePage>  with SingleTickerProviderSta
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text("GYM NAME", 
+                        Text(name!
+                          , 
                           style: 
                           TextStyle(
                             color: Colors.black , fontWeight: FontWeight.bold , fontSize: mq.height*0.025),),
@@ -85,18 +99,16 @@ class _ProfilePageState extends State<ProfilePage>  with SingleTickerProviderSta
                         Text("Gym slogan" , style: TextStyle(),),
                       ],
                     ),
-                    Padding(
-                      padding:  EdgeInsets.only(left: mq.width*0.1),
-                      child: Row(
+                      // padding:  EdgeInsets.only(left: mq.width*0.1),
+                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Icon(Icons.star , color: Colors.amber,),
                           Text("4.5"),
-                          SizedBox(width: mq.width*0.75,),
+                          Spacer(),
                           Text("16 Followers"),
                         ],
                       ),
-                    ),
                   Container(
                     color: Theme.of(context).primaryColor,
                     child: TabBar(

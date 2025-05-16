@@ -12,7 +12,9 @@ class AuthStateRegistering extends AuthState{
   final String? error;
  const AuthStateRegistering({required this.error});
 }
-
+class AuthStateSplashScreen extends AuthState{
+  const AuthStateSplashScreen();
+}
 class AuthStateForgotPassword extends AuthState{
   final String? error;
   final bool hasSendEmail;
@@ -31,6 +33,9 @@ class AuthStateVerifyOtp extends AuthState{
 class AuthStateLoggedIn extends AuthState{
   const AuthStateLoggedIn();
 }
+class AuthStateFIrst extends AuthState{
+  const AuthStateFIrst();
+}
 class AuthStateResetPassword extends AuthState{
   final String? error;
 
@@ -38,7 +43,8 @@ class AuthStateResetPassword extends AuthState{
 
 }
  class AuthStateNeedsVerification extends AuthState{
-    const AuthStateNeedsVerification();
+  final String? email;
+    const AuthStateNeedsVerification(this.email);
  }
 
  class AuthStateErrors extends AuthState{
@@ -53,9 +59,7 @@ class AuthStateLoggedOut extends AuthState{
   const AuthStateLoggedOut({required this.error});
   }
 
-class AuthStateSplashScreen extends AuthState{
-  const AuthStateSplashScreen();
-}
+
 class AuthStateGoogleLoggedIn extends AuthState{
   final String message;
   const AuthStateGoogleLoggedIn(this.message);

@@ -1,45 +1,67 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gymshood/sevices/Auth/auth_provider.dart';
 // import 'package:gymshood/sevices/Auth/AuthUser.dart';
 import 'package:gymshood/sevices/Auth/bloc/auth_event.dart';
 import 'package:gymshood/sevices/Auth/bloc/auth_state.dart';
 import 'package:gymshood/sevices/Auth/server_provider.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:developer' as developer;
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  AuthBloc(ServerProvider provider) : super(const AuthStateNeedsVerification()){
+  AuthBloc(AuthProvider provider) : super(const AuthStateSplashScreen()){
 
-    on<AuthEventRegister>((event,emit)async{
-        
-        final String email = event.email;
-        final String password = event.password;
-        final String name = event.name;
+   on<AuthEventRegister>((event, emit) async {
+  developer.log('📥 AuthEventRegister received');
 
-      final  response = await provider.register(name, email, password);
-       if(response == "Successfull"){
-        emit(AuthStateNeedsVerification());
-       }else{
-        emit(AuthStateRegistering(error: response));
-       }
-    });
+  final String email = event.email;
+  final String password = event.password;
+  final String name = event.name;
 
-    on<AuthEventInitialize>((event, emit) async{
-      final user = await provider.getUser();
-      final String? name = user.name;
+  try {
+    final response = await provider.register(name, email, password);
+    developer.log('📨 Response from provider: $response');
+
+    if (response == "Successfull") {
+      // developer.log('✅ Registration successful');
+      emit(AuthStateNeedsVerification(email));
+    } else {
+      emit(AuthStateRegistering(error: response));
+    }
+  } catch (e) {
+    // developer.log('❌ Error: ${e.toString()}');
+    emit(AuthStateRegistering(error: 'Unexpected error occurred'));
+  }
+});
+
+on<AuthEventInitialize>((event, emit) async {
+  developer.log("✅ AuthEventInitialize triggered");
+  try {
+    final user = await provider.getUser();
+    if(user!=null){
+      developer.log("User: ${user.name}");
+    emit(AuthStateLoggedIn());
+    }else{
+      developer.log(' ❌ user is null');
       emit(AuthStateSplashScreen());
-      if(name == null){
-        emit(AuthStateSplashScreen());
-      }else{
-        emit(AuthStateLoggedIn());
-      }
-    },);
+    }
+  } catch (e, st) {
+    developer.log("❌ Error in getUser: $e\n$st");
+    emit(AuthStateSplashScreen()); // fallback
+  }
+});
+
 
     on<AuthEventVerifyOtp>((event, emit) async{
       final String otp = event.otp;
       final String email = event.email ;
-      final String response = await provider.verifyOTP(otp: otp, email: email);
+       
+      final response = await provider.verifyOTP(otp: otp, email: email);
+     
+      developer.log(response);
       if(response == "Successfull"){
-        emit(AuthStateLoggedOut(error: null));
+        emit(AuthStateLoggedIn());
        }else{
-        emit(AuthStateNeedsVerification());
+        emit(AuthStateVerifyOtp(error: response));
+        // emit(AuthStateErrors(error: response));
        }
     },);
     // on<AuthEventInitialize>((event, emit) async{
@@ -49,12 +71,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthEventLogIn>((event, emit) async{
       final String email = event.email;
       final String password = event.password;
+      developer.log('called');
       final String response = 
       await provider.
       login(email: email, password: password);
+      
       if(response == 'Successfull'){
         emit(AuthStateLoggedIn());
       }else{
+        developer.log(response);
         emit(AuthStateLoggedOut(error: response));
       }
     },);
@@ -78,7 +103,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(AuthStateErrors(error: "some error occured"));
        }
     },);
-
+    on<AutheventFirstScreen>((event, emit) {
+      emit(AuthStateFIrst());
+    },);
+    on<Autheventjustgotologin>((event, emit) {
+      emit(AuthStateLoggedOut(error: null));
+    },);
+    on<Autheventjustgotosignup>((event, emit) {
+      emit(AuthStateRegistering(error:null));
+    },);
     on<AuthEventUpdatePassword>((event, emit) async{
       final String pwd = event.password;
       final String cpwd = event.confirmPassword;
@@ -91,7 +124,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         else{
             emit(AuthStateErrors(error: "Cannot update your password"));
         }
-    },);
+    },
+    
+    );
+
   }
 
   
