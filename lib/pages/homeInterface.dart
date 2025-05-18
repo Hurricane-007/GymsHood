@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gymshood/main.dart';
+import 'package:gymshood/pages/Mydrawer.dart';
 
 class HomeInterface extends StatefulWidget {
   const HomeInterface({super.key});
@@ -15,11 +16,21 @@ class _HomeInterfaceState extends State<HomeInterface> {
     return Scaffold(
         appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
+        leading: Builder(builder: (BuildContext context) {
+          return IconButton(onPressed: () {
+            Scaffold.of(context).openDrawer();
+          }, icon: const Icon(
+            Icons.dashboard,
+            color: Colors.white,
+          ));
+        },) ,
+        
         title: 
         Text("Home" , style:
          TextStyle(color: Colors.white),),
          centerTitle: true,
       ),
+      drawer: Mydrawer(),
       backgroundColor: Colors.white,
       body: ListView.builder(
         itemBuilder: (context, index) => Container(

@@ -11,11 +11,11 @@ import 'dart:developer' as developer;
 
 import 'package:gymshood/sevices/Auth/auth_provider.dart';
 import 'package:path_provider/path_provider.dart';
-
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 // import 'package:gymshood/sevices/Auth/bloc/auth_state.dart';
 
 class ServerProvider implements AuthProvider {
-  final String baseUrl = 'http://10.0.2.2:3000/api/v1/user';
+  final String? baseUrl = dotenv.env['BASE_URL'];
   late final Dio _dio;
   late final PersistCookieJar _cookieJar;
 

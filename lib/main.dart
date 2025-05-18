@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:gymshood/Themes/theme.dart';
 import 'package:gymshood/pages/SignUpPage.dart';
 import 'package:gymshood/pages/bottomNavigationBar.dart';
@@ -23,6 +24,7 @@ import 'package:uni_links/uni_links.dart';
 late Size mq;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+    await dotenv.load(fileName: ".env");
   // await Firebase.initializeApp();
   await ServerProvider().init(); // Proper initialization
 
