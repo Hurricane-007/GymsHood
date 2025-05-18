@@ -11,7 +11,7 @@ import 'package:gymshood/sevices/Auth/bloc/auth_bloc.dart';
 import 'package:gymshood/sevices/Auth/bloc/auth_event.dart';
 // import 'package:gymshood/sevices/Auth/bloc/auth_event.dart';
 import 'package:gymshood/sevices/Auth/bloc/auth_state.dart';
-import 'package:gymshood/sevices/Auth/server_provider.dart';
+// import 'package:gymshood/sevices/Auth/server_provider.dart';
 // import 'package:gymshood/sevices/Auth/server_provider.dart';
 import 'dart:developer' as developer;
 

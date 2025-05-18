@@ -4,6 +4,10 @@
 // import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gymshood/Utilities/Dialogs/info_dialog.dart';
+import 'package:gymshood/Utilities/Dialogs/showLogout_dialog.dart';
+import 'package:gymshood/Utilities/menu_action.dart';
 import 'package:gymshood/main.dart';
 import 'package:gymshood/pages/TabBarPages.dart/AboutTabBar.dart';
 import 'package:gymshood/pages/TabBarPages.dart/equipmentTabBar.dart';
@@ -12,8 +16,11 @@ import 'package:gymshood/pages/TabBarPages.dart/reviewsTabBar.dart';
 import 'package:gymshood/pages/TabBarPages.dart/videoTabbar.dart';
 import 'package:gymshood/sevices/Auth/AuthUser.dart';
 import 'package:gymshood/sevices/Auth/auth_service.dart';
-import 'package:gymshood/sevices/Auth/server_provider.dart';
+// import 'package:gymshood/sevices/Auth/server_provider.dart';
+import 'dart:developer' as developer;
 
+import 'package:gymshood/sevices/Auth/bloc/auth_bloc.dart';
+import 'package:gymshood/sevices/Auth/bloc/auth_event.dart';
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
@@ -24,11 +31,20 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage>  with SingleTickerProviderStateMixin {
   late TabController _tabController;
  late final Authuser? authuser;
- String? name = 'Gym name';
+ String? name;
    Future<void> _getuser()async{
         authuser = await AuthService.server().getUser();
+        // developer.log('profile');
+        // developer.log(authuser!.name!);
         if(authuser!=null){
-          name = authuser!.name!;
+          setState(() {
+            name = authuser!.name!;
+          });
+          
+        }else{
+          setState(() {
+            name = 'GYM NAME';
+          });
         }
    }
   // late String? _image;
@@ -60,6 +76,25 @@ class _ProfilePageState extends State<ProfilePage>  with SingleTickerProviderSta
         Text("Profile" , style:
          TextStyle(color: Colors.white),),
          centerTitle: true,
+         actions: [
+          PopupMenuButton<MenuAction>(
+            color: Theme.of(context).colorScheme.primary,
+            iconColor: Colors.white,
+            onSelected: (value) async{
+            switch(value){
+              case MenuAction.logout:
+              final shouldlogout = await showLogoutDialog(context);
+              if(shouldlogout){
+                context.read<AuthBloc>().add(const AuthEventLogOut());
+              }
+            }
+          }, itemBuilder: (context) { 
+            return const [
+              PopupMenuItem(value: MenuAction.logout,
+                child: Text('Logout' , style: TextStyle(color: Colors.white,)))
+            ];
+           },)
+         ],
       ),
       backgroundColor: Colors.white,
       body: Column(
@@ -87,7 +122,7 @@ class _ProfilePageState extends State<ProfilePage>  with SingleTickerProviderSta
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(name!
+                        Text(name??'GYM NAME'
                           , 
                           style: 
                           TextStyle(
@@ -110,7 +145,7 @@ class _ProfilePageState extends State<ProfilePage>  with SingleTickerProviderSta
                         ],
                       ),
                   Container(
-                    color: Theme.of(context).primaryColor,
+                    color: Theme.of(context).colorScheme.primary,
                     child: TabBar(
                       controller: _tabController,
                       tabs: [

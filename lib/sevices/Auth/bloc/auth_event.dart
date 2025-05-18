@@ -48,7 +48,8 @@ class AuthEventLogIn extends AuthEvent{
 
 class AuthEventForgotPassword extends AuthEvent{
   final String? email;
-  const AuthEventForgotPassword({this.email});
+  final BuildContext context;
+  const AuthEventForgotPassword({required this.context, required this.email});
 }
 
 class AuthEventLogOut extends AuthEvent{
@@ -59,5 +60,14 @@ class AuthEventUpdatePassword extends AuthEvent{
   final String password;
   final String confirmPassword;
   const AuthEventUpdatePassword({required this.password, required this.confirmPassword});
+
+}
+class AuthEventResetPassword extends AuthEvent{
+  final String password;
+  final String confirmPassword;
+ final String token;
+
+  const AuthEventResetPassword({required this.password, required this.confirmPassword, required this.token});
+
 
 }

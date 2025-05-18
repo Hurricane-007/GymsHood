@@ -46,6 +46,16 @@ class AuthService implements AuthProvider{
 
   @override
   Future<String> verifyOTP({required String otp, required String email}) => provider.verifyOTP(otp: otp, email: email);
+  
+  @override
+  Future<void> init() {
+   return provider.init();
+  }
+  
+  @override
+  Future<String> forgotPassword({required String email}) {
+      return provider.forgotPassword(email: email);
+  }
 
   
 }
