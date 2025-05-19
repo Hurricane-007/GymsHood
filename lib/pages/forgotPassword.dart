@@ -9,7 +9,7 @@ import 'package:gymshood/pages/resetPassword.dart';
 import 'package:gymshood/sevices/Auth/bloc/auth_bloc.dart';
 import 'package:gymshood/sevices/Auth/bloc/auth_event.dart';
 import 'package:gymshood/sevices/Auth/bloc/auth_state.dart';
-import 'package:uni_links/uni_links.dart';
+// import 'package:uni_links/uni_links.dart';
 
 class ForgotPasswordView extends StatefulWidget {
   const ForgotPasswordView({super.key});

@@ -141,6 +141,10 @@ class _LoginPageState extends State<LoginPage> {
                       context
                           .read<AuthBloc>()
                           .add(AuthEventLogIn(email: email, password: pwd));
+                
+                      // Navigator.push(context, MaterialPageRoute(builder: (context) {
+                      //   return BottomNavigation();
+                      // },));
                       developer.log('dispatched');
                     },
                     style: TextButton.styleFrom(

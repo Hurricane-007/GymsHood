@@ -39,6 +39,7 @@ on<AuthEventInitialize>((event, emit) async {
   developer.log("✅ AuthEventInitialize triggered");
   try {
     final user = await provider.getUser();
+    
     // developer.log(user.toString());
     if(user!=null){
       developer.log("User: ${user.name}");
@@ -68,10 +69,8 @@ on<AuthEventInitialize>((event, emit) async {
         // emit(AuthStateErrors(error: response));
        }
     },);
-    // on<AuthEventInitialize>((event, emit) async{
-    //  final user = provider.getUser();
-    //  if(user)
-    // },);
+
+
     on<AuthEventLogIn>((event, emit) async{
       final String email = event.email;
       final String password = event.password;
@@ -111,6 +110,9 @@ on<AuthEventInitialize>((event, emit) async {
 
     on<AutheventFirstScreen>((event, emit) {
       emit(AuthStateFIrst());
+    },);
+    on<AuthEventjustgotoHome>((event, emit) {
+      emit(AuthStateLoggedIn());
     },);
     on<Autheventjustgotologin>((event, emit) {
       emit(AuthStateLoggedOut(error: null));

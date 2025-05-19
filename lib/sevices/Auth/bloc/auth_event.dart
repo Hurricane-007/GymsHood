@@ -55,6 +55,9 @@ class AuthEventForgotPassword extends AuthEvent{
 class AuthEventLogOut extends AuthEvent{
    const AuthEventLogOut();
 }
+class AuthEventjustgotoHome extends AuthEvent{
+   const AuthEventjustgotoHome();
+}
 
 class AuthEventUpdatePassword extends AuthEvent{
   final String password;

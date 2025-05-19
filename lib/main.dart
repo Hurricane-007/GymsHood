@@ -16,11 +16,11 @@ import 'package:gymshood/pages/verifyEmailview.dart';
 import 'package:gymshood/sevices/Auth/bloc/auth_bloc.dart';
 import 'package:gymshood/sevices/Auth/bloc/auth_event.dart';
 import 'package:gymshood/sevices/Auth/bloc/auth_state.dart';
-import 'package:gymshood/sevices/Auth/server_provider.dart';
+import 'package:gymshood/sevices/Auth/auth_server_provider.dart';
 
 import 'dart:developer' as developer;
 
-import 'package:uni_links/uni_links.dart';
+// import 'package:uni_links/uni_links.dart';
 late Size mq;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -52,36 +52,36 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _handleIncomingLinks();
-    _handleInitialLink();
+    // _handleIncomingLinks();
+    // _handleInitialLink();
   }
 
-  void _handleIncomingLinks() {
-    _sub = uriLinkStream.listen((Uri? uri) {
-      if (uri != null && uri.path.contains('resetpassword')) {
-        final token = uri.queryParameters['id'];
-        if (token != null) {
-          setState(() {
-            _resetToken = token;
-          });
-        }
-      }
-    }, onError: (err) {
-      developer.log("Deep link error: $err");
-    });
-  }
+  // void _handleIncomingLinks() {
+  //   _sub = uriLinkStream.listen((Uri? uri) {
+  //     if (uri != null && uri.path.contains('resetpassword')) {
+  //       final token = uri.queryParameters['id'];
+  //       if (token != null) {
+  //         setState(() {
+  //           _resetToken = token;
+  //         });
+  //       }
+  //     }
+  //   }, onError: (err) {
+  //     developer.log("Deep link error: $err");
+  //   });
+  // }
 
-  Future<void> _handleInitialLink() async {
-    final uri = await getInitialUri();
-    if (uri != null && uri.path.contains('resetpassword')) {
-      final token = uri.queryParameters['id'];
-      if (token != null) {
-        setState(() {
-          _resetToken = token;
-        });
-      }
-    }
-  }
+  // Future<void> _handleInitialLink() async {
+  //   final uri = await getInitialUri();
+  //   if (uri != null && uri.path.contains('resetpassword')) {
+  //     final token = uri.queryParameters['id'];
+  //     if (token != null) {
+  //       setState(() {
+  //         _resetToken = token;
+  //       });
+  //     }
+  //   }
+  // }
 
   @override
   void didChangeDependencies() {
@@ -148,7 +148,8 @@ Widget _responseWiget(AuthState state, BuildContext context) {
     return const SignUpPage();
   } else if (state is AuthStateResetPassword) {
     return const ForgotPasswordView();
-  } else if (state is AuthStateLoggedIn) {
+  }
+   else if (state is AuthStateLoggedIn) {
     return const BottomNavigation();
   } 
    else if (state is AuthStateFIrst) {

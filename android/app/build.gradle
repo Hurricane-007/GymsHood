@@ -8,6 +8,10 @@ plugins {
 android {
     namespace = "com.Mydomain.gymshood"
     compileSdk = 35
+    defaultConfig {
+        minSdk = 21
+        targetSdk = 35
+    }
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -35,10 +39,15 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.debug
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 }
-
+dependencies {
+    implementation 'androidx.window:window:1.2.0'
+}
 flutter {
     source = "../.."
 }

@@ -3,14 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gymshood/Utilities/Dialogs/error_dialog.dart';
 import 'package:gymshood/main.dart';
-import 'package:gymshood/pages/loginPage.dart';
-import 'package:gymshood/pages/verifyEmailview.dart';
+// import 'package:gymshood/pages/loginPage.dart';
+// import 'package:gymshood/pages/verifyEmailview.dart';
 import 'package:gymshood/sevices/Auth/bloc/auth_bloc.dart';
 import 'package:gymshood/sevices/Auth/bloc/auth_event.dart';
 import 'package:gymshood/sevices/Auth/bloc/auth_state.dart';
 import 'dart:developer' as developer;
 
-import 'package:gymshood/sevices/saveemail.dart';
+import 'package:gymshood/Utilities/helpers/saveemail.dart';
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
 

@@ -1,4 +1,4 @@
-import 'package:gymshood/sevices/Auth/AuthUser.dart';
+import 'package:gymshood/sevices/Models/AuthUser.dart';
 
 abstract class AuthProvider {
   Future<void> init();

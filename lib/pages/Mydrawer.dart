@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gymshood/pages/Gyminfopage.dart';
+import 'package:gymshood/pages/plansPage.dart';
 import 'package:gymshood/sevices/Auth/bloc/auth_bloc.dart';
 import 'package:gymshood/sevices/Auth/bloc/auth_event.dart';
 
@@ -30,40 +32,47 @@ class Mydrawer extends StatelessWidget {
               )),
 
               Padding(
-                padding: const EdgeInsets.only(left: 25),
+                padding: const EdgeInsets.only(left: 10),
                 child: ListTile(
                   title: Text(
-                    'P L A N S', style: TextStyle(color: Colors.white),
+                    'C R E A T E   P L A N S', style: TextStyle(color: Colors.white),
                   ),
                   leading: Icon(Icons.checklist , color: Colors.white,),
                   onTap: () {
-                    
+                    Navigator.push(context, MaterialPageRoute(builder: (context) {
+                      return PlansPage();
+                    },));
                   },
+                  splashColor: Theme.of(context).colorScheme.secondary,
                 ),
               ),
               Divider(color: Colors.white,),
                             Padding(
-                padding: const EdgeInsets.only(left: 25),
+                padding: const EdgeInsets.only(left: 10),
                 child: ListTile(
                   title: Text(
-                    'E q u i p m e n t', style: TextStyle(color: Colors.white),
+                    'A D D   G Y M   M E D I A', style: TextStyle(color: Colors.white),
                   ),
                   leading: Icon(Icons.fitness_center , color: Colors.white,),
                   onTap: () {
-                    
+                   
                   },
+                  splashColor: Theme.of(context).colorScheme.secondary,
                 ),
               ),Divider(color: Colors.white,),
                             Padding(
-                padding: const EdgeInsets.only(left: 25),
+                padding: const EdgeInsets.only(left: 10),
                 child: ListTile(
                   title: Text(
-                    'S L O T S', style: TextStyle(color: Colors.white),
+                    'A D D   G Y M   I N F O', style: TextStyle(color: Colors.white),
                   ),
-                  leading: Icon(Icons.schedule , color: Colors.white,),
+                  leading: Icon(Icons.info_rounded , color: Colors.white,),
                   onTap: () {
-                    
+                     Navigator.push(context, MaterialPageRoute(builder: (context) {
+                      return Gyminfopage();
+                    },));
                   },
+                  splashColor: Theme.of(context).colorScheme.secondary,
                 ),
               ),
               Divider(color: Colors.white,),
