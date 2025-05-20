@@ -47,7 +47,9 @@ android {
 }
 dependencies {
     implementation 'androidx.window:window:1.2.0'
+    
 }
 flutter {
     source = "../.."
 }
+// apply plugin: 'com.google.gms.google-services'

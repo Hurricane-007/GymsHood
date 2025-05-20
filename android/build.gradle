@@ -1,3 +1,15 @@
+
+// buildscript {
+//         repositories {
+//         google()  // ✅ Required to resolve Google services
+//         mavenCentral()  // ✅ Optional but useful
+//     }
+//         dependencies {
+//         classpath 'com.android.tools.build:gradle:8.2.2' // Use your existing version
+//         classpath 'com.google.gms:google-services:4.4.2' // ✅ This is what it's trying to resolve
+//     }
+
+// }
 allprojects {
     repositories {
         google()
