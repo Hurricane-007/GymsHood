@@ -9,7 +9,7 @@ class Gymserviceprovider implements GymOwnerInfoProvider{
   factory Gymserviceprovider.server() => Gymserviceprovider(provider: GymServerProvider());
 
   @override
-  Future<bool> addGymMedia({required String mediaType, required String mediaUrl, required String logourl}) {
+  Future<String> addGymMedia({required String mediaType, required String mediaUrl, required String logourl}) {
    return provider.addGymMedia(mediaType: mediaType, mediaUrl: mediaUrl, logourl: logourl);
   }
 

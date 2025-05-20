@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gymshood/pages/Gyminfopage.dart';
-import 'package:gymshood/pages/plansPage.dart';
+import 'package:gymshood/pages/addGymMediaPage.dart';
+import 'package:gymshood/pages/createplansPage.dart';
 import 'package:gymshood/sevices/Auth/bloc/auth_bloc.dart';
 import 'package:gymshood/sevices/Auth/bloc/auth_event.dart';
 
@@ -55,7 +56,9 @@ class Mydrawer extends StatelessWidget {
                   ),
                   leading: Icon(Icons.fitness_center , color: Colors.white,),
                   onTap: () {
-                   
+                   Navigator.push(context, MaterialPageRoute(builder: (context) {
+                      return UploadMultipleImagesPage();
+                    },));
                   },
                   splashColor: Theme.of(context).colorScheme.secondary,
                 ),

@@ -1,9 +1,11 @@
 import 'dart:developer' as developer;
 
-import 'package:cookie_jar/cookie_jar.dart';
+// import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:gymshood/sevices/Auth/auth_server_provider.dart';
+import 'package:gymshood/sevices/Auth/auth_service.dart';
+import 'package:gymshood/sevices/Models/AuthUser.dart';
 import 'package:gymshood/sevices/Models/gym.dart';
 import 'package:gymshood/sevices/gymInfo/gymowner_info_provider.dart';
 
@@ -12,14 +14,15 @@ class GymServerProvider implements GymOwnerInfoProvider{
    final Dio dio = ServerProvider().dio;
 
   @override
-  Future<bool> addGymMedia({
+  Future<String> addGymMedia({
     required String mediaType,
      required String mediaUrl, 
-     required String logourl,}) async{
-    
+     required String logourl,
+     required }) async{
+    Authuser? user = await AuthService.server().getUser();
     try{
         final response = await dio.post(
-                '$baseUrl/gym/:id/media',  
+                '$baseUrl/gym/682b6695d64293ae028027ed/media',  
                   data: {'mediaType': mediaType,
                    'mediaUrl': mediaUrl, 
                    'logourl': logourl,},
@@ -27,20 +30,20 @@ class GymServerProvider implements GymOwnerInfoProvider{
         );
 
         if(response.statusCode == 201){
-          return true;
+          return 'Successfully added Media';
         }else{
-          return false;
+          return response.data['message'];
         }
     }on DioException catch (e) {
       if (e.response != null) {
         developer.log('Error response: ${e.response?.data}');
-        return false;
+        return e.response?.data;
       } else {
         developer.log('Dio error: ${e.message}');
-        return false;
+        return e.message!;
       }
     } catch (e) {
-      return false;
+      return e.toString();
       // developer.log(e.toString());
     }
    

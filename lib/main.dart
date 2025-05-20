@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:firebase_core/firebase_core.dart';
+// import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -18,7 +18,7 @@ import 'package:gymshood/sevices/Auth/bloc/auth_event.dart';
 import 'package:gymshood/sevices/Auth/bloc/auth_state.dart';
 import 'package:gymshood/sevices/Auth/auth_server_provider.dart';
 
-import 'dart:developer' as developer;
+// import 'dart:developer' as developer;
 
 // import 'package:uni_links/uni_links.dart';
 late Size mq;

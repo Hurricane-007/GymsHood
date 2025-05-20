@@ -19,7 +19,7 @@ abstract class GymOwnerInfoProvider {
     required String userid,
      });
 
-     Future<bool> addGymMedia({
+     Future<String> addGymMedia({
         required String mediaType,//needed dropdown menu of photo , video
         required String mediaUrl,
         required String logourl,
