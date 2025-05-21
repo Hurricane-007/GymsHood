@@ -1,6 +1,6 @@
 -- Merging decision tree log ---
 application
-INJECTED from D:\AppDevelopmentProject\flutter\gymshood\android\app\src\main\AndroidManifest.xml:7:5-52:19
+INJECTED from D:\AppDevelopmentProject\flutter\gymshood\android\app\src\main\AndroidManifest.xml:7:5-53:19
 INJECTED from D:\AppDevelopmentProject\flutter\gymshood\android\app\src\debug\AndroidManifest.xml
 MERGED from [:firebase_dynamic_links] D:\AppDevelopmentProject\flutter\gymshood\build\firebase_dynamic_links\intermediates\merged_manifest\debug\AndroidManifest.xml:9:5-15:19
 MERGED from [:firebase_dynamic_links] D:\AppDevelopmentProject\flutter\gymshood\build\firebase_dynamic_links\intermediates\merged_manifest\debug\AndroidManifest.xml:9:5-15:19
@@ -47,8 +47,8 @@ MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\le
 	android:name
 		INJECTED from D:\AppDevelopmentProject\flutter\gymshood\android\app\src\main\AndroidManifest.xml
 manifest
-ADDED from D:\AppDevelopmentProject\flutter\gymshood\android\app\src\main\AndroidManifest.xml:1:5-64:12
-MERGED from D:\AppDevelopmentProject\flutter\gymshood\android\app\src\main\AndroidManifest.xml:1:5-64:12
+ADDED from D:\AppDevelopmentProject\flutter\gymshood\android\app\src\main\AndroidManifest.xml:1:5-65:12
+MERGED from D:\AppDevelopmentProject\flutter\gymshood\android\app\src\main\AndroidManifest.xml:1:5-65:12
 INJECTED from D:\AppDevelopmentProject\flutter\gymshood\android\app\src\debug\AndroidManifest.xml:1:1-7:12
 INJECTED from D:\AppDevelopmentProject\flutter\gymshood\android\app\src\debug\AndroidManifest.xml:1:1-7:12
 INJECTED from D:\AppDevelopmentProject\flutter\gymshood\android\app\src\debug\AndroidManifest.xml:1:1-7:12
@@ -158,19 +158,19 @@ ADDED from D:\AppDevelopmentProject\flutter\gymshood\android\app\src\main\Androi
 	android:name
 		ADDED from D:\AppDevelopmentProject\flutter\gymshood\android\app\src\main\AndroidManifest.xml:5:22-78
 queries
-ADDED from D:\AppDevelopmentProject\flutter\gymshood\android\app\src\main\AndroidManifest.xml:58:5-63:15
+ADDED from D:\AppDevelopmentProject\flutter\gymshood\android\app\src\main\AndroidManifest.xml:59:5-64:15
 MERGED from [:file_picker] D:\AppDevelopmentProject\flutter\gymshood\build\file_picker\intermediates\merged_manifest\debug\AndroidManifest.xml:7:5-13:15
 MERGED from [:file_picker] D:\AppDevelopmentProject\flutter\gymshood\build\file_picker\intermediates\merged_manifest\debug\AndroidManifest.xml:7:5-13:15
 intent#action:name:android.intent.action.PROCESS_TEXT+data:mimeType:text/plain
-ADDED from D:\AppDevelopmentProject\flutter\gymshood\android\app\src\main\AndroidManifest.xml:59:9-62:18
+ADDED from D:\AppDevelopmentProject\flutter\gymshood\android\app\src\main\AndroidManifest.xml:60:9-63:18
 action#android.intent.action.PROCESS_TEXT
-ADDED from D:\AppDevelopmentProject\flutter\gymshood\android\app\src\main\AndroidManifest.xml:60:13-72
+ADDED from D:\AppDevelopmentProject\flutter\gymshood\android\app\src\main\AndroidManifest.xml:61:13-72
 	android:name
-		ADDED from D:\AppDevelopmentProject\flutter\gymshood\android\app\src\main\AndroidManifest.xml:60:21-70
+		ADDED from D:\AppDevelopmentProject\flutter\gymshood\android\app\src\main\AndroidManifest.xml:61:21-70
 data
-ADDED from D:\AppDevelopmentProject\flutter\gymshood\android\app\src\main\AndroidManifest.xml:61:13-50
+ADDED from D:\AppDevelopmentProject\flutter\gymshood\android\app\src\main\AndroidManifest.xml:62:13-50
 	android:mimeType
-		ADDED from D:\AppDevelopmentProject\flutter\gymshood\android\app\src\main\AndroidManifest.xml:61:19-48
+		ADDED from D:\AppDevelopmentProject\flutter\gymshood\android\app\src\main\AndroidManifest.xml:62:19-48
 uses-sdk
 INJECTED from D:\AppDevelopmentProject\flutter\gymshood\android\app\src\debug\AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from D:\AppDevelopmentProject\flutter\gymshood\android\app\src\debug\AndroidManifest.xml

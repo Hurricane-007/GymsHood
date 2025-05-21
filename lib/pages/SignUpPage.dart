@@ -169,7 +169,9 @@ class _SignUpPageState extends State<SignUpPage> {
                 },
                 style: TextButton.styleFrom(
                   backgroundColor: Theme.of(context).primaryColor,
+                  overlayColor: Colors.white,
                   shape: RoundedRectangleBorder(
+                    
                     borderRadius: BorderRadius.circular(30),
                   ),
                   side: const BorderSide(color: Colors.black),

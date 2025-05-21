@@ -115,6 +115,7 @@ PersistCookieJar get cookieJar => _cookieJar;
   Future<String> login(
       {required String email, required String password}) async {
     try {
+      developer.log('login pressed');
       final response = await _dio.post("$baseUrl/login",
           data: {
             'email': email,
@@ -130,10 +131,11 @@ PersistCookieJar get cookieJar => _cookieJar;
       //   developer.log('🍪 Stored cookie: ${cookie.name}=${cookie.value}');
       // });
       if (response.statusCode == 200) {
+        developer.log('Login successful');
         return "Successfull";
       } else {
         final message = response.data['message'];
-        // developer.log(message);
+        developer.log(message);
         return message?.toString() ?? 'unknown error';
       }
     } on DioException catch (e) {
@@ -154,7 +156,7 @@ PersistCookieJar get cookieJar => _cookieJar;
     try {
       final response = await _dio.post("$baseUrl/google-login",
           data: {
-            {'token': token},
+            'token': token,
           },
           options: Options(headers: {'Content-Type': 'application/json'}));
       if (response.statusCode == 200) {
@@ -178,6 +180,7 @@ PersistCookieJar get cookieJar => _cookieJar;
   }
 
   final GoogleSignIn _googleSignIn = GoogleSignIn(
+    clientId:'822225462564-ueaoirv3f0kcj40omo9tuedki8253dq5.apps.googleusercontent.com' ,
     scopes: ['email', 'profile'],
   );
   @override
@@ -193,7 +196,7 @@ PersistCookieJar get cookieJar => _cookieJar;
           await googleUser.authentication;
 
       final token = googleAuth.idToken;
-
+      developer.log('token');
       if (token == null) {
         return "Failed to get ID Token";
       } else {

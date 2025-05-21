@@ -78,15 +78,15 @@ class _GyminfopageState extends State<Gyminfopage> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                DropdownButtonFormField<String>(
-                  value: role,
-                  decoration: const InputDecoration(labelText: 'Role'),
-                  items: ['Trainer', 'Staff', 'Member', 'Admin', 'GymOwner']
-                      .map((r) => DropdownMenuItem(value: r, child: Text(r)))
-                      .toList(),
-                  onChanged: (value) => setState(() => role = value!),
-                ),
-                buildTextField(nameController, 'Name'),
+                // DropdownButtonFormField<String>(
+                //   value: role,
+                //   decoration: const InputDecoration(labelText: 'Role'),
+                //   items: ['Trainer', 'Staff', 'Member', 'Admin', 'GymOwner']
+                //       .map((r) => DropdownMenuItem(value: r, child: Text(r)))
+                //       .toList(),
+                //   onChanged: (value) => setState(() => role = value!),
+                // ),
+                // buildTextField(nameController, 'Name'),
                 buildTextField(locationController, 'Location'),
                 buildTextField(coordinatesController, 'Coordinates (comma-separated)', keyboardType: TextInputType.number),
                 buildTextField(capacityController, 'Capacity', keyboardType: TextInputType.number),
@@ -141,7 +141,7 @@ class _GyminfopageState extends State<Gyminfopage> {
                 const SizedBox(height: 20),
 
                 ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor),
+                  style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor, overlayColor: Colors.white),
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
                       Authuser? authuser = await AuthService.server().getUser();

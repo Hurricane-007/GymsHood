@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:gymshood/Utilities/Dialogs/error_dialog.dart';
 // import 'package:flutter/widgets.dart';
 // import 'package:gymshood/Themes/theme.dart';
 // import 'package:gymshood/main.dart';
 import 'dart:developer' as developer;
+
+import 'package:gymshood/sevices/gymInfo/gymserviceprovider.dart';
 
 class PlansPage extends StatefulWidget {
   const PlansPage({super.key});
@@ -212,12 +215,9 @@ class _PlansPageState extends State<PlansPage> {
                     labelStyle:
                         TextStyle(color: Theme.of(context).primaryColor)),
                 items: [
-                  '30 mins',
-                  '45 mins',
-                  '1 hour',
-                  '1.5 hours',
-                  '2 hours',
-                  'No limit!'
+                  '1hr',
+                  '2hr',
+                  'flexible'
                 ]
                     .map((dur) => DropdownMenuItem(
                         value: dur,
@@ -238,25 +238,28 @@ class _PlansPageState extends State<PlansPage> {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).primaryColor,
+                  overlayColor: Colors.white
                 ),
-                onPressed: () {
+                onPressed: () async{
                   if (_formKey.currentState!.validate()) {
-                    // Submit logic
-                    developer.log("Name: ${nameController.text}");
-                    developer.log("Validity: $startdate");
-                    developer.log("Validity: $enddate");
-
-                    developer.log("Price: ${priceController.text}");
-                    developer.log("Discount: ${discountController.text}");
-                    developer.log("Features: ${featuresController.text}");
-                    developer.log("Plan Type: $selectedPlanType");
-                    developer.log("Trainer Included: $isTrainerIncluded");
-                    developer.log("Workout Duration: $workoutDuration");
-
+                    developer.log('call recieved inside form');
+                    Duration validity = enddate!.difference(startdate!);
+                    final response = await Gymserviceprovider.server().createPlan(name: nameController.text,
+                     validity: validity.inDays,
+                      price: num.parse(priceController.text), 
+                      discountPercent: num.parse(discountController.text), 
+                      features: featuresController.text, 
+                      planType: selectedPlanType!,
+                       isTrainerIncluded: isTrainerIncluded, 
+                       workoutDuration: workoutDuration!);
+                       developer.log(response);
+                    if(response == 'Successfull'){
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text("Plan submitted")),
                     );
-
+                    }else{
+                      showErrorDialog(context, response);
+                    }
                     _formKey.currentState!.reset();
                     nameController.clear();
                     priceController.clear();

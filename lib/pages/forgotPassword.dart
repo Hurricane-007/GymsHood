@@ -144,6 +144,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                     }
                   },
                   style: TextButton.styleFrom(
+                    overlayColor: Colors.white,
                     backgroundColor: Theme.of(context).primaryColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),

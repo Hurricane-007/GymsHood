@@ -1,74 +1,55 @@
 import 'package:flutter/material.dart';
+import 'package:gymshood/Utilities/Dialogs/error_dialog.dart';
+import 'package:gymshood/sevices/fileserver.dart';
+import 'package:http/http.dart';
 
 class PhotosTabBar extends StatefulWidget {
   const PhotosTabBar({super.key});
-
+ 
   @override
   State<PhotosTabBar> createState() => _PhotosTabBarState();
 }
 
+
+
+
 class _PhotosTabBarState extends State<PhotosTabBar> {
+  late List<String> _imageUrlsFuture;
+
+  Future<List<String>>? getfiles()async{
+     _imageUrlsFuture = await Fileserver().fetchMediaUrls('photo');
+    return _imageUrlsFuture;
+}
+  @override
+  void initState() {
+  setState(() {
+        getfiles();
+  });
+
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return  Center(
-        child: GridView.count(
-          padding: EdgeInsets.all(20),
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
+    return RefreshIndicator(
+    onRefresh: () async {
+      setState(() {
+             getfiles();
+      });
+    },
+    child: FutureBuilder<List<String>>(
+      future: getfiles(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        final imageUrls = snapshot.data ?? [];
+        return GridView.count(
           crossAxisCount: 2,
-          children: [
-            //need to integrate backend here
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: Colors.grey,
-              ),
-              
-            ),
-           Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: Colors.grey,
-              ),
-              
-            ),
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: Colors.grey,
-              ),
-              
-            ),
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: Colors.grey,
-              ),
-              
-            ),
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: Colors.grey,
-              ),
-              
-            ),
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: Colors.grey,
-              ),
-              
-            ),
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: Colors.grey,
-              ),
-              
-            ),
-          ],
-          ),
-    );
-  }
-}
+          children: imageUrls.map((url) => Image.network(url, fit: BoxFit.cover,)).toList(),
+        );
+      },
+    ),
+  );
+}}

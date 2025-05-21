@@ -23,6 +23,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
    _navigateToNextScreen() async{
     Future.delayed(const Duration(seconds: 2), (){
+      if(!mounted) return;
       context.read<AuthBloc>().add(AutheventFirstScreen());
   });
    }

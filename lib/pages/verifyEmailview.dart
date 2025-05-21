@@ -196,6 +196,7 @@ void _startResendCountDown(){
                           // }
                         },
                         style: TextButton.styleFrom(
+                          overlayColor: Colors.white,
                             backgroundColor: Theme.of(context).primaryColor,
                             shape: RoundedRectangleBorder(
                               borderRadius:

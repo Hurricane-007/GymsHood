@@ -42,5 +42,29 @@ abstract class GymOwnerInfoProvider {
      });
 
 
+    // name,
+    // validity,
+    // price,
+    // discountPercent,
+    // features,
+    // planType,
+    // isTrainerIncluded,
+    // workoutDuration
+  Future<String> createPlan({
+    required String name ,
+    required num validity,
+    required num price,
+    required num discountPercent,
+    required String features,
+    required String planType,
+    required bool isTrainerIncluded,
+    required String workoutDuration,
+  });
+
+  Future<List<Gym>> getAllGyms({
+  String? status,
+  String? search,
+  String? near, // Format: "lat,lng,radius"
+}) ;
 
 }

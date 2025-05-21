@@ -3,8 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gymshood/Utilities/Dialogs/error_dialog.dart';
 import 'package:gymshood/main.dart';
-import 'package:gymshood/pages/SignUpPage.dart';
 import 'package:gymshood/pages/bottomNavigationBar.dart';
+// import 'package:gymshood/pages/SignUpPage.dart';
+// import 'package:gymshood/pages/bottomNavigationBar.dart';
 import 'package:gymshood/pages/forgotPassword.dart';
 import 'package:gymshood/sevices/Auth/bloc/auth_bloc.dart';
 import 'package:gymshood/sevices/Auth/bloc/auth_event.dart';
@@ -133,10 +134,11 @@ class _LoginPageState extends State<LoginPage> {
                   height: 55,
                   width: double.infinity,
                   child: TextButton(
+                    
                     onPressed: () {
                       final email = _email.text.trim();
                       final pwd = _password.text.trim();
-                      developer.log("Login pressed: $email / $pwd");
+                      // developer.log("Login pressed: $email / $pwd");
 
                       context
                           .read<AuthBloc>()
@@ -149,6 +151,7 @@ class _LoginPageState extends State<LoginPage> {
                     },
                     style: TextButton.styleFrom(
                       backgroundColor: Theme.of(context).primaryColor,
+                      overlayColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),

@@ -27,4 +27,14 @@ class Gymserviceprovider implements GymOwnerInfoProvider{
   Future<bool> updateGym({required String name, required String location, required num capacity, required String openTime, required String closeTime, required String contactEmail, required String phone, required String about, required String shifts}) {
    return provider.updateGym(name: name, location: location, capacity: capacity, openTime: openTime, closeTime: closeTime, contactEmail: contactEmail, phone: phone, about: about, shifts: shifts);
   }
+  
+  @override
+  Future<String> createPlan({required String name, required num validity, required num price, required num discountPercent, required String features, required String planType, required bool isTrainerIncluded, required String workoutDuration}) {
+    return provider.createPlan(name: name, validity: validity, price: price, discountPercent: discountPercent, features: features, planType: planType, isTrainerIncluded: isTrainerIncluded, workoutDuration: workoutDuration);
+  }
+  
+  @override
+  Future<List<Gym>> getAllGyms({String? status, String? search, String? near}) {
+   return provider.getAllGyms();
+  }
 }

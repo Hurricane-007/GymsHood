@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gymshood/sevices/fileserver.dart';
 
 class VideoTabBar extends StatefulWidget {
   const VideoTabBar({super.key});
@@ -8,67 +9,43 @@ class VideoTabBar extends StatefulWidget {
 }
 
 class _VideoTabBarState extends State<VideoTabBar> {
+    late List<String> _videoUrlsFuture;
+
+  Future<List<String>>? getfiles()async{
+     _videoUrlsFuture = await Fileserver().fetchMediaUrls('video');
+    return _videoUrlsFuture;
+}
+  @override
+  void initState() {
+  setState(() {
+        getfiles();
+  });
+
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Center(
-        child: GridView.count(
-          padding: EdgeInsets.all(20),
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
+    return RefreshIndicator(
+    onRefresh: () async {
+      setState(() {
+             getfiles();
+      });
+    },
+    child: FutureBuilder<List<String>>(
+      future: getfiles(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        final imageUrls = snapshot.data ?? [];
+        return GridView.count(
           crossAxisCount: 2,
-          children: [
-            //need to integrate backend here
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: Colors.grey,
-              ),
-              
-            ),
-           Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: Colors.grey,
-              ),
-              
-            ),
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: Colors.grey,
-              ),
-              
-            ),
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: Colors.grey,
-              ),
-              
-            ),
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: Colors.grey,
-              ),
-              
-            ),
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: Colors.grey,
-              ),
-              
-            ),
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: Colors.grey,
-              ),
-              
-            ),
-          ],
-          ),
-    );
-  }
+          children: imageUrls.map((url) => Image.network(url, fit: BoxFit.cover,)).toList(),
+        );
+      },
+    ),
+  );
+}
 }

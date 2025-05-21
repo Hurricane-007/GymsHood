@@ -36,7 +36,7 @@ class Mydrawer extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 10),
                 child: ListTile(
                   title: Text(
-                    'C R E A T E   P L A N S', style: TextStyle(color: Colors.white),
+                    'CREATE   PLANS', style: TextStyle(color: Colors.white),
                   ),
                   leading: Icon(Icons.checklist , color: Colors.white,),
                   onTap: () {
@@ -45,6 +45,9 @@ class Mydrawer extends StatelessWidget {
                     },));
                   },
                   splashColor: Theme.of(context).colorScheme.secondary,
+                  // selectedTileColor: Theme.of(
+                  // context).colorScheme.tertiary,
+                  // focusColor: Colors.white,
                 ),
               ),
               Divider(color: Colors.white,),
@@ -52,7 +55,7 @@ class Mydrawer extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 10),
                 child: ListTile(
                   title: Text(
-                    'A D D   G Y M   M E D I A', style: TextStyle(color: Colors.white),
+                    'ADD  GYM  MEDIA', style: TextStyle(color: Colors.white),
                   ),
                   leading: Icon(Icons.fitness_center , color: Colors.white,),
                   onTap: () {
@@ -67,7 +70,7 @@ class Mydrawer extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 10),
                 child: ListTile(
                   title: Text(
-                    'A D D   G Y M   I N F O', style: TextStyle(color: Colors.white),
+                    'ADD   GYM  INFO', style: TextStyle(color: Colors.white),
                   ),
                   leading: Icon(Icons.info_rounded , color: Colors.white,),
                   onTap: () {
@@ -86,7 +89,7 @@ class Mydrawer extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 25 , bottom: 25),
                 child: ListTile(
                   title: Text(
-                    'L O G O U T', style: TextStyle(color: Colors.white),
+                    'LOGOUT', style: TextStyle(color: Colors.white),
                   ),
                   leading: Icon(Icons.logout , color: Colors.white,),
                   onTap: () {
