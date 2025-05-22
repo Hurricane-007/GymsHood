@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gymshood/Utilities/Dialogs/error_dialog.dart';
+import 'package:gymshood/pages/FullScreenPage.dart';
 import 'package:gymshood/sevices/fileserver.dart';
 import 'package:http/http.dart';
 
@@ -47,7 +48,10 @@ class _PhotosTabBarState extends State<PhotosTabBar> {
         final imageUrls = snapshot.data ?? [];
         return GridView.count(
           crossAxisCount: 2,
-          children: imageUrls.map((url) => Image.network(url, fit: BoxFit.cover,)).toList(),
+          children: imageUrls.map((url) => GestureDetector(
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => FullScreenImagePage(imageUrl: url),)),
+      
+            child: Image.network(url, fit: BoxFit.cover,))).toList(),
         );
       },
     ),

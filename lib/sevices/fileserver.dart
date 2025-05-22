@@ -99,25 +99,47 @@ Future<List<String>> getallfiles()async{
     return [];
 }
 
-Future<List<String>> fetchMediaUrls(String mediaType) async {
-    final Authuser? auth = await AuthService.server().getUser();
+Future< List<String>> fetchMediaUrls(String mediaType) async {
+  final Authuser? auth = await AuthService.server().getUser();
+  final String gymId = auth!.userid!;
 
-// final List<Gym> gym = await Gymserviceprovider.server().getAllGyms(search: auth!.userid );
-// developer.log(gym.length.toString());
-  String gymId = auth!.userid!;
-    final response = await _dio.get(
-      '$baseurl/files',
-      queryParameters: {
-        'prefix':gymId, // or pass gymId if you want filtering
-        'mediaType': mediaType
-      },
-    );
+  final response = await _dio.get(
+    '$baseurl/files',
+    queryParameters: {
+      'prefix': gymId,
+    },
+  );
 
-    if (response.data['success'] == true) {
-      return List<String>.from(
-          response.data['files'].map((f) => f['url']));
-    } else {
-      throw Exception('Failed to fetch media URLs');
+  if (response.data['success'] == true) {
+    final files = List<String>.from(response.data['files'].map((f) => f['url']));
+
+    final photos = <String>[];
+    final videos = <String>[];
+
+    for (final url in files) {
+      final uri = Uri.parse(url.toLowerCase());
+
+      if (uri.path.endsWith('.jpg') ||
+          uri.path.endsWith('.jpeg') ||
+          uri.path.endsWith('.png') ||
+          uri.path.endsWith('.webp')) {
+        photos.add(url);
+      } else if (uri.path.endsWith('.mp4') ||
+                 uri.path.endsWith('.mov') ||
+                 uri.path.endsWith('.avi') ||
+                 uri.path.endsWith('.mkv')) {
+        videos.add(url);
+      }
     }
+      if(mediaType == 'photo'){
+        return photos;
+      }else{
+        return videos;
+      }
+
+  } else {
+    throw Exception('Failed to fetch media URLs');
   }
+}
+
 }

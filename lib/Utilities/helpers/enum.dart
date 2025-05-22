@@ -1,5 +1,5 @@
 enum MenuAction {
-  logout
+  logout , createPlan , addGymMedia , addGyminfo
 }
 
 enum GymStatus{

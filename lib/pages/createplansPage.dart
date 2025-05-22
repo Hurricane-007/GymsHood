@@ -7,14 +7,14 @@ import 'dart:developer' as developer;
 
 import 'package:gymshood/sevices/gymInfo/gymserviceprovider.dart';
 
-class PlansPage extends StatefulWidget {
-  const PlansPage({super.key});
+class CreatePlansPage extends StatefulWidget {
+  const CreatePlansPage({super.key});
 
   @override
-  State<PlansPage> createState() => _PlansPageState();
+  State<CreatePlansPage> createState() => _PlansPageState();
 }
 
-class _PlansPageState extends State<PlansPage> {
+class _PlansPageState extends State<CreatePlansPage> {
   final _formKey = GlobalKey<FormState>();
 
   // Controllers or state variables

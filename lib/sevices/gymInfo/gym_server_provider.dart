@@ -8,6 +8,7 @@ import 'package:gymshood/sevices/Auth/auth_service.dart';
 import 'package:gymshood/sevices/Models/AuthUser.dart';
 import 'package:gymshood/sevices/Models/gym.dart';
 import 'package:gymshood/sevices/gymInfo/gymowner_info_provider.dart';
+import 'package:gymshood/sevices/gymInfo/gymserviceprovider.dart';
 
 class GymServerProvider implements GymOwnerInfoProvider  {
      final String? baseUrl = dotenv.env['BASE_URL'];
@@ -50,10 +51,28 @@ class GymServerProvider implements GymOwnerInfoProvider  {
   }
 
   @override
-  Future<Gym> getGymDetails({required String id}) {
-    // TODO: implement getGymDetails
-    throw UnimplementedError();
+  Future<Gym> getGymDetails({required String id}) async{
+    try {
+      final Authuser? auth = await AuthService.server().getUser();
+      final List<Gym> gyms = await Gymserviceprovider.server().getAllGyms(search: auth!.userid);
+      final gymId = gyms[0].gymid;
+      final response = await dio.get('$baseUrl/gym/$gymId');
+
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        final data = response.data['gym'];
+        developer.log(data.toString());
+        return Gym.fromJson(data);
+      } else {
+        developer.log('error occured');
+        throw Exception('Failed to load gym data');
+      }
+    } catch (e) {
+      developer.log( 'error occured: $e');
+      rethrow; // Let the calling function handle the exception
+    }
   }
+  
+  
 
   @override
   Future<String> registerGym({
@@ -204,5 +223,4 @@ Future<List<Gym>> getAllGyms({
   throw Exception();
   // return [];
 }
-
 }

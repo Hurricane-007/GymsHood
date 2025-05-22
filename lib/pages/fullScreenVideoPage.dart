@@ -1,5 +1,3 @@
-import 'dart:developer' as developer;
-
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
@@ -22,7 +20,6 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
     _controller = VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl))
       ..initialize().then((_) {
         setState(() {
-          // developer.log(Uri.parse(widget.videoUrl).toString());
           _isInitialized = true;
           _controller.play();
         });
@@ -37,7 +34,6 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
