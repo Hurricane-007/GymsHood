@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:gymshood/Utilities/Dialogs/error_dialog.dart';
 import 'package:gymshood/Utilities/Dialogs/info_dialog.dart';
+import 'package:gymshood/pages/mapPickerPage.dart';
 import 'package:gymshood/sevices/Auth/auth_service.dart';
 import 'package:gymshood/sevices/Models/AuthUser.dart';
 import 'package:gymshood/sevices/gymInfo/gymserviceprovider.dart';
@@ -57,8 +59,10 @@ class _GyminfopageState extends State<Gyminfopage> {
     return '$hour:$minute';
   }
 
-  Future<void> pickTime(BuildContext context, TextEditingController controller) async {
-    final picked = await showTimePicker(context: context, initialTime: TimeOfDay.now());
+  Future<void> pickTime(
+      BuildContext context, TextEditingController controller) async {
+    final picked =
+        await showTimePicker(context: context, initialTime: TimeOfDay.now());
     if (picked != null) controller.text = formatTimeOfDay(picked);
   }
 
@@ -66,7 +70,8 @@ class _GyminfopageState extends State<Gyminfopage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Register your gym / Update gym info", style: TextStyle(color: Colors.white)),
+        title: const Text("Register your gym / Update gym info",
+            style: TextStyle(color: Colors.white)),
         backgroundColor: Theme.of(context).colorScheme.primary,
         leading: BackButton(color: Colors.white),
       ),
@@ -87,18 +92,44 @@ class _GyminfopageState extends State<Gyminfopage> {
                 //   onChanged: (value) => setState(() => role = value!),
                 // ),
                 // buildTextField(nameController, 'Name'),
-                buildTextField(locationController, 'Location'),
-                buildTextField(coordinatesController, 'Coordinates (comma-separated)', keyboardType: TextInputType.number),
-                buildTextField(capacityController, 'Capacity', keyboardType: TextInputType.number),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor),
+                  onPressed: () async {
+                    final picked = await Navigator.of(context).push(
+                      MaterialPageRoute(
+                          builder: (_) => const LocationPickerPage()),
+                    );
+
+                    if (picked is LatLng) {
+                      coordinatesController.text =
+                          "${picked.latitude},${picked.longitude}";
+                    }
+                  },
+                  child: const Text('Pick Location from Map' , style: TextStyle(color: Colors.white),),
+                ),
+                buildTextField(
+                    coordinatesController, 'Coordinates (auto-filled)',
+                    keyboardType: TextInputType.text),
+
+                // buildTextField(locationController, 'Location'),
+                buildTextField(
+                    coordinatesController, 'Coordinates (comma-separated)',
+                    keyboardType: TextInputType.number),
+                buildTextField(capacityController, 'Capacity',
+                    keyboardType: TextInputType.number),
                 buildTimeField(openTimeController, 'Open Time'),
                 buildTimeField(closeTimeController, 'Close Time'),
                 buildTextField(contactEmailController, 'Contact Email'),
-                buildTextField(phoneController, 'Phone', keyboardType: TextInputType.phone),
+                buildTextField(phoneController, 'Phone',
+                    keyboardType: TextInputType.phone),
                 buildTextField(aboutController, 'About'),
-                buildTextField(equipmentController, 'Equipment List (comma-separated)'),
+                buildTextField(
+                    equipmentController, 'Equipment List (comma-separated)'),
 
                 const SizedBox(height: 20),
-                const Text("Shifts", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const Text("Shifts",
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
 
                 ...shiftControllers.asMap().entries.map((entry) {
                   final index = entry.key;
@@ -112,18 +143,23 @@ class _GyminfopageState extends State<Gyminfopage> {
                         children: [
                           Row(
                             children: [
-                              Text("Shift ${index + 1}", style: const TextStyle(fontWeight: FontWeight.bold , )),
+                              Text("Shift ${index + 1}",
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  )),
                               const Spacer(),
                               IconButton(
                                 onPressed: () => removeShift(index),
-                                icon: const Icon(Icons.delete, color: Colors.red),
+                                icon:
+                                    const Icon(Icons.delete, color: Colors.red),
                               )
                             ],
                           ),
                           buildTextField(shift['name']!, 'Shift Name'),
                           buildTimeField(shift['startTime']!, 'Start Time'),
                           buildTimeField(shift['endTime']!, 'End Time'),
-                          buildTextField(shift['capacity']!, 'Shift Capacity', keyboardType: TextInputType.number),
+                          buildTextField(shift['capacity']!, 'Shift Capacity',
+                              keyboardType: TextInputType.number),
                         ],
                       ),
                     ),
@@ -141,7 +177,9 @@ class _GyminfopageState extends State<Gyminfopage> {
                 const SizedBox(height: 20),
 
                 ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor, overlayColor: Colors.white),
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).primaryColor,
+                      overlayColor: Colors.white),
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
                       Authuser? authuser = await AuthService.server().getUser();
@@ -170,7 +208,10 @@ class _GyminfopageState extends State<Gyminfopage> {
                         contactEmail: contactEmailController.text,
                         phone: phoneController.text,
                         about: aboutController.text,
-                        equipmentList: equipmentController.text.split(',').map((e) => e.trim()).toList(),
+                        equipmentList: equipmentController.text
+                            .split(',')
+                            .map((e) => e.trim())
+                            .toList(),
                         shifts: shifts,
                         userid: authuser!.userid!,
                       );
@@ -187,14 +228,16 @@ class _GyminfopageState extends State<Gyminfopage> {
                       equipmentController.clear();
                       equipmentController.clear();
                       shiftControllers.clear();
-                      if (res == "Successfully registered gym , will be notified once verified" ) {
+                      if (res ==
+                          "Successfully registered gym , will be notified once verified") {
                         showInfoDialog(context, res);
                       } else {
                         showErrorDialog(context, res);
                       }
                     }
                   },
-                  child: const Text('Submit', style: TextStyle(color: Colors.white)),
+                  child: const Text('Submit',
+                      style: TextStyle(color: Colors.white)),
                 ),
               ],
             ),
@@ -209,9 +252,12 @@ class _GyminfopageState extends State<Gyminfopage> {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
-      decoration: InputDecoration(labelText: label ,
+      decoration: InputDecoration(
+        labelText: label,
       ),
-      validator: (value) => value == null || value.trim().isEmpty ? 'This field is required' : null,
+      validator: (value) => value == null || value.trim().isEmpty
+          ? 'This field is required'
+          : null,
     );
   }
 

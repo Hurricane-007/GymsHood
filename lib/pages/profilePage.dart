@@ -58,7 +58,7 @@ Future<void> getRating() async {
       equipment=gymi.equipmentList;
     });
 
-    developer.log("About text: $about");
+    // developer.log("About text: $about");
   }
 }
 

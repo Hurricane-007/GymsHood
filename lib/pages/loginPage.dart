@@ -147,7 +147,7 @@ class _LoginPageState extends State<LoginPage> {
                       // Navigator.push(context, MaterialPageRoute(builder: (context) {
                       //   return BottomNavigation();
                       // },));
-                      developer.log('dispatched');
+                      // developer.log('dispatched');
                     },
                     style: TextButton.styleFrom(
                       backgroundColor: Theme.of(context).primaryColor,

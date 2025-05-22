@@ -242,7 +242,7 @@ class _PlansPageState extends State<CreatePlansPage> {
                 ),
                 onPressed: () async{
                   if (_formKey.currentState!.validate()) {
-                    developer.log('call recieved inside form');
+                    // developer.log('call recieved inside form');
                     Duration validity = enddate!.difference(startdate!);
                     final response = await Gymserviceprovider.server().createPlan(name: nameController.text,
                      validity: validity.inDays,
@@ -252,7 +252,7 @@ class _PlansPageState extends State<CreatePlansPage> {
                       planType: selectedPlanType!,
                        isTrainerIncluded: isTrainerIncluded, 
                        workoutDuration: workoutDuration!);
-                       developer.log(response);
+                      //  developer.log(response);
                     if(response == 'Successfull'){
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text("Plan submitted")),

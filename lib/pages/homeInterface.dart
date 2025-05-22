@@ -15,14 +15,7 @@ class _HomeInterfaceState extends State<HomeInterface> {
     return Scaffold(
         appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
-        leading: Builder(builder: (BuildContext context) {
-          return IconButton(onPressed: () {
-            Scaffold.of(context).openDrawer();
-          }, icon: const Icon(
-            Icons.dashboard,
-            color: Colors.white,
-          ));
-        },) ,
+        
         
         title: 
         Text("Home" , style:

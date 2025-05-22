@@ -11,19 +11,19 @@ class AboutTabBar extends StatelessWidget {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               ShaderMask(
                 shaderCallback: (Rect bounds) {
-                  return const LinearGradient(
-                    colors: [Colors.deepPurple, Colors.pink],
+                  return  LinearGradient(
+                    colors: [Theme.of(context).primaryColor, Theme.of(context).colorScheme.secondary],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ).createShader(bounds);
                 },
-                child: const Text(
+                child:  Text(
                   "About Us",
                   style: TextStyle(
                     fontSize: 32,
@@ -32,13 +32,13 @@ class AboutTabBar extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
               Text(
                 aboutText,
                 textAlign: TextAlign.justify,
-                style: const TextStyle(
+                style:  TextStyle(
                   fontSize: 18,
-                  color: Colors.black87,
+                  color: Theme.of(context).colorScheme.primary,
                   height: 1.5,
                 ),
               ),

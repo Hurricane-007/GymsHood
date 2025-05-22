@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -26,9 +27,10 @@ class _VideoTabBarState extends State<VideoTabBar> {
 
   Future<void> _loadVideosAndThumbnails() async {
     final urls = await Fileserver().fetchMediaUrls('video');
-
+    _videoUrls=urls;
     final Map<String, String> thumbnails = {};
     for (var url in urls) {
+      developer.log(url);
       final tempDir = await getTemporaryDirectory();
       final thumbPath = await VideoThumbnail.thumbnailFile(
         video: url,
@@ -61,6 +63,7 @@ class _VideoTabBarState extends State<VideoTabBar> {
         crossAxisCount: 2,
         children: _videoUrls.map((url) {
           final thumbPath = _thumbnails[url];
+          developer.log('Video Url Here : $url');
           return GestureDetector(
             onTap: () {
               Navigator.push(

@@ -1,5 +1,6 @@
 // import 'package:gymshood/sevices/Auth/auth_service.dart';
 import 'package:gymshood/sevices/Models/gym.dart';
+import 'package:gymshood/sevices/Models/planModel.dart';
 import 'package:gymshood/sevices/gymInfo/gym_server_provider.dart';
 import 'package:gymshood/sevices/gymInfo/gymowner_info_provider.dart';
 
@@ -36,5 +37,10 @@ class Gymserviceprovider implements GymOwnerInfoProvider{
   @override
   Future<List<Gym>> getAllGyms({String? status, String? search, String? near}) {
    return provider.getAllGyms();
+  }
+
+  @override
+  Future<List<Plan>> getPlans() {
+   return provider.getPlans();
   }
 }

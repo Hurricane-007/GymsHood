@@ -59,7 +59,7 @@ PersistCookieJar get cookieJar => _cookieJar;
         return "Successfull";
       } else {
         final message = response.data['message'];
-        developer.log(message);
+        // developer.log(message);
         return message?.toString() ?? 'unknown error';
       }
     } on DioException catch (e) {
@@ -86,7 +86,7 @@ PersistCookieJar get cookieJar => _cookieJar;
   @override
   Future<String> verifyOTP({required String otp, required String email}) async {
     try {
-      developer.log('main aagaya');
+      // developer.log('main aagaya');
       final response = await _dio.post('$baseUrl/verify-otp',
           data: {'otp': otp, 'email': email},
           options: Options(headers: {'Content-Type': 'application/json'}));
@@ -115,7 +115,7 @@ PersistCookieJar get cookieJar => _cookieJar;
   Future<String> login(
       {required String email, required String password}) async {
     try {
-      developer.log('login pressed');
+      // developer.log('login pressed');
       final response = await _dio.post("$baseUrl/login",
           data: {
             'email': email,
@@ -135,7 +135,7 @@ PersistCookieJar get cookieJar => _cookieJar;
         return "Successfull";
       } else {
         final message = response.data['message'];
-        developer.log(message);
+        // developer.log(message);
         return message?.toString() ?? 'unknown error';
       }
     } on DioException catch (e) {
@@ -163,7 +163,7 @@ PersistCookieJar get cookieJar => _cookieJar;
         return "Successfull";
       } else {
         final message = response.data['message'];
-        developer.log(message);
+        // developer.log(message);
         return message?.toString() ?? 'unknown error';
       }
     } on DioException catch (e) {
@@ -239,7 +239,7 @@ PersistCookieJar get cookieJar => _cookieJar;
       // developer.log(jsonEncode(response.data['user']));
       final user = response.data['user'];
       // developer.log(user.);
-      developer.log(jsonEncode(user));
+      // developer.log(jsonEncode(user));
       // developer.log(user['name']);
       final Authuser authuser = Authuser.fromJson(user);
       // developer.log(user.name);

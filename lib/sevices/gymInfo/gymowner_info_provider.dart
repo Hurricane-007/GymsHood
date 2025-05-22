@@ -1,6 +1,7 @@
 
 
 import 'package:gymshood/sevices/Models/gym.dart';
+import 'package:gymshood/sevices/Models/planModel.dart';
 
 abstract class GymOwnerInfoProvider {
   Future<String> registerGym({
@@ -67,4 +68,5 @@ abstract class GymOwnerInfoProvider {
   String? near, // Format: "lat,lng,radius"
 }) ;
 
+Future<List<Plan>> getPlans();
 }

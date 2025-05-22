@@ -33,31 +33,31 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
       , backgroundColor: Theme.of(context).primaryColor, leading: GestureDetector(
         onTap: () => Navigator.pop(context),
         child: Icon(Icons.arrow_back , color: Colors.white,)),),
-      // backgroundColor: Colors.white,
+      backgroundColor: Colors.white,
       
-      // body: GoogleMap(
-      //   initialCameraPosition: const CameraPosition(
-      //     target: LatLng(20.5937, 78.9629), // Default to center of India
-      //     zoom: 5,
-      //   ),
-      //   onTap: (LatLng latLng) {
-      //     setState(() => selectedLocation = latLng);
-      //   },
-      //   markers: selectedLocation != null
-      //       ? {
-      //           Marker(markerId: const MarkerId("selected"), position: selectedLocation!)
-      //         }
-      //       : {},
-      //   onMapCreated: (GoogleMapController controller) {
-      //     mapController = controller;
-      //   },
-      // ),
-        body: GoogleMap(
-    initialCameraPosition: CameraPosition(
-      target: LatLng(37.7749, -122.4194),
-      zoom: 10,
-    ),
-  ),
+      body: GoogleMap(
+        initialCameraPosition: const CameraPosition(
+          target: LatLng(20.5937, 78.9629), // Default to center of India
+          zoom: 5,
+        ),
+        onTap: (LatLng latLng) {
+          setState(() => selectedLocation = latLng);
+        },
+        markers: selectedLocation != null
+            ? {
+                Marker(markerId: const MarkerId("selected"), position: selectedLocation!)
+              }
+            : {},
+        onMapCreated: (GoogleMapController controller) {
+          mapController = controller;
+        },
+      ),
+  //       body: GoogleMap(
+  //   initialCameraPosition: CameraPosition(
+  //     target: LatLng(37.7749, -122.4194),
+  //     zoom: 10,
+  //   ),
+  // ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           if (selectedLocation != null) {

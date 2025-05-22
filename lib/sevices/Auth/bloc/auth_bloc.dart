@@ -42,7 +42,7 @@ on<AuthEventInitialize>((event, emit) async {
     
     // developer.log(user.toString());
     if(user!=null){
-      developer.log("User: ${user.name}");
+      // developer.log("User: ${user.name}");
     emit(AuthStateLoggedIn());
     }else{
       developer.log(' ❌ user is null');
@@ -61,7 +61,7 @@ on<AuthEventInitialize>((event, emit) async {
        
       final response = await provider.verifyOTP(otp: otp, email: email);
      
-      developer.log(response);
+      // developer.log(response);
       if(response == "Successfull"){
         emit(AuthStateLoggedIn());
        }else{
