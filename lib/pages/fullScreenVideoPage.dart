@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import 'package:gymshood/sevices/fileserver.dart'; // Import your delete function
 
 class FullScreenVideoPlayer extends StatefulWidget {
   final String videoUrl;
@@ -32,6 +33,48 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
     super.dispose();
   }
 
+  Future<void> _deleteVideo() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: Colors.white,
+        title: Text(
+          'Delete Video',
+          style: TextStyle(color: Theme.of(context).colorScheme.primary),
+        ),
+        content: Text(
+          'Are you sure you want to delete this video?',
+          style: TextStyle(color: Theme.of(context).primaryColor),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('Cancel', style: TextStyle(color: Theme.of(context).primaryColor)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text('Delete', style: TextStyle(color: Theme.of(context).primaryColor)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      final filename = widget.videoUrl.split('/').last;
+      final success = await Fileserver().deleteFileFromServer(filename);
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Video deleted successfully')),
+        );
+        Navigator.of(context).pop();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to delete video')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,6 +83,12 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
         backgroundColor: Colors.transparent,
         iconTheme: const IconThemeData(color: Colors.white),
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete, color: Colors.red),
+            onPressed: _deleteVideo,
+          ),
+        ],
       ),
       body: Center(
         child: _isInitialized
@@ -53,9 +102,7 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
           ? FloatingActionButton(
               onPressed: () {
                 setState(() {
-                  _controller.value.isPlaying
-                      ? _controller.pause()
-                      : _controller.play();
+                  _controller.value.isPlaying ? _controller.pause() : _controller.play();
                 });
               },
               child: Icon(

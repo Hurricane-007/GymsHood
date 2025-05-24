@@ -1,6 +1,7 @@
 import 'dart:developer' as developer;
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gymshood/pages/fullScreenVideoPage.dart';
 import 'package:gymshood/sevices/fileserver.dart';
@@ -30,8 +31,14 @@ class _VideoTabBarState extends State<VideoTabBar> {
     _videoUrls=urls;
     final Map<String, String> thumbnails = {};
     for (var url in urls) {
-      developer.log(url);
+      print(url);
       final tempDir = await getTemporaryDirectory();
+      final httpClient = HttpClient();
+      final request = await httpClient.getUrl(Uri.parse(url));
+      final response = await request.close();
+      final bytes = await consolidateHttpClientResponseBytes(response);
+      final tempVideo = File('${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.mp4');
+      await tempVideo.writeAsBytes(bytes);
       final thumbPath = await VideoThumbnail.thumbnailFile(
         video: url,
         thumbnailPath: tempDir.path,
@@ -59,6 +66,8 @@ class _VideoTabBarState extends State<VideoTabBar> {
 
     return RefreshIndicator(
       onRefresh: _loadVideosAndThumbnails,
+      color: Theme.of(context).primaryColor,
+      backgroundColor: Colors.white,
       child: GridView.count(
         crossAxisCount: 2,
         children: _videoUrls.map((url) {

@@ -40,6 +40,8 @@ class Gym {
     required this.media,
   });
 
+  
+
   factory Gym.fromJson(Map<String, dynamic> json) {
   //   developer.log('Gym JSON: $json');
   //     final gymId = json['_id']?.toString();

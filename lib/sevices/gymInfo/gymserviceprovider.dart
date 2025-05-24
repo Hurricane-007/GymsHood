@@ -43,4 +43,9 @@ class Gymserviceprovider implements GymOwnerInfoProvider{
   Future<List<Plan>> getPlans() {
    return provider.getPlans();
   }
+  
+  @override
+  Future<bool> deletePlan({required String planId}) {
+    return provider.deletePlan(planId: planId);
+  }
 }

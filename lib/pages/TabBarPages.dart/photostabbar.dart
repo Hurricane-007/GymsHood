@@ -33,6 +33,8 @@ class _PhotosTabBarState extends State<PhotosTabBar> {
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
+      backgroundColor: Colors.white,
+      color: Theme.of(context).primaryColor,
     onRefresh: () async {
       setState(() {
              getfiles();

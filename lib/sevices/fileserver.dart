@@ -24,7 +24,7 @@ class Fileserver {
   factory Fileserver() => _instance;
   final baseurl = dotenv.env['BASE_URL_FILE_SERVER'];
 
-  Future<String> uploadToServer(File file , String mediaType) async {
+  Future<String> uploadToServer(File file , String mediaType ) async {
  // use your configured Dio instance if needed
   // gymer
   final Authuser? auth = await AuthService.server().getUser();
@@ -46,7 +46,7 @@ String gymId = auth!.userid!;
 // }
   final filename = path.basename(file.path);
   final fileext = path.extension(file.path);
-  final customfilename = '${gymId}_$mediaType$filename$fileext';
+  final customfilename = '${gymId}_$mediaType$filename';
 
   final formData = FormData.fromMap({
     'file': await MultipartFile.fromFile(file.path, filename: customfilename , 
@@ -99,7 +99,7 @@ Future<List<String>> getallfiles()async{
     return [];
 }
 
-Future< List<String>> fetchMediaUrls(String mediaType) async {
+Future<List<String>> fetchMediaUrls(String mediaType) async {
   final Authuser? auth = await AuthService.server().getUser();
   final String gymId = auth!.userid!;
 
@@ -115,30 +115,65 @@ Future< List<String>> fetchMediaUrls(String mediaType) async {
 
     final photos = <String>[];
     final videos = <String>[];
+    final logos = <String>[];
 
     for (final url in files) {
-      final uri = Uri.parse(url.toLowerCase());
+      final uri = Uri.parse(url);
+      final path = uri.path.toLowerCase();
+      final filename = uri.pathSegments.isNotEmpty ? uri.pathSegments.last.toLowerCase() : '';
 
-      if (uri.path.endsWith('.jpg') ||
-          uri.path.endsWith('.jpeg') ||
-          uri.path.endsWith('.png') ||
-          uri.path.endsWith('.webp')) {
+      if (filename.contains('logo')) {
+        logos.add(url);
+      } else if (path.endsWith('.jpg') ||
+                 path.endsWith('.jpeg') ||
+                 path.endsWith('.png') ||
+                 path.endsWith('.webp')) {
         photos.add(url);
-      } else if (uri.path.endsWith('.mp4') ||
-                 uri.path.endsWith('.mov') ||
-                 uri.path.endsWith('.avi') ||
-                 uri.path.endsWith('.mkv')) {
+      } else if (path.endsWith('.mp4') ||
+                 path.endsWith('.mov') ||
+                 path.endsWith('.avi') ||
+                 path.endsWith('.mkv')) {
         videos.add(url);
       }
     }
-      if(mediaType == 'photo'){
-        return photos;
-      }else{
-        return videos;
-      }
 
+    if (mediaType.toLowerCase() == 'logo') {
+      return logos;
+    } else if (mediaType.toLowerCase() == 'photo') {
+      return photos;
+    } else {
+      return videos;
+    }
   } else {
     throw Exception('Failed to fetch media URLs');
+  }
+}
+
+
+Future<bool> deleteFileFromServer(String filename) async {
+  // final dio = Dio();
+
+  try {
+    final response = await _dio.delete(
+      '$baseurl/files/$filename',
+      options: Options(
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      ),
+    );
+
+    if (response.statusCode == 200 && response.data['success'] == true) {
+      developer.log('File deleted successfully: ${response.data['filename']}');
+      return true;
+    } else {
+      developer.log('Failed to delete file: ${response.data}');
+      return false;
+    }
+  } catch (e) {
+    developer.log('Error while deleting file: $e');
+    return false;
+    
   }
 }
 

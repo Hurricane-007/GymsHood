@@ -23,8 +23,11 @@ class GymServerProvider implements GymOwnerInfoProvider {
       required}) async {
     // Authuser? user = await AuthService.server().getUser();
     try {
+        final Authuser? user = await AuthService.server().getUser();
+  final List<Gym> gym = await Gymserviceprovider.server().getAllGyms(search: user!.userid);
+  final gymId = gym[0].gymid;
       final response =
-          await dio.post('$baseUrl/gym/682b6695d64293ae028027ed/media',
+          await dio.post('$baseUrl/gym/$gymId/media',
               data: {
                 'mediaType': mediaType,
                 'mediaUrl': mediaUrl,
@@ -56,7 +59,8 @@ class GymServerProvider implements GymOwnerInfoProvider {
     try {
       final Authuser? auth = await AuthService.server().getUser();
       final List<Gym> gyms =
-          await Gymserviceprovider.server().getAllGyms(search: auth!.userid);
+          await Gymserviceprovider.server().getAllGyms(search: auth!.name);
+          // developer.log(gyms.toList().toString());
       final gymId = gyms[0].gymid;
       final response = await dio.get('$baseUrl/gym/$gymId');
 
@@ -208,7 +212,7 @@ class GymServerProvider implements GymOwnerInfoProvider {
 
       if (response.statusCode == 200 && response.data['success'] == true) {
         final responseData = response.data;
-        // developer.log(responseData.runtimeType.toString());
+        developer.log(responseData.toString());
         List<Gym> gyms = [];
 
         if (responseData is Map<String, dynamic> &&
@@ -235,14 +239,16 @@ class GymServerProvider implements GymOwnerInfoProvider {
   Future<List<Plan>> getPlans() async {
     try {
       final Authuser? auth = await AuthService.server().getUser();
-      final List<Gym> gyms =
-          await Gymserviceprovider.server().getAllGyms(search: auth!.userid);
-      final gymId = gyms[0].gymid;
+      final Gym gyms =
+          await Gymserviceprovider.server().getGymDetails(id: auth!.userid!);
+          
+
+      final gymId = gyms.gymid;
       final response = await dio.get('$baseUrl/plans/gym/$gymId');
-      
+      developer.log('${auth.userid!},GymID: $gymId');
       if (response.statusCode == 200 && response.data['success']) {
         final List<dynamic> data = response.data['plans'];
-        developer.log(data.toString());
+        // developer.log(data.toString());
         return data.map((json) => Plan.fromJson(json)).toList();
       } else {
         throw Exception("Failed to fetch plans");
@@ -251,4 +257,17 @@ class GymServerProvider implements GymOwnerInfoProvider {
       throw Exception("Error fetching plans: $e");
     }
   }
+  
+  @override
+  Future<bool> deletePlan({required String planId}) async{
+        try {
+      final response = await dio.delete('$baseUrl/plans/$planId');
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        return true;
+      } else {
+        throw Exception(response.data['message'] ?? "Failed to delete plan");
+      }
+    } catch (e) {      return false;
+    }
+    }
 }

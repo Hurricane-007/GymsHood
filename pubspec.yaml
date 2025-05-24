@@ -53,8 +53,11 @@ dependencies:
   file_picker: ^10.1.9
   google_maps_flutter: ^2.12.2
   geolocator: ^14.0.0
-  # uni_links: ^0.5.1
   video_thumbnail: ^0.5.6
+  flutter_google_places_hoc081098: ^2.0.0
+  google_place_plus: ^1.0.0
+  google_api_headers: ^4.0.3
+  google_maps_flutter_web: ^0.5.12
   flutter_dotenv: ^5.2.1
   http_parser: ^4.1.2
   video_player: ^2.9.5

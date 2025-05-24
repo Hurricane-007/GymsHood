@@ -278,7 +278,7 @@ class _PlansPageState extends State<CreatePlansPage> {
                 child: Text(
                   "Submit",
                   style: TextStyle(
-                      color: Colors.white, fontSize: 20, letterSpacing: 10),
+                      color: Colors.white, fontSize: 20),
                 ),
               )
             ],

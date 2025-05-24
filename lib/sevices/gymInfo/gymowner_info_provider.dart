@@ -29,7 +29,7 @@ abstract class GymOwnerInfoProvider {
      Future<Gym> getGymDetails({
         required String id
      });
-
+     Future<bool> deletePlan({required String planId});
      Future<bool> updateGym({
     required String name,
     required String location,
