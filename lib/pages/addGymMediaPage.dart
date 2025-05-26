@@ -3,13 +3,15 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:gymshood/Utilities/Dialogs/error_dialog.dart';
 import 'package:gymshood/Utilities/Dialogs/info_dialog.dart';
-import 'package:gymshood/sevices/fileserver.dart';
-import 'package:gymshood/sevices/gymInfo/gymserviceprovider.dart';
+import 'package:gymshood/services/Models/gym.dart';
+import 'package:gymshood/services/fileserver.dart';
+import 'package:gymshood/services/gymInfo/gymserviceprovider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
 
 class UploadMultipleImagesPage extends StatefulWidget {
-  const UploadMultipleImagesPage({super.key});
+  final Gym gym;
+  const UploadMultipleImagesPage({super.key, required this.gym});
 
   @override
   State<UploadMultipleImagesPage> createState() => _UploadMultipleImagesPageState();
@@ -82,7 +84,7 @@ class _UploadMultipleImagesPageState extends State<UploadMultipleImagesPage> {
   }
 
   Future<String> uploadToServer(File file , String mediatype) async {
-     final String res =  await Fileserver().uploadToServer(file , mediatype); 
+     final String res =  await Fileserver().uploadToServer(file , mediatype , widget.gym.gymid); 
      if(res is Exception){
       showErrorDialog(context, "Media cannot be uploaded! please try again (info : Max size is 10MB)");
      }

@@ -3,9 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gymshood/Utilities/Dialogs/error_dialog.dart';
 import 'package:gymshood/Utilities/Dialogs/info_dialog.dart';
 import 'package:gymshood/main.dart';
-import 'package:gymshood/sevices/Auth/bloc/auth_bloc.dart';
-import 'package:gymshood/sevices/Auth/bloc/auth_event.dart';
-import 'package:gymshood/sevices/Auth/bloc/auth_state.dart';
+import 'package:gymshood/services/Auth/bloc/auth_bloc.dart';
+import 'package:gymshood/services/Auth/bloc/auth_event.dart';
+import 'package:gymshood/services/Auth/bloc/auth_state.dart';
 
 class Resetpassword extends StatefulWidget {
   const Resetpassword({super.key , required this.token});

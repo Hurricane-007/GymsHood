@@ -6,16 +6,17 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:gymshood/Utilities/Dialogs/error_dialog.dart';
 import 'package:gymshood/Utilities/generic/argument.dart';
 import 'package:gymshood/main.dart';
-import 'package:gymshood/sevices/Auth/auth_service.dart';
-import 'package:gymshood/sevices/Auth/bloc/auth_bloc.dart';
-import 'package:gymshood/sevices/Auth/bloc/auth_event.dart';
+import 'package:gymshood/services/Auth/auth_service.dart';
+import 'package:gymshood/services/Auth/bloc/auth_bloc.dart';
+import 'package:gymshood/services/Auth/bloc/auth_event.dart';
 // import 'package:gymshood/sevices/Auth/bloc/auth_event.dart';
-import 'package:gymshood/sevices/Auth/bloc/auth_state.dart';
+import 'package:gymshood/services/Auth/bloc/auth_state.dart';
 // import 'package:gymshood/sevices/Auth/server_provider.dart';
 // import 'package:gymshood/sevices/Auth/server_provider.dart';
 import 'dart:developer' as developer;
 
 import 'package:shared_preferences/shared_preferences.dart';
+
 class VerifyEmailView extends StatefulWidget {
   const VerifyEmailView({super.key});
 
@@ -28,70 +29,74 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
   int _countDown = 0;
   Timer? _timer;
   String? email;
+  String? password;
+  String? name;
   late final TextEditingController _otp;
-  void getemail()async{
-     setState(() async{
+  void getemail() async {
+    setState(() async {
       final prefs = await SharedPreferences.getInstance();
-      email = prefs.getString('unverified_email');
-     });
+      email = prefs.getString('email');
+      password = prefs.getString('password');
+      name = prefs.getString('name');
+    });
   }
 
-void _startResendCountDown(){
-  setState(() {
-    _canResend=false;
-    _countDown=30;
-  });
+  void _startResendCountDown() {
+    setState(() {
+      _canResend = false;
+      _countDown = 30;
+    });
 
-  _timer?.cancel();
+    _timer?.cancel();
 
-  _timer = Timer.periodic(Duration(seconds: 1), (timer){
-    if(_countDown == 1){
-      timer.cancel();
-      setState(() {
-        _canResend=true;
-        _countDown=0;
-      });
-    }else{
-      setState(() {
-        _countDown--;
-      });
-    }
-  });
-}
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (_countDown == 1) {
+        timer.cancel();
+        setState(() {
+          _canResend = true;
+          _countDown = 0;
+        });
+      } else {
+        setState(() {
+          _countDown--;
+        });
+      }
+    });
+  }
 
   @override
   void initState() {
     _otp = TextEditingController();
-    _canResend=false;
+    _canResend = false;
     _startResendCountDown();
     getemail();
     super.initState();
   }
-    @override
-  void dispose() { 
+
+  @override
+  void dispose() {
     _otp.dispose();
     _timer?.cancel();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     mq = MediaQuery.of(context).size;
-    
-       
-      
-      //  developer.log(email!);
-       if(context.getArgument<String>()!=null){
-        email= context.getArgument<String>();
-       }
-       
-    return BlocListener<AuthBloc  , AuthState>(
+
+    //  developer.log(email!);
+    if (context.getArgument<String>() != null) {
+      email = context.getArgument<String>();
+    }
+
+    return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
-         if (state is AuthStateNeedsVerification){
-          if(state.email!=null){
+        if (state is AuthStateNeedsVerification) {
+          if (state.email != null) {
             developer.log('aaaaaaaa');
-            email = state.email;}
-          
-        }else if(state is AuthStateErrors){
+            email = state.email;
+          }
+        } else if (state is AuthStateErrors) {
           developer.log('showing errors');
           showErrorDialog(context, state.error);
         }
@@ -136,67 +141,62 @@ void _startResendCountDown(){
                 SizedBox(
                   height: 26,
                   width: mq.width * 0.7,
-                  child: 
-                      TextField(
-                        controller: _otp,
-                        decoration: InputDecoration(
-                            enabledBorder: UnderlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: Theme.of(context).primaryColor)),
-                            hintText: 'otp',
-                            hintStyle: GoogleFonts.mulish(fontSize: 16,
-                                 color: Colors.grey)),
-                      ),
-                    
+                  child: TextField(
+                    controller: _otp,
+                    decoration: InputDecoration(
+                        enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Theme.of(context).primaryColor)),
+                        hintText: 'otp',
+                        hintStyle: GoogleFonts.mulish(
+                            fontSize: 16, color: Colors.grey)),
                   ),
-                  Padding(
-                    padding: EdgeInsets.only(left: mq.width*0.6),
-                    child:_canResend
-  ? GestureDetector(
-      onTap:() async{
-         
-         await AuthService.server().sendverificationemail(email: email!);
-         setState(() {
-           _canResend=false;
-           _countDown=30;
-         });
-      } ,
-      child: Text(
-        'Resend OTP',
-        style: TextStyle(
-          color: Theme.of(context).colorScheme.primary,
-          decoration: TextDecoration.underline,
-        ),
-      ),
-    )
-  : Text(
-      'Resend in $_countDown seconds',
-      style: TextStyle(
-        color: Colors.grey,
-        fontStyle: FontStyle.italic,
-      ),
-    ),
-                    ),
-                
+                ),
+                Padding(
+                  padding: EdgeInsets.only(left: mq.width * 0.6),
+                  child: _canResend
+                      ? GestureDetector(
+                          onTap: () async {
+                            await AuthService.server()
+                                .register(name!, email!, password!);
+                            _startResendCountDown(); // Properly resets the timer
+                          },
+                          child: Text(
+                            'Resend OTP',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.primary,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        )
+                      : Text(
+                          'Resend in $_countDown seconds',
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                ),
                 SizedBox(
                   height: mq.height * 0.1,
                 ),
                 Padding(
-                    padding: EdgeInsets.only(top: mq.height*0.05),
+                    padding: EdgeInsets.only(top: mq.height * 0.05),
                     child: SizedBox(
                       height: 55,
                       width: mq.width * 0.6,
                       child: TextButton(
                         onPressed: () {
-                            developer.log('button pressed');
-                            
-                            developer.log(email!);
-                            
-                            context.read<AuthBloc>().add(AuthEventVerifyOtp(otp: _otp.text, email: email!));
+                          developer.log('button pressed');
+
+                          developer.log(email!);
+
+                          context.read<AuthBloc>().add(AuthEventVerifyOtp(
+                              otp: _otp.text.trim(), email: email!));
                           // }
                         },
                         style: TextButton.styleFrom(
-                          overlayColor: Colors.white,
+                            overlayColor: Colors.white,
                             backgroundColor: Theme.of(context).primaryColor,
                             shape: RoundedRectangleBorder(
                               borderRadius:
@@ -206,8 +206,7 @@ void _startResendCountDown(){
                               color: Colors.black,
                             )),
                         child: Text(
-                          'verify'
-                          ,
+                          'verify',
                           style: GoogleFonts.openSans(
                               textStyle: TextStyle(
                                   fontSize: 20,

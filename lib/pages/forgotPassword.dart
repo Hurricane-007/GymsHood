@@ -6,9 +6,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:gymshood/Utilities/Dialogs/error_dialog.dart';
 import 'package:gymshood/Utilities/Dialogs/info_dialog.dart';
 // import 'package:gymshood/pages/resetPassword.dart';
-import 'package:gymshood/sevices/Auth/bloc/auth_bloc.dart';
-import 'package:gymshood/sevices/Auth/bloc/auth_event.dart';
-import 'package:gymshood/sevices/Auth/bloc/auth_state.dart';
+import 'package:gymshood/services/Auth/bloc/auth_bloc.dart';
+import 'package:gymshood/services/Auth/bloc/auth_event.dart';
+import 'package:gymshood/services/Auth/bloc/auth_state.dart';
 // import 'package:uni_links/uni_links.dart';
 
 class ForgotPasswordView extends StatefulWidget {

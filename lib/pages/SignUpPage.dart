@@ -5,9 +5,9 @@ import 'package:gymshood/Utilities/Dialogs/error_dialog.dart';
 import 'package:gymshood/main.dart';
 // import 'package:gymshood/pages/loginPage.dart';
 // import 'package:gymshood/pages/verifyEmailview.dart';
-import 'package:gymshood/sevices/Auth/bloc/auth_bloc.dart';
-import 'package:gymshood/sevices/Auth/bloc/auth_event.dart';
-import 'package:gymshood/sevices/Auth/bloc/auth_state.dart';
+import 'package:gymshood/services/Auth/bloc/auth_bloc.dart';
+import 'package:gymshood/services/Auth/bloc/auth_event.dart';
+import 'package:gymshood/services/Auth/bloc/auth_state.dart';
 import 'dart:developer' as developer;
 
 import 'package:gymshood/Utilities/helpers/saveemail.dart';
@@ -26,7 +26,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   void _handleSaveEmail()async{
     developer.log('hi');
-    await saveEmail(email.text.trim());
+    await saveCredentials(email.text.trim(),gymName.text.trim(), password.text.trim() );
   }
   @override
   void initState() {

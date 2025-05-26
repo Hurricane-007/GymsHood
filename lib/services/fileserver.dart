@@ -4,11 +4,11 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:gymshood/sevices/Auth/auth_server_provider.dart';
-import 'package:gymshood/sevices/Auth/auth_service.dart';
-import 'package:gymshood/sevices/Models/AuthUser.dart';
-import 'package:gymshood/sevices/Models/gym.dart';
-import 'package:gymshood/sevices/gymInfo/gymserviceprovider.dart';
+import 'package:gymshood/services/Auth/auth_server_provider.dart';
+import 'package:gymshood/services/Auth/auth_service.dart';
+import 'package:gymshood/services/Models/AuthUser.dart';
+import 'package:gymshood/services/Models/gym.dart';
+import 'package:gymshood/services/gymInfo/gymserviceprovider.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:path/path.dart' as path;
 
@@ -24,28 +24,9 @@ class Fileserver {
   factory Fileserver() => _instance;
   final baseurl = dotenv.env['BASE_URL_FILE_SERVER'];
 
-  Future<String> uploadToServer(File file , String mediaType ) async {
- // use your configured Dio instance if needed
-  // gymer
-  final Authuser? auth = await AuthService.server().getUser();
+  Future<String> uploadToServer(File file , String mediaType , String gymId) async {
 
-// final List<Gym> gym = await Gymserviceprovider.server().getAllGyms(search: auth!.userid );
-// developer.log(gym.length.toString());
-String gymId = auth!.userid!;
-// for(Gym g in gym){
-//   gymId = g.gymid;
-// }
-// for(Gym g in gym){
-//  developer.log(g.name);
-// }
-//   try {
-//   // final res = await _dio.get('$baseurl/files');
-//   // developer.log('✅ Connection to file server successful: ${res.data}');
-// } catch (e) {
-//   developer.log('❌ Cannot connect to file server: $e');
-// }
   final filename = path.basename(file.path);
-  final fileext = path.extension(file.path);
   final customfilename = '${gymId}_$mediaType$filename';
 
   final formData = FormData.fromMap({
@@ -60,8 +41,6 @@ String gymId = auth!.userid!;
       options: Options(
         headers: {
           'Content-Type': 'multipart/form-data',
-          // Include auth header if you're using tokens
-          // 'Authorization': 'Bearer yourToken'
         },
       ),
     );
@@ -69,7 +48,7 @@ String gymId = auth!.userid!;
     if (response.statusCode == 201 && response.data['url'] != null) {
       return response.data['url']; // backend gives you this URL
     } else {
-      developer.log('${response.data},${response.statusCode}');
+      developer.log('${response.data},c${response.statusCode}');
       throw Exception('Upload failed');
     }
   }on DioException catch(e){
@@ -99,9 +78,7 @@ Future<List<String>> getallfiles()async{
     return [];
 }
 
-Future<List<String>> fetchMediaUrls(String mediaType) async {
-  final Authuser? auth = await AuthService.server().getUser();
-  final String gymId = auth!.userid!;
+Future<List<String>> fetchMediaUrls(String mediaType , String gymId ) async {
 
   final response = await _dio.get(
     '$baseurl/files',

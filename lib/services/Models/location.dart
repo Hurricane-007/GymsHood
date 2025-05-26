@@ -7,7 +7,8 @@ class Location {
     required this.coordinates,
   });
 
-  factory Location.fromJson(Map<String, dynamic> json) {
+  factory Location.
+  fromJson(Map<String, dynamic> json) {
     final rawCoords = json['coordinates'];
 
     final List<double> coords = (rawCoords is List)
@@ -23,8 +24,5 @@ class Location {
     );
   }
 
-  Map<String, dynamic> toJson() => {
-        'address': address,
-        'coordinates': coordinates,
-      };
+
 }

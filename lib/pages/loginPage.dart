@@ -7,9 +7,9 @@ import 'package:gymshood/pages/bottomNavigationBar.dart';
 // import 'package:gymshood/pages/SignUpPage.dart';
 // import 'package:gymshood/pages/bottomNavigationBar.dart';
 import 'package:gymshood/pages/forgotPassword.dart';
-import 'package:gymshood/sevices/Auth/bloc/auth_bloc.dart';
-import 'package:gymshood/sevices/Auth/bloc/auth_event.dart';
-import 'package:gymshood/sevices/Auth/bloc/auth_state.dart';
+import 'package:gymshood/services/Auth/bloc/auth_bloc.dart';
+import 'package:gymshood/services/Auth/bloc/auth_event.dart';
+import 'package:gymshood/services/Auth/bloc/auth_state.dart';
 // import 'package:gymshood/pages/homeInterface.dart';
 import 'dart:developer' as developer;
 

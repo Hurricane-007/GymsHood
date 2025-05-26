@@ -4,9 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gymshood/Utilities/Dialogs/error_dialog.dart';
 import 'package:gymshood/main.dart';
-import 'package:gymshood/sevices/Auth/bloc/auth_bloc.dart';
-import 'package:gymshood/sevices/Auth/bloc/auth_event.dart';
-import 'package:gymshood/sevices/Auth/bloc/auth_state.dart';
+import 'package:gymshood/services/Auth/bloc/auth_bloc.dart';
+import 'package:gymshood/services/Auth/bloc/auth_event.dart';
+import 'package:gymshood/services/Auth/bloc/auth_state.dart';
 
 
 class FirstScreen extends StatefulWidget {
@@ -107,8 +107,8 @@ Widget build(BuildContext context) {
               ),
               SizedBox(height: 10),
               SizedBox(
-                width: mq.width * 0.2,
-                height: mq.height * 0.2,
+                width: mq.width * 0.12,
+                height: mq.height * 0.12,
                 child: GestureDetector(
                   onTap: () {
                     context.read<AuthBloc>().add(AuthEventGoogleLogIn());

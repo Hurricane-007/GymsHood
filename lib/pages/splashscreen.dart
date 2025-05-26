@@ -3,8 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 // import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gymshood/main.dart';
 import 'package:gymshood/pages/firstScreen.dart';
-import 'package:gymshood/sevices/Auth/bloc/auth_bloc.dart';
-import 'package:gymshood/sevices/Auth/bloc/auth_event.dart';
+import 'package:gymshood/services/Auth/bloc/auth_bloc.dart';
+import 'package:gymshood/services/Auth/bloc/auth_event.dart';
 // import 'package:gymshood/sevices/Auth/bloc/auth_bloc.dart';
 // import 'package:gymshood/sevices/Auth/bloc/auth_event.dart';
 

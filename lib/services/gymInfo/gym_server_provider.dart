@@ -3,13 +3,13 @@ import 'dart:developer' as developer;
 // import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:gymshood/sevices/Auth/auth_server_provider.dart';
-import 'package:gymshood/sevices/Auth/auth_service.dart';
-import 'package:gymshood/sevices/Models/AuthUser.dart';
-import 'package:gymshood/sevices/Models/gym.dart';
-import 'package:gymshood/sevices/Models/planModel.dart';
-import 'package:gymshood/sevices/gymInfo/gymowner_info_provider.dart';
-import 'package:gymshood/sevices/gymInfo/gymserviceprovider.dart';
+import 'package:gymshood/services/Auth/auth_server_provider.dart';
+import 'package:gymshood/services/Auth/auth_service.dart';
+import 'package:gymshood/services/Models/AuthUser.dart';
+import 'package:gymshood/services/Models/gym.dart';
+import 'package:gymshood/services/Models/planModel.dart';
+import 'package:gymshood/services/gymInfo/gymowner_info_provider.dart';
+import 'package:gymshood/services/gymInfo/gymserviceprovider.dart';
 
 class GymServerProvider implements GymOwnerInfoProvider {
   final String? baseUrl = dotenv.env['BASE_URL'];
@@ -57,16 +57,12 @@ class GymServerProvider implements GymOwnerInfoProvider {
   @override
   Future<Gym> getGymDetails({required String id}) async {
     try {
-      final Authuser? auth = await AuthService.server().getUser();
-      final List<Gym> gyms =
-          await Gymserviceprovider.server().getAllGyms(search: auth!.name);
-          // developer.log(gyms.toList().toString());
-      final gymId = gyms[0].gymid;
-      final response = await dio.get('$baseUrl/gym/$gymId');
+      final response = await dio.get('$baseUrl/gym/$id');
 
       if (response.statusCode == 200 && response.data['success'] == true) {
         final data = response.data['gym'];
-        // developer.log(data.toString());
+
+        developer.log(data.toString());
         return Gym.fromJson(data);
       } else {
         developer.log('error occured');
@@ -79,11 +75,11 @@ class GymServerProvider implements GymOwnerInfoProvider {
   }
 
   @override
-  Future<String> registerGym(
+  Future<Map<String,dynamic>> registerGym(
       {required String role,
       required String name,
       required String location,
-      List<num>? coordinates,
+     required List<num> coordinates,
       required num capacity,
       required String openTime,
       required String closeTime,
@@ -96,12 +92,13 @@ class GymServerProvider implements GymOwnerInfoProvider {
     try {
       // dev
       final Authuser? user = await ServerProvider().getUser();
+      developer.log(coordinates.toString());
       final response = await dio.post('$baseUrl/gym/register',
           data: {
             'role': user!.role,
-            'name': user.name,
+            'name': name,
             'location': location,
-            'coordinates': coordinates,
+            'coordinates':coordinates,
             'capacity': capacity,
             'openTime': openTime,
             'closeTime': closeTime,
@@ -114,38 +111,80 @@ class GymServerProvider implements GymOwnerInfoProvider {
           options: Options(headers: {'Content-Type': 'application/json'}));
 
       if (response.statusCode == 201) {
-        return "Successfully registered gym , will be notified once verified";
+        return {
+            'success':true,
+            'message':"Successfully registered the gym will be notified once it's verified"
+        };
       } else {
         developer.log(response.data['message']);
-        return response.data['message'];
+        return {
+            'success':false,
+            'message':response.data['message']
+        };
       }
     } on DioException catch (e) {
       if (e.response != null) {
         developer.log('Error response: ${e.response?.data}');
-        return e.response?.data;
+        return {
+            'success':false,
+            'message':"Successfully registered the gym will be notified once it's verified"
+        };
       } else {
         developer.log('Dio error: ${e.message}');
-        return '${e.message}';
+        return  {
+            'success':false,
+            'message':"${e.message}"
+        };
       }
     } catch (e) {
-      return e.toString();
+      developer.log(e.toString());
+       return {
+            'success':false,
+            'message':e.toString()
+        };
       // developer.log(e.toString());
     }
   }
 
   @override
   Future<bool> updateGym(
-      {required String name,
-      required String location,
+      { required String gymId,
+        required String name,
+      required Map<String,dynamic> location,
       required num capacity,
       required String openTime,
       required String closeTime,
       required String contactEmail,
       required String phone,
       required String about,
-      required String shifts}) {
-    // TODO: implement updateGym
-    throw UnimplementedError();
+      required List<Map<String,dynamic>> shifts}) async{
+        
+        try{
+          final response = await dio.put('$baseUrl/gym/$gymId',
+            data: {
+                'name':name,
+                'location':location,
+                'capacity':capacity,
+                'openTime':openTime,
+                'closeTime':closeTime,
+                'contactEmail':contactEmail,
+                'phone':phone,
+                'about':about,
+                'shifts':shifts
+            },
+
+          );
+          if(response.statusCode == 200){
+            return true;
+          }else{
+            developer.log(response.data['message']);
+            return false;
+          }
+
+        }catch(e){
+          developer.log(e.toString());
+            return false;
+        }
   }
 
   @override
@@ -157,10 +196,13 @@ class GymServerProvider implements GymOwnerInfoProvider {
       required String features,
       required String planType,
       required bool isTrainerIncluded,
-      required String workoutDuration}) async {
+      required String workoutDuration,
+      required String gymId
+     }) async {
     try {
+
       final response = await dio.post(
-        '$baseUrl/682b6695d64293ae028027ed/plans',
+        '$baseUrl/$gymId/plans',
         data: {
           'name': name,
           'validity': validity,
@@ -206,13 +248,13 @@ class GymServerProvider implements GymOwnerInfoProvider {
       if (near != null) queryParams['near'] = near;
 
       final response = await dio.get(
-        '$baseUrl/admin/gyms',
+        '$baseUrl/gyms',
         queryParameters: queryParams,
       );
 
       if (response.statusCode == 200 && response.data['success'] == true) {
         final responseData = response.data;
-        developer.log(responseData.toString());
+        // developer.log(responseData.toString());
         List<Gym> gyms = [];
 
         if (responseData is Map<String, dynamic> &&
@@ -236,19 +278,14 @@ class GymServerProvider implements GymOwnerInfoProvider {
   }
 
   @override
-  Future<List<Plan>> getPlans() async {
+  Future<List<Plan>> getPlans(String gymId) async {
+       
     try {
-      final Authuser? auth = await AuthService.server().getUser();
-      final Gym gyms =
-          await Gymserviceprovider.server().getGymDetails(id: auth!.userid!);
-          
-
-      final gymId = gyms.gymid;
       final response = await dio.get('$baseUrl/plans/gym/$gymId');
-      developer.log('${auth.userid!},GymID: $gymId');
+      // developer.log(',GymID: $gymId');
       if (response.statusCode == 200 && response.data['success']) {
         final List<dynamic> data = response.data['plans'];
-        // developer.log(data.toString());
+        developer.log(data.toString());
         return data.map((json) => Plan.fromJson(json)).toList();
       } else {
         throw Exception("Failed to fetch plans");
@@ -261,7 +298,9 @@ class GymServerProvider implements GymOwnerInfoProvider {
   @override
   Future<bool> deletePlan({required String planId}) async{
         try {
-      final response = await dio.delete('$baseUrl/plans/$planId');
+      final response = await dio.put('$baseUrl/plans/$planId' , data: {
+        'isActive':false
+      });
       if (response.statusCode == 200 && response.data['success'] == true) {
         return true;
       } else {
@@ -270,4 +309,48 @@ class GymServerProvider implements GymOwnerInfoProvider {
     } catch (e) {      return false;
     }
     }
+@override
+  Future<List<Gym>> getGymsByowner(String id)async{
+    try{
+        final response = await dio.get('$baseUrl/gym/owner/$id');
+        List<Gym> gyms = [];
+        if(response.statusCode==200){
+          final gymsjson = response.data['gyms'] as List<dynamic>;
+          gyms = gymsjson.map<Gym>((json) => Gym.fromJson(json as Map<String,dynamic>)).toList();
+          return gyms;
+        }
+        else{
+          throw(Exception());
+        }
+    }catch(e){
+      developer.log(e.toString());
+      return [];
+    }
+  }
+  
+  @override
+  Future<bool> updatePlan({required String planId, required String name, required num price, required num discountPercent, required String features, required String workoutDuration, required bool isTrainerIncluded}) async{
+    try{
+      final response = await dio.put(
+          '$baseUrl/plans/$planId',
+          data: {
+             'name':name,
+              'price':price,
+              'discountPercent':discountPercent,
+              'features':features,
+              'workoutDuration':workoutDuration,
+              'isTrainerIncluded':isTrainerIncluded
+          }
+      );
+      if(response.statusCode==200){
+        return true;
+      }else{
+        developer.log(response.data['message']);
+        return false;
+      }
+    }catch(e){
+      developer.log(e.toString());
+            return false;
+          }
+  }
 }

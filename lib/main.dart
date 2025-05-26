@@ -13,10 +13,10 @@ import 'package:gymshood/pages/loginPage.dart';
 import 'package:gymshood/pages/resetPassword.dart';
 import 'package:gymshood/pages/splashscreen.dart';
 import 'package:gymshood/pages/verifyEmailview.dart';
-import 'package:gymshood/sevices/Auth/bloc/auth_bloc.dart';
-import 'package:gymshood/sevices/Auth/bloc/auth_event.dart';
-import 'package:gymshood/sevices/Auth/bloc/auth_state.dart';
-import 'package:gymshood/sevices/Auth/auth_server_provider.dart';
+import 'package:gymshood/services/Auth/bloc/auth_bloc.dart';
+import 'package:gymshood/services/Auth/bloc/auth_event.dart';
+import 'package:gymshood/services/Auth/bloc/auth_state.dart';
+import 'package:gymshood/services/Auth/auth_server_provider.dart';
 
 // import 'dart:developer' as developer;
 

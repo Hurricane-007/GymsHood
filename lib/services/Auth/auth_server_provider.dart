@@ -8,10 +8,10 @@ import 'package:dio/dio.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:gymshood/sevices/Models/AuthUser.dart';
+import 'package:gymshood/services/Models/AuthUser.dart';
 import 'dart:developer' as developer;
 
-import 'package:gymshood/sevices/Auth/auth_provider.dart';
+import 'package:gymshood/services/Auth/auth_provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 // import 'package:gymshood/sevices/Auth/bloc/auth_state.dart';

@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:gymshood/Utilities/Dialogs/error_dialog.dart';
+import 'package:gymshood/services/Auth/auth_service.dart';
+import 'package:gymshood/services/Models/AuthUser.dart';
+import 'package:gymshood/services/Models/gym.dart';
+import 'package:gymshood/services/Models/planModel.dart';
 // import 'package:flutter/widgets.dart';
 // import 'package:gymshood/Themes/theme.dart';
 // import 'package:gymshood/main.dart';
 import 'dart:developer' as developer;
 
-import 'package:gymshood/sevices/gymInfo/gymserviceprovider.dart';
+import 'package:gymshood/services/gymInfo/gymserviceprovider.dart';
 
 class CreatePlansPage extends StatefulWidget {
   const CreatePlansPage({super.key});
@@ -22,13 +26,38 @@ class _PlansPageState extends State<CreatePlansPage> {
   TextEditingController priceController = TextEditingController();
   TextEditingController discountController = TextEditingController();
   TextEditingController featuresController = TextEditingController();
-
+  List<Gym> gyms = [];
   String? selectedPlanType;
   String? workoutDuration;
   bool isTrainerIncluded = false;
   final DateTime today = DateTime.now();
   DateTime? startdate;
   DateTime? enddate;
+  Gym? selectedGym;
+
+  @override
+  void initState() {
+    super.initState();
+    getGym().then((_) {
+      if (gyms.isNotEmpty) {
+        setState(() => selectedGym = gyms.first); // default selection
+      }
+    });
+  }
+
+  Future<void> getGym() async {
+    final Authuser? auth = await AuthService.server().getUser();
+    final fetchedGyms =
+        await Gymserviceprovider.server().getGymsByowner(auth!.userid!);
+    setState(() {
+      gyms = fetchedGyms;
+    });
+  }
+
+  Future<String> getGymInfo(Plan plan)async{
+      final gym = await Gymserviceprovider.server().getGymDetails(id: plan.gymId);
+      return gym.name;
+  }
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -56,6 +85,8 @@ class _PlansPageState extends State<CreatePlansPage> {
       });
     }
   }
+
+
 
   Future<void> _selectEndDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -85,6 +116,8 @@ class _PlansPageState extends State<CreatePlansPage> {
     }
   }
 
+  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -95,7 +128,7 @@ class _PlansPageState extends State<CreatePlansPage> {
         ),
         backgroundColor: Theme.of(context).colorScheme.primary,
         leading: GestureDetector(
-            onTap: () => Navigator.pop(context),
+            onTap: () => Navigator.pop(context,true),
             child: Icon(
               Icons.arrow_back,
               color: Colors.white,
@@ -108,6 +141,31 @@ class _PlansPageState extends State<CreatePlansPage> {
           key: _formKey,
           child: ListView(
             children: [
+              if (gyms.isNotEmpty)
+                DropdownButtonFormField<Gym>(
+                  value: selectedGym,
+                  decoration: InputDecoration(
+                    labelText: 'Select Gym',
+                    labelStyle:
+                        TextStyle(color: Theme.of(context).colorScheme.primary),
+                  ),
+                  items: gyms
+                      .map((gym) => DropdownMenuItem(
+                            value: gym,
+                            child: Text(gym.name),
+                          ))
+                      .toList(),
+                  onChanged: (gym) {
+                    setState(() => selectedGym = gym);
+                  },
+                  validator: (val) => val == null ? 'Select a gym' : null,
+                )
+              else
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 10),
+                  child: Text('No gyms found. Please register a gym first.',
+                      style: TextStyle(color: Colors.red)),
+                ),
               TextFormField(
                 controller: nameController,
                 decoration: InputDecoration(labelText: 'Name'),
@@ -179,10 +237,17 @@ class _PlansPageState extends State<CreatePlansPage> {
                 value: selectedPlanType,
                 dropdownColor: Colors.white,
                 style: TextStyle(color: Theme.of(context).colorScheme.primary),
-                decoration: InputDecoration(labelText: 'Plan Type'),
+                decoration: InputDecoration(
+                    labelText: 'Plan Type',
+                    labelStyle: TextStyle(
+                        color: Theme.of(context).colorScheme.primary)),
                 items: ['day', 'monthly', 'yearly']
-                    .map((type) =>
-                        DropdownMenuItem(value: type, child: Text(type)))
+                    .map((type) => DropdownMenuItem(
+                        value: type,
+                        child: Text(
+                          type,
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        )))
                     .toList(),
                 onChanged: (val) {
                   setState(() => selectedPlanType = val);
@@ -214,11 +279,7 @@ class _PlansPageState extends State<CreatePlansPage> {
                     labelText: 'Workout Duration',
                     labelStyle:
                         TextStyle(color: Theme.of(context).primaryColor)),
-                items: [
-                  '1hr',
-                  '2hr',
-                  'flexible'
-                ]
+                items: ['1hr', '2hr', 'flexible']
                     .map((dur) => DropdownMenuItem(
                         value: dur,
                         child: Text(
@@ -237,27 +298,45 @@ class _PlansPageState extends State<CreatePlansPage> {
 
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).primaryColor,
-                  overlayColor: Colors.white
-                ),
-                onPressed: () async{
+                    backgroundColor: Theme.of(context).primaryColor,
+                    overlayColor: Colors.white),
+                onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     // developer.log('call recieved inside form');
+                    if(gyms.isEmpty){
+                      showErrorDialog(context, "Register your gym first");
+                           _formKey.currentState!.reset();
+                    nameController.clear();
+                    priceController.clear();
+                    discountController.clear();
+                    featuresController.clear();
+
+                    setState(() {
+                      selectedPlanType = null;
+                      workoutDuration = null;
+                      isTrainerIncluded = false;
+                      startdate = null;
+                      enddate = null;
+                    });
+                    }
                     Duration validity = enddate!.difference(startdate!);
-                    final response = await Gymserviceprovider.server().createPlan(name: nameController.text,
-                     validity: validity.inDays,
-                      price: num.parse(priceController.text), 
-                      discountPercent: num.parse(discountController.text), 
-                      features: featuresController.text, 
-                      planType: selectedPlanType!,
-                       isTrainerIncluded: isTrainerIncluded, 
-                       workoutDuration: workoutDuration!);
-                      //  developer.log(response);
-                    if(response == 'Successfull'){
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("Plan submitted")),
-                    );
-                    }else{
+                    final response = await Gymserviceprovider.server()
+                        .createPlan(
+                            name: nameController.text,
+                            validity: validity.inDays,
+                            price: num.parse(priceController.text),
+                            discountPercent: num.parse(discountController.text),
+                            features: featuresController.text,
+                            planType: selectedPlanType!,
+                            isTrainerIncluded: isTrainerIncluded,
+                            workoutDuration: workoutDuration!,
+                            gymId: selectedGym!.gymid);
+                    //  developer.log(response);
+                     if (response == 'Successfull') {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Plan submitted")),
+                      );
+                    } else {
                       showErrorDialog(context, response);
                     }
                     _formKey.currentState!.reset();
@@ -277,8 +356,7 @@ class _PlansPageState extends State<CreatePlansPage> {
                 },
                 child: Text(
                   "Submit",
-                  style: TextStyle(
-                      color: Colors.white, fontSize: 20),
+                  style: TextStyle(color: Colors.white, fontSize: 20),
                 ),
               )
             ],
@@ -286,6 +364,7 @@ class _PlansPageState extends State<CreatePlansPage> {
         ),
       ),
     );
+   
   }
 }
 

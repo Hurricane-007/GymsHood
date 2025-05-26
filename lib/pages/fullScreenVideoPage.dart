@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:gymshood/Utilities/Dialogs/showdeletedialog.dart';
+import 'package:gymshood/main.dart';
 import 'package:video_player/video_player.dart';
-import 'package:gymshood/sevices/fileserver.dart'; // Import your delete function
+import 'package:gymshood/services/fileserver.dart'; // Import your delete function
 
 class FullScreenVideoPlayer extends StatefulWidget {
   final String videoUrl;
@@ -34,30 +36,7 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
   }
 
   Future<void> _deleteVideo() async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: Colors.white,
-        title: Text(
-          'Delete Video',
-          style: TextStyle(color: Theme.of(context).colorScheme.primary),
-        ),
-        content: Text(
-          'Are you sure you want to delete this video?',
-          style: TextStyle(color: Theme.of(context).primaryColor),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancel', style: TextStyle(color: Theme.of(context).primaryColor)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text('Delete', style: TextStyle(color: Theme.of(context).primaryColor)),
-          ),
-        ],
-      ),
-    );
+    final confirm = await showDeleteDialog(context);
 
     if (confirm == true) {
       final filename = widget.videoUrl.split('/').last;
@@ -77,6 +56,7 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
 
   @override
   Widget build(BuildContext context) {
+    mq = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -99,16 +79,19 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
             : const CircularProgressIndicator(),
       ),
       floatingActionButton: _isInitialized
-          ? FloatingActionButton(
-              onPressed: () {
-                setState(() {
-                  _controller.value.isPlaying ? _controller.pause() : _controller.play();
-                });
-              },
-              child: Icon(
-                _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
+          ? Padding(
+            padding:  EdgeInsets.only(right: mq.width*0.38 ),
+            child: FloatingActionButton(
+                onPressed: () {
+                  setState(() {
+                    _controller.value.isPlaying ? _controller.pause() : _controller.play();
+                  });
+                },
+                child: Icon(
+                  _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
+                ),
               ),
-            )
+          )
           : null,
     );
   }

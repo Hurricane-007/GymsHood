@@ -2,10 +2,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gymshood/Utilities/Dialogs/error_dialog.dart';
 import 'package:gymshood/Utilities/Dialogs/info_dialog.dart';
-import 'package:gymshood/sevices/Auth/auth_provider.dart';
+import 'package:gymshood/services/Auth/auth_provider.dart';
 // import 'package:gymshood/sevices/Auth/AuthUser.dart';
-import 'package:gymshood/sevices/Auth/bloc/auth_event.dart';
-import 'package:gymshood/sevices/Auth/bloc/auth_state.dart';
+import 'package:gymshood/services/Auth/bloc/auth_event.dart';
+import 'package:gymshood/services/Auth/bloc/auth_state.dart';
 // import 'package:gymshood/sevices/Auth/server_provider.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:developer' as developer;

@@ -1,14 +1,14 @@
 
 
-import 'package:gymshood/sevices/Models/gym.dart';
-import 'package:gymshood/sevices/Models/planModel.dart';
+import 'package:gymshood/services/Models/gym.dart';
+import 'package:gymshood/services/Models/planModel.dart';
 
 abstract class GymOwnerInfoProvider {
-  Future<String> registerGym({
+  Future<Map<String,dynamic>> registerGym({
     required String role , 
     required String name,
     required String location,
-     List<num>? coordinates,
+    required  List<num> coordinates,
     required num capacity,
     required String openTime,
     required String closeTime,
@@ -20,6 +20,18 @@ abstract class GymOwnerInfoProvider {
     required String userid,
      });
 
+    Future<List<Gym>> getGymsByowner(String id);
+     
+  //    Future<Plan> updateGymPlan(
+  //   String name,
+  //   num price,
+  //   num discountPercent,
+  //   String features,
+  //   String workoutDuration,
+  //  bool isTrainerIncluded,
+  //   isActive,
+
+  //    )
      Future<String> addGymMedia({
         required String mediaType,//needed dropdown menu of photo , video
         required String mediaUrl,
@@ -30,16 +42,18 @@ abstract class GymOwnerInfoProvider {
         required String id
      });
      Future<bool> deletePlan({required String planId});
+
      Future<bool> updateGym({
+      required String gymId,
     required String name,
-    required String location,
+    required Map<String,dynamic> location,
     required num capacity,
     required String openTime,
     required String closeTime,
     required String contactEmail,
     required String phone,
     required String about,
-    required String shifts,
+    required List<Map<String,dynamic>> shifts,
      });
 
 
@@ -60,13 +74,26 @@ abstract class GymOwnerInfoProvider {
     required String planType,
     required bool isTrainerIncluded,
     required String workoutDuration,
+    required String gymId
   });
 
   Future<List<Gym>> getAllGyms({
   String? status,
   String? search,
-  String? near, // Format: "lat,lng,radius"
+  String? near, 
+// Format: "lat,lng,radius"
 }) ;
 
-Future<List<Plan>> getPlans();
+Future<List<Plan>> getPlans(String gymId);
+
+Future<bool> updatePlan({
+  required String planId,
+  required String    name,
+   required num price,
+   required num discountPercent,
+    required String features,
+    required String workoutDuration,
+    required bool isTrainerIncluded,
+
+});
 }

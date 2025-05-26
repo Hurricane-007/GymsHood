@@ -1,6 +1,6 @@
-import 'package:gymshood/sevices/Models/AuthUser.dart';
-import 'package:gymshood/sevices/Auth/auth_provider.dart';
-import 'package:gymshood/sevices/Auth/auth_server_provider.dart';
+import 'package:gymshood/services/Models/AuthUser.dart';
+import 'package:gymshood/services/Auth/auth_provider.dart';
+import 'package:gymshood/services/Auth/auth_server_provider.dart';
 
 class AuthService implements AuthProvider{
   final AuthProvider provider;

@@ -2,7 +2,7 @@ import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
 import 'package:gymshood/Utilities/helpers/enum.dart';
-import 'package:gymshood/sevices/Models/location.dart'; // Assuming GymStatus is defined there
+import 'package:gymshood/services/Models/location.dart'; // Assuming GymStatus is defined there
 
 @immutable
 class Gym {
@@ -11,7 +11,7 @@ class Gym {
   final Location location;
   final String openTime;
   final String closeTime;
-  final String contactTime;
+  final String contactEmail;
   final String phone;
   final String about;
   final List<String> equipmentList;
@@ -21,14 +21,15 @@ class Gym {
   final bool isverified;
   final bool isDeleted;
   final List<String> media;
-
+  final List<Map<String,dynamic>> shifts;
   const Gym({
+    required this.shifts,
     required this.gymid,
     required this.name,
     required this.location,
     required this.openTime,
     required this.closeTime,
-    required this.contactTime,
+    required this.contactEmail,
     required this.phone,
     required this.about,
     required this.equipmentList,
@@ -43,8 +44,8 @@ class Gym {
   
 
   factory Gym.fromJson(Map<String, dynamic> json) {
-  //   developer.log('Gym JSON: $json');
-  //     final gymId = json['_id']?.toString();
+    // developer.log('Gym JSON: $json');
+      // final gymId = json['_id']?.toString();
   // developer.log('Extracted gymid: $gymId');
     return 
     Gym(
@@ -55,7 +56,7 @@ class Gym {
         : Location(address: '', coordinates: [0.0, 0.0]),
       openTime: json['openTime'] ?? '',
       closeTime: json['closeTime'] ?? '',
-      contactTime: json['contactTime'] ?? '',
+      contactEmail: json['contactEmail'] ?? '',
       phone: json['phone'] ?? '',
       about: json['about'] ?? '',
       equipmentList: List<String>.from(json['equipmentList'] ?? []),
@@ -70,6 +71,13 @@ class Gym {
         .toList()
     : json['media'] is Map
         ? [json['media']['mediaUrl']?.toString() ?? '']
+        : [],
+     shifts: json['shifts'] is List
+        ? List<Map<String, dynamic>>.from(
+            (json['shifts'] as List).map(
+              (shift) => Map<String, dynamic>.from(shift),
+            ),
+          )
         : [],
     );
   }

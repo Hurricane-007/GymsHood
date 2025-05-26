@@ -21,7 +21,7 @@ class _LocationPickerPageState extends State<LocationPickerPage> {
   late GoogleMapController mapController;
 
   double fabX = 20;
-  double fabY = 600;
+  double fabY = 500;
 
   final places = GoogleMapsPlaces(apiKey: '$googleApiKey');
 

@@ -12,8 +12,10 @@ class Plan {
   final DateTime lastUpdatedAt;
   final List<String>? features;
   final String? lastUpdatedBy;
+  final String workoutDuration;
+  Plan(
 
-  Plan({
+    {
     required this.id,
     required this.name,
     required this.gymId,
@@ -24,12 +26,14 @@ class Plan {
     required this.isTrainerIncluded,
     required this.isActive,
     required this.lastUpdatedAt,
+    required this.workoutDuration,
     this.features,
     this.lastUpdatedBy,
   });
 
   factory Plan.fromJson(Map<String, dynamic> json) {
     return Plan(
+      workoutDuration: json['workoutDuration']?? "",
       id: json['_id'] ?? '',
       name: json['name'] ?? '',
       gymId: json['gymId'] ?? '',
@@ -51,6 +55,7 @@ class Plan {
 
   Map<String, dynamic> toJson() {
     return {
+      'workoutDuration':workoutDuration,
       '_id': id,
       'name': name,
       'gymId': gymId,
