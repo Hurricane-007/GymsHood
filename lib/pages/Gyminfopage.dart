@@ -38,7 +38,7 @@ class _GyminfopageState extends State<Gyminfopage>
       builder: (context) {
         final selected = <int>{};
         return AlertDialog(
-          title: const Text("Copy shifts to days"),
+          title: const Text("Copy shifts to days" ),
           content: StatefulBuilder(
             builder: (context, setState) {
               return Column(

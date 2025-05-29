@@ -27,7 +27,7 @@ class GymServerProvider implements GymOwnerInfoProvider {
   final List<Gym> gym = await Gymserviceprovider.server().getAllGyms(search: user!.userid);
   final gymId = gym[0].gymid;
       final response =
-          await dio.post('$baseUrl/gym/$gymId/media',
+          await dio.post('$baseUrl/gymdb/gym/$gymId/media',
               data: {
                 'mediaType': mediaType,
                 'mediaUrl': mediaUrl,
@@ -57,7 +57,7 @@ class GymServerProvider implements GymOwnerInfoProvider {
   @override
   Future<Gym> getGymDetails({required String id}) async {
     try {
-      final response = await dio.get('$baseUrl/gym/$id');
+      final response = await dio.get('$baseUrl/gymdb/gym/$id');
 
       if (response.statusCode == 200 && response.data['success'] == true) {
         final data = response.data['gym'];
@@ -93,7 +93,7 @@ class GymServerProvider implements GymOwnerInfoProvider {
       // dev
       final Authuser? user = await ServerProvider().getUser();
       developer.log(coordinates.toString());
-      final response = await dio.post('$baseUrl/gym/register',
+      final response = await dio.post('$baseUrl/gymdb/gym/register',
           data: {
             'role': user!.role,
             'name': name,
@@ -160,7 +160,7 @@ class GymServerProvider implements GymOwnerInfoProvider {
       required List<Map<String,dynamic>> shifts}) async{
         
         try{
-          final response = await dio.put('$baseUrl/gym/$gymId',
+          final response = await dio.put('$baseUrl/gymdb/gym/$gymId',
             data: {
                 'name':name,
                 'location':location,
@@ -202,7 +202,7 @@ class GymServerProvider implements GymOwnerInfoProvider {
     try {
 
       final response = await dio.post(
-        '$baseUrl/$gymId/plans',
+        '$baseUrl/gymdb/$gymId/plans',
         data: {
           'name': name,
           'validity': validity,
@@ -248,7 +248,7 @@ class GymServerProvider implements GymOwnerInfoProvider {
       if (near != null) queryParams['near'] = near;
 
       final response = await dio.get(
-        '$baseUrl/gyms',
+        '$baseUrl/gymdb/gyms',
         queryParameters: queryParams,
       );
 
@@ -281,7 +281,7 @@ class GymServerProvider implements GymOwnerInfoProvider {
   Future<List<Plan>> getPlans(String gymId) async {
        
     try {
-      final response = await dio.get('$baseUrl/plans/gym/$gymId');
+      final response = await dio.get('$baseUrl/gymdb/plans/gym/$gymId');
       // developer.log(',GymID: $gymId');
       if (response.statusCode == 200 && response.data['success']) {
         final List<dynamic> data = response.data['plans'];
@@ -298,7 +298,7 @@ class GymServerProvider implements GymOwnerInfoProvider {
   @override
   Future<bool> deletePlan({required String planId}) async{
         try {
-      final response = await dio.put('$baseUrl/plans/$planId' , data: {
+      final response = await dio.put('$baseUrl/gymdb/plans/$planId' , data: {
         'isActive':false
       });
       if (response.statusCode == 200 && response.data['success'] == true) {
@@ -312,14 +312,17 @@ class GymServerProvider implements GymOwnerInfoProvider {
 @override
   Future<List<Gym>> getGymsByowner(String id)async{
     try{
-        final response = await dio.get('$baseUrl/gym/owner/$id');
+        final response = await dio.get('$baseUrl/gymdb/gym/owner/$id');
         List<Gym> gyms = [];
         if(response.statusCode==200){
           final gymsjson = response.data['gyms'] as List<dynamic>;
+          // developer.log(response.data['gyms'].toString());
           gyms = gymsjson.map<Gym>((json) => Gym.fromJson(json as Map<String,dynamic>)).toList();
+          developer.log(gyms[0].gymid);
           return gyms;
         }
         else{
+          developer.log(response.data['message'].toString());
           throw(Exception());
         }
     }catch(e){
@@ -332,7 +335,7 @@ class GymServerProvider implements GymOwnerInfoProvider {
   Future<bool> updatePlan({required String planId, required String name, required num price, required num discountPercent, required String features, required String workoutDuration, required bool isTrainerIncluded}) async{
     try{
       final response = await dio.put(
-          '$baseUrl/plans/$planId',
+          '$baseUrl/gymdb/plans/$planId',
           data: {
              'name':name,
               'price':price,

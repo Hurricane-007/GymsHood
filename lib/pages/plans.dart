@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:gymshood/Utilities/Dialogs/showdeletedialog.dart';
 import 'package:gymshood/pages/Gyminfopage.dart';
@@ -180,49 +182,57 @@ class _PlansPageState extends State<PlansPage> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : plans.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.event_busy,
-                          size: 60, color: Colors.grey),
-                      const SizedBox(height: 10),
-                      const Text("No Plans Available",
-                          style: TextStyle(fontSize: 18)),
-                      const SizedBox(height: 10),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const CreatePlansPage()),
-                          );
-                          setState(() {
-                            getPlans();
-                          });
-                        },
-                        icon: const Icon(Icons.add),
-                        label: const Text("Create Plan"),
-                      ),
-                      const SizedBox(height: 10),
-                      const Text("Your gym is not created?",
-                          style: TextStyle(fontSize: 18)),
-                      const SizedBox(height: 10),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const Gyminfopage()),
-                          );
-                          setState(() {
-                            getPlans();
-                          });
-                        },
-                        icon: const Icon(Icons.add),
-                        label: const Text("Register Gym"),
-                      ),
-                    ],
+              ? RefreshIndicator.adaptive(
+                  onRefresh: getPlans,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.event_busy,
+                            size: 60, color: Colors.grey),
+                        const SizedBox(height: 10),
+                        const Text("No Plans Available",
+                            style: TextStyle(fontSize: 18)),
+                        const SizedBox(height: 10),
+                        ElevatedButton.icon(
+                          onPressed: () async {
+                            final result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      const CreatePlansPage()),
+                            );
+                            // developer.log("CreatePlansPage returned: $result");
+                            if (result == true) {
+                              // developer.log("Calling getPlans()...");
+                              await getPlans();
+                            } else {
+                              developer.log("No refresh triggered");
+                            }
+                          },
+                          icon: const Icon(Icons.add),
+                          label: const Text("Create Plan"),
+                        ),
+                        const SizedBox(height: 10),
+                        const Text("Your gym is not created?",
+                            style: TextStyle(fontSize: 18)),
+                        const SizedBox(height: 10),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const Gyminfopage()),
+                            );
+                            setState(() {
+                              getPlans();
+                            });
+                          },
+                          icon: const Icon(Icons.add),
+                          label: const Text("Register Gym"),
+                        ),
+                      ],
+                    ),
                   ),
                 )
               : RefreshIndicator.adaptive(
@@ -245,17 +255,20 @@ class _PlansPageState extends State<PlansPage> {
                         final plan = plans[index];
                         final isSelected = _selectedPlans.contains(plan);
                         return GestureDetector(
-                          onTap: () {
+                          onTap: () async {
                             if (_selectionMode) {
                               _toggleSelection(plan);
                             } else {
-                              Navigator.push(
+                              final res = await Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) =>
                                       PlanDetailsPage(plan: plan),
                                 ),
                               );
+                              if (res) {
+                                getPlans();
+                              }
                             }
                           },
                           onLongPress: () => _toggleSelection(plan),
@@ -344,13 +357,17 @@ class _PlansPageState extends State<PlansPage> {
                   ),
                 ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () async{
-         final result = await Navigator.push(
+        onPressed: () async {
+          final result = await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const CreatePlansPage()),
           );
-          if(result == true){
-            getPlans();
+          developer.log("CreatePlansPage returned: $result");
+          if (result == true) {
+            developer.log("Calling getPlans()...");
+            await getPlans();
+          } else {
+            developer.log("No refresh triggered");
           }
         },
         backgroundColor: Theme.of(context).primaryColor,

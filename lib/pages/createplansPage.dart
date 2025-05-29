@@ -336,6 +336,7 @@ class _PlansPageState extends State<CreatePlansPage> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text("Plan submitted")),
                       );
+                      Navigator.pop(context,true);
                     } else {
                       showErrorDialog(context, response);
                     }

@@ -49,10 +49,10 @@ PersistCookieJar get cookieJar => _cookieJar;
   }
 
   @override
-  Future<String> register(String name, String email, String password) async {
+  Future<String> register(String name, String email, String password, String role) async {
     try {
-      final response = await _dio.post('$baseUrl/register',
-          data: {'name': name, 'email': email, 'password': password},
+      final response = await _dio.post('$baseUrl/auth/register',
+          data: {'name': name, 'email': email, 'password': password , 'role': role},
           options: Options(headers: {'Content-Type': 'application/json'}));
       // developer.log('aagaya idhar');
       if (response.statusCode == 200) {
@@ -87,7 +87,7 @@ PersistCookieJar get cookieJar => _cookieJar;
   Future<String> verifyOTP({required String otp, required String email}) async {
     try {
       // developer.log('main aagaya');
-      final response = await _dio.post('$baseUrl/verify-otp',
+      final response = await _dio.post('$baseUrl/auth/verify-otp',
           data: {'otp': otp, 'email': email},
           options: Options(headers: {'Content-Type': 'application/json'}));
       if (response.statusCode == 200) {
@@ -116,7 +116,7 @@ PersistCookieJar get cookieJar => _cookieJar;
       {required String email, required String password}) async {
     try {
       // developer.log('login pressed');
-      final response = await _dio.post("$baseUrl/login",
+      final response = await _dio.post("$baseUrl/auth/login",
           data: {
             'email': email,
             'password': password,
@@ -154,7 +154,7 @@ PersistCookieJar get cookieJar => _cookieJar;
   @override
   Future<String> googleLogIn({required token}) async {
     try {
-      final response = await _dio.post("$baseUrl/google-login",
+      final response = await _dio.post("$baseUrl/auth/google-login",
           data: {
             'token': token,
           },
@@ -211,7 +211,7 @@ PersistCookieJar get cookieJar => _cookieJar;
   @override
   Future<String> logOut() async {
     final response = await _dio.get(
-      '$baseUrl/logout',
+      '$baseUrl/auth/logout',
       options: Options(
         headers: {'Content-Type': 'application/json'},
         extra: {'withCredentials': true},
@@ -229,7 +229,7 @@ PersistCookieJar get cookieJar => _cookieJar;
     try {
       // final cookies = await cookieJar.loadForRequest(Uri.parse(baseUrl));
       // developer.log('➡️ Will send cookies: $cookies');
-      final response = await _dio.get('$baseUrl/profile',
+      final response = await _dio.get('$baseUrl/auth/profile',
           options: Options(
             headers: {'Content-Type': 'application/json'},
             extra: {'withCredentials': true},
@@ -261,7 +261,7 @@ PersistCookieJar get cookieJar => _cookieJar;
   @override
   Future<String> forgotPassword({required String? email}) async {
     final response =
-        await _dio.post('$baseUrl/password/forgot', data: {'email': email},
+        await _dio.post('$baseUrl/auth/password/forgot', data: {'email': email},
               options: Options(
         headers: {'Content-Type': 'application/json'},
         extra: {'withCredentials': true},
@@ -283,7 +283,7 @@ PersistCookieJar get cookieJar => _cookieJar;
 }) async {
   try {
     final response = await _dio.put(
-      '$baseUrl/password/reset/$token',
+      '$baseUrl/auth/password/reset/$token',
       data: {
         'password': password,
         'confirmPassword': confirmPassword,
@@ -306,7 +306,7 @@ PersistCookieJar get cookieJar => _cookieJar;
   @override
   Future<String> updatePassword(
       {required String newPassword, required String confirmPassword}) async {
-    final response = await _dio.put('/update-password',
+    final response = await _dio.put('$baseUrl/auth/update-password',
         data: {'newPassword': newPassword, 'confirmPassword': confirmPassword});
     if (response.statusCode == 200) {
       return 'Successfull';

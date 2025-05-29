@@ -31,6 +31,7 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
   String? email;
   String? password;
   String? name;
+  String? role;
   late final TextEditingController _otp;
   void getemail() async {
     setState(() async {
@@ -38,6 +39,8 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
       email = prefs.getString('email');
       password = prefs.getString('password');
       name = prefs.getString('name');
+      role = prefs.getString('role');
+
     });
   }
 
@@ -158,7 +161,7 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
                       ? GestureDetector(
                           onTap: () async {
                             await AuthService.server()
-                                .register(name!, email!, password!);
+                                .register(name!, email!, password!,role!);
                             _startResendCountDown(); // Properly resets the timer
                           },
                           child: Text(

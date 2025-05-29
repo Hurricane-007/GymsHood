@@ -36,7 +36,7 @@ class _PlanDetailsPageState extends State<PlanDetailsPage> {
         title: Text(gymName, style: const TextStyle(color: Colors.white)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.pop(context,true),
         ),
         backgroundColor: Theme.of(context).primaryColor,
         centerTitle: true,

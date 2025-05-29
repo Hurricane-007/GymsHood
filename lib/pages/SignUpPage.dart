@@ -20,13 +20,14 @@ class SignUpPage extends StatefulWidget {
 
 class _SignUpPageState extends State<SignUpPage> {
   late final TextEditingController gymName;
+  late final TextEditingController role;
   late final TextEditingController email;
   late final TextEditingController password;
   late final TextEditingController confirmPassword;
 
   void _handleSaveEmail()async{
     developer.log('hi');
-    await saveCredentials(email.text.trim(),gymName.text.trim(), password.text.trim() );
+    await saveCredentials(email.text.trim(),gymName.text.trim(), password.text.trim() , role.text.trim() );
   }
   @override
   void initState() {
@@ -34,6 +35,7 @@ class _SignUpPageState extends State<SignUpPage> {
     email = TextEditingController();
     password = TextEditingController();
     confirmPassword = TextEditingController();
+    role = TextEditingController();
     super.initState();
   }
 
@@ -41,6 +43,7 @@ class _SignUpPageState extends State<SignUpPage> {
   void dispose() {
     gymName.dispose();
     email.dispose();
+    role.dispose();
     password.dispose();
     confirmPassword.dispose();
     super.dispose();
@@ -85,7 +88,15 @@ class _SignUpPageState extends State<SignUpPage> {
             // Gym Name
             buildTextField(
               controller: gymName,
-              hint: "Gym Name",
+              hint: "Name",
+              icon: null,
+              obscure: false,
+            ),
+
+            SizedBox(height: mq.height * 0.025),
+            buildTextField(
+              controller: role,
+              hint: "Role",
               icon: null,
               obscure: false,
             ),
@@ -163,6 +174,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           email: email.text.trim(),
                           password: password.text.trim(),
                           name: gymName.text.trim(),
+                          role: role.text.trim()
                         ),
                       );
                   }

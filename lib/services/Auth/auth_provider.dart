@@ -2,7 +2,7 @@ import 'package:gymshood/services/Models/AuthUser.dart';
 
 abstract class AuthProvider {
   Future<void> init();
-  Future<String> register(String name, String email, String password);
+  Future<String> register(String name, String email, String password , String role);
   Future<void> sendverificationemail({required String email});
   Future<String> verifyOTP({required String otp, required String email});
   Future<String> login({required String email, required String password});

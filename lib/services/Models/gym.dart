@@ -45,7 +45,7 @@ class Gym {
 
   factory Gym.fromJson(Map<String, dynamic> json) {
     // developer.log('Gym JSON: $json');
-      // final gymId = json['_id']?.toString();
+  //     final gymId = json['_id']?.toString();
   // developer.log('Extracted gymid: $gymId');
     return 
     Gym(

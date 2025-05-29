@@ -26,8 +26,8 @@ class AuthService implements AuthProvider{
   provider.login(email: email, password: password);
 
   @override
-  Future<String> register(String name, String email, String password) =>
-  provider.register(name, email, password);
+  Future<String> register(String name, String email, String password , String role) =>
+  provider.register(name, email, password , role);
 
   @override
   Future<String> resetPassword({required String token,

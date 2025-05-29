@@ -24,7 +24,7 @@ class AboutTabBar extends StatelessWidget {
                   ).createShader(bounds);
                 },
                 child:  Text(
-                  "About Us",
+                  "About:",
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,

@@ -63,6 +63,7 @@ class _UploadMultipleImagesPageState extends State<UploadMultipleImagesPage> {
         mediaType: video ? 'video' : 'photo',
         mediaUrl: mediaUrl,
         logourl: '',
+        gymId: widget.gym.gymid
       );
 
       if (success != 'Successfully added Media') {

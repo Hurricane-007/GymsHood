@@ -126,29 +126,33 @@ class _UpdatePlanPageState extends State<UpdatePlanPage> {
     );
   }
 
-  Widget _buildWorkoutDurationDropdown() {
-    return DropdownButtonFormField<String>(
-      value: selectedWorkoutDuration,
-      decoration: InputDecoration(
-        labelText: "Workout Duration",
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-      items: workoutDurationOptions.map((String duration) {
-        return DropdownMenuItem<String>(
-          value: duration,
-          child: Text(duration),
-        );
-      }).toList(),
-      onChanged: (value) {
-        if (value != null) {
-          setState(() {
-            selectedWorkoutDuration = value;
-          });
-        }
-      },
-      validator: (value) => value == null || value.isEmpty ? "Please select a duration" : null,
-    );
-  }
+Widget _buildWorkoutDurationDropdown() {
+  return DropdownButtonFormField<String>(
+    value: workoutDurationOptions.contains(selectedWorkoutDuration)
+        ? selectedWorkoutDuration
+        : workoutDurationOptions.first,
+    decoration: InputDecoration(
+      labelText: "Workout Duration",
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+    ),
+    items: workoutDurationOptions.map((String duration) {
+      return DropdownMenuItem<String>(
+        value: duration,
+        child: Text(duration),
+      );
+    }).toList(),
+    onChanged: (value) {
+      if (value != null) {
+        setState(() {
+          selectedWorkoutDuration = value;
+        });
+      }
+    },
+    validator: (value) =>
+        value == null || value.isEmpty ? "Please select a duration" : null,
+  );
+}
+
 
   Widget _buildTextField(TextEditingController controller, String label, {bool isNumber = false}) {
     return Padding(

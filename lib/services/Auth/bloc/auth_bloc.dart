@@ -18,9 +18,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final String email = event.email;
   final String password = event.password;
   final String name = event.name;
+  final String role = event.role;
+
 
   try {
-    final response = await provider.register(name, email, password);
+    final response = await provider.register(name, email, password,role);
     developer.log('📨 Response from provider: $response');
 
     if (response == "Successfull") {

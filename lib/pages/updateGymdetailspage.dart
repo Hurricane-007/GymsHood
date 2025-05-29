@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:gymshood/Utilities/Dialogs/error_dialog.dart';
+import 'package:gymshood/Utilities/Dialogs/info_dialog.dart';
 import 'package:gymshood/pages/mapPickerPage.dart';
 import 'package:gymshood/services/Auth/auth_service.dart';
 import 'package:gymshood/services/Models/AuthUser.dart';
@@ -152,16 +154,12 @@ class _UpdateGymDetailsPageState extends State<UpdateGymDetailsPage>
 
     if (!mounted) return;
 
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(response ? "Success" : "Error"),
-        content: Text("successfully updated"),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("OK")),
-        ],
-      ),
-    );
+    if(response){
+      showInfoDialog(context, "Successfully updated your gym details");
+    }
+    else{
+      showErrorDialog(context, "Your details are not updated");
+    }
   }
 
   Widget buildTextField(TextEditingController controller, String label, String? Function(String?)? validator,
@@ -195,7 +193,10 @@ class _UpdateGymDetailsPageState extends State<UpdateGymDetailsPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Update Gym Info")),
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).primaryColor,
+        leading: GestureDetector(child: Icon(Icons.arrow_back , color: Colors.white,) , onTap: () => Navigator.pop(context),),
+        title: const Text("Update Gym Info" , style: TextStyle(color: Colors.white),)),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: _gyms.isEmpty

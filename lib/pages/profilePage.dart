@@ -58,14 +58,12 @@ class _ProfilePageState extends State<ProfilePage>
   Future<void> getRating() async {
     final Authuser? user = await AuthService.server().getUser();
     gyms = await Gymserviceprovider.server().getGymsByowner(user!.userid!);
-
+    developer.log("Extracted gymIds: ${gyms[0].gymid}");
     if (gyms.isNotEmpty) {
       selectedGym = gyms[0];
       dropdownValue = selectedGym!.name;
-
       final List<String> images =
           await Fileserver().fetchMediaUrls('Logo', selectedGym!.gymid);
-
       _updateGymDetails(selectedGym!, images);
     }
 
@@ -107,7 +105,7 @@ class _ProfilePageState extends State<ProfilePage>
             dropdownColor: Theme.of(context).colorScheme.primary,
             value: dropdownValue,
             style: const TextStyle(
-                color: Colors.white, fontWeight: FontWeight.bold),
+                color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
             icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
             items: gyms.map((gym) {
               return DropdownMenuItem<String>(
@@ -125,7 +123,6 @@ class _ProfilePageState extends State<ProfilePage>
 
                 final images = await Fileserver()
                     .fetchMediaUrls('Logo', selectedGym!.gymid);
-
                 _updateGymDetails(selectedGym!, images);
               }
             },
@@ -375,119 +372,126 @@ class _ProfilePageState extends State<ProfilePage>
         ],
         body: selectedGym == null
             ? const Center(child: CircularProgressIndicator())
-            : NestedScrollView(
-                headerSliverBuilder: (context, innerBoxIsScrolled) => [
-                  // ... existing headerSliverBuilder content
+            : TabBarView(
+                controller: _tabController,
+                children: [
+                  PhotosTabBar(gym: selectedGym!),
+                  VideoTabBar(gym: selectedGym!),
+                  EquipmentTabBar(list: equipment),
+                  ReviewsTabBar(),
+                  AboutTabBar(aboutText: about),
                 ],
-                body: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    PhotosTabBar(gym: selectedGym!),
-                    VideoTabBar(gym: selectedGym!),
-                    EquipmentTabBar(list: equipment),
-                    ReviewsTabBar(),
-                    AboutTabBar(aboutText: about),
-                  ],
-                ),
               ),
       ),
     );
   }
 
-  void _showBottomSheet() {
-    showModalBottomSheet(
-        context: context,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.only(topLeft: Radius.circular(20))),
-        backgroundColor: Theme.of(context).primaryColor,
-        builder: (_) {
-          return ListView(
-            shrinkWrap: true,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Pick Your Profile Picture',
-                    style: TextStyle(color: Colors.white, fontSize: 20),
-                  ),
-                ],
+void _showBottomSheet() {
+  showModalBottomSheet(
+    context: context,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    backgroundColor: Theme.of(context).primaryColor,
+    builder: (_) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Pick Your Profile Picture',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
               ),
-              SizedBox(
-                height: mq.height * 0.1,
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 60),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  crossAxisAlignment: CrossAxisAlignment.end,
+            ),
+            const SizedBox(height: 30),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                // From Gallery
+                Column(
                   children: [
-                    SizedBox(
-                      height: mq.height * 0.1,
-                      child: ElevatedButton(
-                          onPressed: () async {
-                            final ImagePicker picker = ImagePicker();
-
-                            // Pick an image.
-                            final XFile? image = await picker.pickImage(
-                                source: ImageSource.gallery);
-                            if (image != null) {
-                              await Fileserver().uploadToServer(
-                                  File(image.path), 'Logo', selectedGym!.gymid);
-                              final imageUrl = await Fileserver()
-                                  .fetchMediaUrls('Logo', selectedGym!.gymid);
-                              // Gymserviceprovider.server().addGymMedia(mediaType: 'photo', mediaUrl: "", logourl: image.path);
-                              setState(() {
-                                _image = imageUrl.last;
-                                getRating();
-                              });
-                              //update the profile with set state
-                            }
-                            Navigator.pop(context);
-                          },
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white),
-                          child: SizedBox(
-                              height: mq.height * 0.08,
-                              child: Image.asset(
-                                  "assets/images/galleryImage.png"))),
+                    ElevatedButton(
+                      onPressed: () async {
+                        final ImagePicker picker = ImagePicker();
+                        final XFile? image = await picker.pickImage(
+                          source: ImageSource.gallery,
+                        );
+                        if (image != null) {
+                          await Fileserver().uploadToServer(
+                            File(image.path), 'Logo', selectedGym!.gymid);
+                          final imageUrl = await Fileserver()
+                              .fetchMediaUrls('Logo', selectedGym!.gymid);
+                          setState(() {
+                            _image = imageUrl.last;
+                            getRating();
+                          });
+                        }
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        shape: const CircleBorder(),
+                        padding: const EdgeInsets.all(15),
+                      ),
+                      child: Image.asset(
+                        "assets/images/galleryImage.png",
+                        height: mq.height * 0.05,
+                      ),
                     ),
-
-                    //set image from camera
-                    SizedBox(
-                      height: mq.height * 0.1,
-                      child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white),
-                          onPressed: () async {
-                            final ImagePicker picker = ImagePicker();
-
-                            final XFile? image = await picker.pickImage(
-                                source: ImageSource.camera);
-                            if (image != null) {
-                              await Fileserver().uploadToServer(
-                                  File(image.path), 'Logo', selectedGym!.gymid);
-                              final imageUrl = await Fileserver()
-                                  .fetchMediaUrls('Logo', selectedGym!.gymid);
-                              // Gymserviceprovider.server().addGymMedia(mediaType: 'photo', mediaUrl: "", logourl: image.path);
-                              setState(() {
-                                _image = imageUrl.last;
-                                getRating();
-                              });
-                            }
-                            Navigator.pop(context);
-                          },
-                          child: SizedBox(
-                              height: mq.height * 0.08,
-                              child: Image.asset("assets/images/camera.png"))),
-                    )
+                    const SizedBox(height: 10),
+                    const Text("Gallery", style: TextStyle(color: Colors.white))
                   ],
                 ),
-              )
-            ],
-          );
-        });
-  }
+
+                // From Camera
+                Column(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () async {
+                        final ImagePicker picker = ImagePicker();
+                        final XFile? image = await picker.pickImage(
+                          source: ImageSource.camera,
+                        );
+                        if (image != null) {
+                          await Fileserver().uploadToServer(
+                            File(image.path), 'Logo', selectedGym!.gymid);
+                          final imageUrl = await Fileserver()
+                              .fetchMediaUrls('Logo', selectedGym!.gymid);
+                          setState(() {
+                            _image = imageUrl.last;
+                            getRating();
+                          });
+                        }
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        shape: const CircleBorder(),
+                        padding: const EdgeInsets.all(15),
+                      ),
+                      child: Image.asset(
+                        "assets/images/camera.png",
+                        height: mq.height * 0.05,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    const Text("Camera", style: TextStyle(color: Colors.white))
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
+      );
+    },
+  );
+}
+
 }
 
 class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {

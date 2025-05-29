@@ -21,7 +21,8 @@ class _EquipmentTabBarState extends State<EquipmentTabBar> {
     // Colors.pinkAccent
       const Color(0xFF071952),
        const Color(0xFF0b666a),
-        Color(0xFF97FEED),
+        // Color(0xFF97FEED),
+         Colors.teal,
          Color(0xFF35A29F),
          Colors.grey,
          Colors.blueGrey,
