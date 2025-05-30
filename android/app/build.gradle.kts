@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.example.gymshood"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 35
     
      
     compileOptions {
