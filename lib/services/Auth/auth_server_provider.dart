@@ -8,12 +8,14 @@ import 'package:dio/dio.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:gymshood/services/Helpers/saveCredentials.dart';
 import 'package:gymshood/services/Models/AuthUser.dart';
 import 'dart:developer' as developer;
 
 import 'package:gymshood/services/Auth/auth_provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:gymshood/sevices/Auth/bloc/auth_state.dart';
 
 class ServerProvider implements AuthProvider {
@@ -48,12 +50,27 @@ PersistCookieJar get cookieJar => _cookieJar;
     _initialized = true;
   }
 
+  Future<String?> getCookieToken() async {
+  final cookies = await _cookieJar.loadForRequest(Uri.parse(baseUrl!));
+
+  for (var cookie in cookies) {
+    if (cookie.name == 'token') {
+      // developer.log('🍪 Found token: ${cookie.value}');
+      return cookie.value;
+    }
+  }
+
+  developer.log('⚠️ No token cookie found');
+  return null;
+}
+
   @override
   Future<String> register(String name, String email, String password, String role) async {
     try {
       final response = await _dio.post('$baseUrl/auth/register',
           data: {'name': name, 'email': email, 'password': password , 'role': role},
           options: Options(headers: {'Content-Type': 'application/json'}));
+          saveRegistrationSessionId(response.data['registrationSessionId'].toString());
       // developer.log('aagaya idhar');
       if (response.statusCode == 200) {
         return "Successfull";
@@ -87,8 +104,10 @@ PersistCookieJar get cookieJar => _cookieJar;
   Future<String> verifyOTP({required String otp, required String email}) async {
     try {
       // developer.log('main aagaya');
+      final prefs = await SharedPreferences.getInstance();
+      final String? reg_id =  prefs.getString('registrationSessionId');
       final response = await _dio.post('$baseUrl/auth/verify-otp',
-          data: {'otp': otp, 'email': email},
+          data: {'otp': otp, 'email': email , "registrationSessionId": reg_id},
           options: Options(headers: {'Content-Type': 'application/json'}));
       if (response.statusCode == 200) {
         return "Successfull";
@@ -157,6 +176,7 @@ PersistCookieJar get cookieJar => _cookieJar;
       final response = await _dio.post("$baseUrl/auth/google-login",
           data: {
             'token': token,
+            'role': "GymOwner"
           },
           options: Options(headers: {'Content-Type': 'application/json'}));
       if (response.statusCode == 200) {
@@ -180,7 +200,7 @@ PersistCookieJar get cookieJar => _cookieJar;
   }
 
   final GoogleSignIn _googleSignIn = GoogleSignIn(
-    clientId:'822225462564-ueaoirv3f0kcj40omo9tuedki8253dq5.apps.googleusercontent.com' ,
+    clientId: dotenv.env['GOOGLE_CLIENT_ID'] ,
     scopes: ['email', 'profile'],
   );
   @override
@@ -196,11 +216,12 @@ PersistCookieJar get cookieJar => _cookieJar;
           await googleUser.authentication;
 
       final token = googleAuth.idToken;
-      developer.log('token');
+      developer.log('token: $token');
       if (token == null) {
         return "Failed to get ID Token";
       } else {
         final String response = await googleLogIn(token: token);
+        // developer.log()
         return response;
       }
     } catch (error) {
@@ -229,21 +250,16 @@ PersistCookieJar get cookieJar => _cookieJar;
     try {
       // final cookies = await cookieJar.loadForRequest(Uri.parse(baseUrl));
       // developer.log('➡️ Will send cookies: $cookies');
+        final cookies = await _cookieJar.loadForRequest(Uri.parse('$baseUrl/user'));
+  // developer.log('🍪 Loaded cookies: $cookies');
+
       final response = await _dio.get('$baseUrl/auth/profile',
           options: Options(
             headers: {'Content-Type': 'application/json'},
             extra: {'withCredentials': true},
           ));
-
-      // developer.log('✅ get called');
-      // developer.log(jsonEncode(response.data['user']));
       final user = response.data['user'];
-      // developer.log(user.);
-      // developer.log(jsonEncode(user));
-      // developer.log(user['name']);
       final Authuser authuser = Authuser.fromJson(user);
-      // developer.log(user.name);
-      // developer.log(authuser.name!);
       return authuser;
     } on DioException catch (e) {
       if (e.response != null) {

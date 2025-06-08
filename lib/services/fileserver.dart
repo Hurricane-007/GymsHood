@@ -1,17 +1,17 @@
-import 'dart:convert';
+// import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:gymshood/services/Auth/auth_server_provider.dart';
-import 'package:gymshood/services/Auth/auth_service.dart';
-import 'package:gymshood/services/Models/AuthUser.dart';
-import 'package:gymshood/services/Models/gym.dart';
-import 'package:gymshood/services/gymInfo/gymserviceprovider.dart';
+// import 'package:gymshood/services/Auth/auth_server_provider.dart';
+// import 'package:gymshood/services/Auth/auth_service.dart';
+// import 'package:gymshood/services/Models/AuthUser.dart';
+// import 'package:gymshood/services/Models/gym.dart';
+// import 'package:gymshood/services/gymInfo/gymserviceprovider.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:path/path.dart' as path;
-
+import 'package:mime/mime.dart';
 class Fileserver {
   // final dio = ServerProvider().dio;
     late final Dio _dio;
@@ -24,19 +24,32 @@ class Fileserver {
   factory Fileserver() => _instance;
   final baseurl = dotenv.env['BASE_URL_FILE_SERVER'];
 
-  Future<String> uploadToServer(File file , String mediaType , String gymId) async {
-
+Future<String> uploadToServer(File file, String mediaType, String gymId) async {
   final filename = path.basename(file.path);
   final customfilename = '${gymId}_$mediaType$filename';
 
+  // Lookup the MIME type dynamically from the file path
+  final mimeType = lookupMimeType(file.path);
+  MediaType? contentType;
+
+  if (mimeType != null) {
+    final parts = mimeType.split('/');
+    if (parts.length == 2) {
+      contentType = MediaType(parts[0], parts[1]);
+    }
+  }
+//  developer.log('$contentType');
   final formData = FormData.fromMap({
-    'file': await MultipartFile.fromFile(file.path, filename: customfilename , 
+    'file': await MultipartFile.fromFile(
+      file.path,
+      filename: customfilename,
+      contentType: contentType,
     ),
   });
-    // developer.log("$baseurl/upload");
+
   try {
-    final response = await _dio.post(
-      '$baseurl/upload', // your actual endpoint
+    final response = await Dio().post(
+      '$baseurl/upload',
       data: formData,
       options: Options(
         headers: {
@@ -44,18 +57,17 @@ class Fileserver {
         },
       ),
     );
-
+    developer.log('upload to server $response');
     if (response.statusCode == 201 && response.data['url'] != null) {
-      return response.data['url']; // backend gives you this URL
+      return response.data['url'];
     } else {
-      developer.log('${response.data},c${response.statusCode}');
+      developer.log('${response.data}, code: ${response.statusCode}');
       throw Exception('Upload failed');
     }
-  }on DioException catch(e){
-    developer.log(e.toString());
+  } on DioException catch (e) {
+    developer.log('Dio error: $e');
     throw Exception(e.toString());
-  }
-   catch (e) {
+  } catch (e) {
     developer.log('Upload error: $e');
     throw Exception('Upload failed');
   }
@@ -84,9 +96,10 @@ Future<List<String>> fetchMediaUrls(String mediaType , String gymId ) async {
     '$baseurl/files',
     queryParameters: {
       'prefix': gymId,
+      'mediaType':mediaType
     },
   );
-
+  developer.log('$response');
   if (response.data['success'] == true) {
     final files = List<String>.from(response.data['files'].map((f) => f['url']));
 
@@ -155,3 +168,6 @@ Future<bool> deleteFileFromServer(String filename) async {
 }
 
 }
+
+// "filename":"7a02bcc7-0467-4699-b6fe-075c095610bd.jpg",
+// "originalname":"684192a64d4a0c73b2b2376a_photo1000000036.jpg"

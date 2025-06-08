@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gymshood/pages/updatePlansPage.dart';
+import 'package:gymshood/pages/createServicesPages/updatePlansPage.dart';
 import 'package:gymshood/services/Models/gym.dart';
 import 'package:gymshood/services/Models/planModel.dart';
 import 'package:gymshood/services/gymInfo/gymserviceprovider.dart';
@@ -86,7 +86,7 @@ class _PlanDetailsPageState extends State<PlanDetailsPage> {
                         : Colors.red,
                   ),
                   _buildDetailRow(Icons.timelapse, "workoutDuration",
-                      widget.plan.workoutDuration),
+                      '${widget.plan.workoutDuration}hr'),
                   const SizedBox(height: 12),
                   const Text(
                     "Features",

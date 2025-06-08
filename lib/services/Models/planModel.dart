@@ -1,4 +1,6 @@
 
+import 'dart:developer' as developer;
+
 class Plan {
   final String id;
   final String name;
@@ -12,7 +14,7 @@ class Plan {
   final DateTime lastUpdatedAt;
   final List<String>? features;
   final String? lastUpdatedBy;
-  final String workoutDuration;
+  final num workoutDuration;
   Plan(
 
     {
@@ -32,8 +34,9 @@ class Plan {
   });
 
   factory Plan.fromJson(Map<String, dynamic> json) {
+    // developer.log(json.toString());
     return Plan(
-      workoutDuration: json['workoutDuration']?? "",
+      workoutDuration: json['duration']?? 0,
       id: json['_id'] ?? '',
       name: json['name'] ?? '',
       gymId: json['gymId'] ?? '',
@@ -55,7 +58,7 @@ class Plan {
 
   Map<String, dynamic> toJson() {
     return {
-      'workoutDuration':workoutDuration,
+      'duration':workoutDuration,
       '_id': id,
       'name': name,
       'gymId': gymId,
@@ -71,3 +74,4 @@ class Plan {
     };
   }
 }
+// [{_id: 6839b4a9e91514f6c6113068, gymId: 68397da0e91514f6c6112e67, name: new plan, validity: 4, price: 10000, discountPercent: 10, features: the new plan, planType: monthly, isTrainerIncluded: true, isActive: true, lastUpdatedAt: 2025-05-30T13:37:45.486Z, createdAt: 2025-05-30T13:37:45.486Z, updatedAt: 2025-05-30T13:37:54.229Z, __v: 0}]

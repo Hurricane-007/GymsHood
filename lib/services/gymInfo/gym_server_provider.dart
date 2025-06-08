@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer' as developer;
 
 // import 'package:cookie_jar/cookie_jar.dart';
@@ -8,6 +9,7 @@ import 'package:gymshood/services/Auth/auth_service.dart';
 import 'package:gymshood/services/Models/AuthUser.dart';
 import 'package:gymshood/services/Models/gym.dart';
 import 'package:gymshood/services/Models/planModel.dart';
+import 'package:gymshood/services/Models/gymDashboardStats.dart';
 import 'package:gymshood/services/gymInfo/gymowner_info_provider.dart';
 import 'package:gymshood/services/gymInfo/gymserviceprovider.dart';
 
@@ -18,19 +20,17 @@ class GymServerProvider implements GymOwnerInfoProvider {
   @override
   Future<String> addGymMedia(
       {required String mediaType,
-      required String mediaUrl,
+      required List<String> mediaUrl,
       required String logourl,
-      required}) async {
+      required String gymId}) async {
     // Authuser? user = await AuthService.server().getUser();
     try {
-        final Authuser? user = await AuthService.server().getUser();
-  final List<Gym> gym = await Gymserviceprovider.server().getAllGyms(search: user!.userid);
-  final gymId = gym[0].gymid;
+
       final response =
           await dio.post('$baseUrl/gymdb/gym/$gymId/media',
               data: {
                 'mediaType': mediaType,
-                'mediaUrl': mediaUrl,
+                'mediaUrls': mediaUrl,
                 'logourl': logourl,
               },
               options: Options(headers: {'Content-Type': 'application/json'}));
@@ -62,7 +62,7 @@ class GymServerProvider implements GymOwnerInfoProvider {
       if (response.statusCode == 200 && response.data['success'] == true) {
         final data = response.data['gym'];
 
-        developer.log(data.toString());
+        // developer.log(data.toString());
         return Gym.fromJson(data);
       } else {
         developer.log('error occured');
@@ -80,6 +80,7 @@ class GymServerProvider implements GymOwnerInfoProvider {
       required String name,
       required String location,
      required List<num> coordinates,
+     required String gymSlogan,
       required num capacity,
       required String openTime,
       required String closeTime,
@@ -106,6 +107,7 @@ class GymServerProvider implements GymOwnerInfoProvider {
             'phone': phone,
             'about': about,
             'equipmentList': equipmentList,
+            'gymSlogan': gymSlogan,
             'shifts': shifts
           },
           options: Options(headers: {'Content-Type': 'application/json'}));
@@ -196,7 +198,7 @@ class GymServerProvider implements GymOwnerInfoProvider {
       required String features,
       required String planType,
       required bool isTrainerIncluded,
-      required String workoutDuration,
+      required num workoutDuration,
       required String gymId
      }) async {
     try {
@@ -211,7 +213,7 @@ class GymServerProvider implements GymOwnerInfoProvider {
           'features': features,
           'planType': planType,
           'isTrainerIncluded': isTrainerIncluded,
-          'workoutDuration': workoutDuration
+          'duration': workoutDuration
         },
         options: Options(headers: {'Content-Type': 'application/json'}),
       );
@@ -285,7 +287,7 @@ class GymServerProvider implements GymOwnerInfoProvider {
       // developer.log(',GymID: $gymId');
       if (response.statusCode == 200 && response.data['success']) {
         final List<dynamic> data = response.data['plans'];
-        developer.log(data.toString());
+        // developer.log(data.toString());
         return data.map((json) => Plan.fromJson(json)).toList();
       } else {
         throw Exception("Failed to fetch plans");
@@ -316,7 +318,8 @@ class GymServerProvider implements GymOwnerInfoProvider {
         List<Gym> gyms = [];
         if(response.statusCode==200){
           final gymsjson = response.data['gyms'] as List<dynamic>;
-          // developer.log(response.data['gyms'].toString());
+
+          
           gyms = gymsjson.map<Gym>((json) => Gym.fromJson(json as Map<String,dynamic>)).toList();
           developer.log(gyms[0].gymid);
           return gyms;
@@ -332,7 +335,7 @@ class GymServerProvider implements GymOwnerInfoProvider {
   }
   
   @override
-  Future<bool> updatePlan({required String planId, required String name, required num price, required num discountPercent, required String features, required String workoutDuration, required bool isTrainerIncluded}) async{
+  Future<bool> updatePlan({required String planId, required String name, required num price, required num discountPercent, required String features, required num workoutDuration, required bool isTrainerIncluded}) async{
     try{
       final response = await dio.put(
           '$baseUrl/gymdb/plans/$planId',
@@ -341,7 +344,7 @@ class GymServerProvider implements GymOwnerInfoProvider {
               'price':price,
               'discountPercent':discountPercent,
               'features':features,
-              'workoutDuration':workoutDuration,
+              'duration':workoutDuration,
               'isTrainerIncluded':isTrainerIncluded
           }
       );
@@ -355,5 +358,20 @@ class GymServerProvider implements GymOwnerInfoProvider {
       developer.log(e.toString());
             return false;
           }
+  }
+  
+  @override
+  Future<GymDashboardStats> getgymDashBoardStatus(String gymId) async {
+    try {
+      final response = await dio.get('$baseUrl/dashboard/stats/$gymId');
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        return GymDashboardStats.fromJson(response.data['stats']);
+      } else {
+        throw Exception('Failed to load dashboard stats');
+      }
+    } catch (e) {
+      developer.log('Error fetching dashboard stats: $e');
+      rethrow;
+    }
   }
 }

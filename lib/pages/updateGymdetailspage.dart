@@ -326,7 +326,7 @@ class _UpdateGymDetailsPageState extends State<UpdateGymDetailsPage>
       ),
 
       bottomNavigationBar:  Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.only(bottom: 30),
         child: ElevatedButton(
                         onPressed: updateGymInfo,
                         style: ElevatedButton.styleFrom(

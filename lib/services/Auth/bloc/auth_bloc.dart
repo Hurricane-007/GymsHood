@@ -1,14 +1,21 @@
 // import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gymshood/Utilities/Dialogs/error_dialog.dart';
 import 'package:gymshood/Utilities/Dialogs/info_dialog.dart';
+import 'package:gymshood/pages/AuthPages/firstScreen.dart';
 import 'package:gymshood/services/Auth/auth_provider.dart';
+import 'package:gymshood/services/Auth/auth_server_provider.dart';
+import 'package:gymshood/services/Auth/auth_service.dart';
 // import 'package:gymshood/sevices/Auth/AuthUser.dart';
 import 'package:gymshood/services/Auth/bloc/auth_event.dart';
 import 'package:gymshood/services/Auth/bloc/auth_state.dart';
+import 'package:gymshood/services/Helpers/checkFirstTime.dart';
 // import 'package:gymshood/sevices/Auth/server_provider.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:developer' as developer;
+
+import 'package:gymshood/services/Models/AuthUser.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc(AuthProvider provider) : super(const AuthStateSplashScreen()){
 
@@ -24,7 +31,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   try {
     final response = await provider.register(name, email, password,role);
     developer.log('📨 Response from provider: $response');
-
+    
     if (response == "Successfull") {
       // developer.log('✅ Registration successful');
       emit(AuthStateNeedsVerification(email));
@@ -39,20 +46,30 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
 on<AuthEventInitialize>((event, emit) async {
   developer.log("✅ AuthEventInitialize triggered");
+
+    Future.delayed(Duration(seconds: 2));
   try {
-    final user = await provider.getUser();
-    
-    // developer.log(user.toString());
-    if(user!=null){
-      // developer.log("User: ${user.name}");
-    emit(AuthStateLoggedIn());
-    }else{
-      developer.log(' ❌ user is null');
-      emit(AuthStateSplashScreen());
+
+  final token = await ServerProvider().getCookieToken();
+    if(token ==null){
+    emit(AuthStateFIrst());
+    return;
+    }
+    final user = await AuthService.server().getUser();
+
+    if (user == null) {
+      emit(const AuthStateFIrst());
+      return;
+    }
+      bool isFirstTime = await checkIfFirstTime();
+        if (isFirstTime) {
+      emit(const AuthStateFIrst());
+    } else {
+      emit(AuthStateLoggedIn());
     }
   } catch (e, st) {
     developer.log("❌ Error in getUser: $e\n$st");
-    emit(AuthStateSplashScreen()); // fallback
+    emit(AuthStateFIrst()); // fallback
   }
 });
 
@@ -110,9 +127,12 @@ on<AuthEventInitialize>((event, emit) async {
        }
     },);
 
-    on<AutheventFirstScreen>((event, emit) {
+    on<AutheventFirstScreen>((event, emit) async{
+       await Future.delayed(const Duration(seconds: 3));
       emit(AuthStateFIrst());
     },);
+
+
     on<AuthEventjustgotoHome>((event, emit) {
       emit(AuthStateLoggedIn());
     },);

@@ -1,8 +1,11 @@
 import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
-import 'package:gymshood/Utilities/helpers/enum.dart';
-import 'package:gymshood/services/Models/location.dart'; // Assuming GymStatus is defined there
+import 'package:gymshood/pages/verifydocumentPage.dart';
+import 'package:gymshood/services/Helpers/enum.dart' show GymStatus;
+import 'package:gymshood/services/Models/gymMediaModel.dart';
+import 'package:gymshood/services/Models/location.dart';
+import 'package:gymshood/services/Models/verifydocModels.dart'; // Assuming GymStatus is defined there
 
 @immutable
 class Gym {
@@ -14,20 +17,24 @@ class Gym {
   final String contactEmail;
   final String phone;
   final String about;
+  final String gymslogan ;
   final List<String> equipmentList;
   final GymStatus status;
   final num avgrating;
   final num capacity;
   final bool isverified;
   final bool isDeleted;
-  final List<String> media;
-  final List<Map<String,dynamic>> shifts;
+  final GymMedia? media;
+  final List<VerificationDocument>? docs;
+  final List<Map<String, dynamic>> shifts;
   const Gym({
     required this.shifts,
+    required this.docs,
     required this.gymid,
     required this.name,
     required this.location,
     required this.openTime,
+    required this.gymslogan,
     required this.closeTime,
     required this.contactEmail,
     required this.phone,
@@ -41,19 +48,23 @@ class Gym {
     required this.media,
   });
 
-  
-
   factory Gym.fromJson(Map<String, dynamic> json) {
     // developer.log('Gym JSON: $json');
-  //     final gymId = json['_id']?.toString();
-  // developer.log('Extracted gymid: $gymId');
-    return 
-    Gym(
-      gymid: json['_id']?.toString() ?? '' ,
+    //     final gymId = json['_id']?.toString();
+    // developer.log('Extracted gymid: $gymId');
+    return Gym(
+      gymid: json['_id']?.toString() ?? '',
       name: json['name'] ?? '',
-      location: json['location'] != null && json['location'] is Map<String, dynamic>
-        ? Location.fromJson(json['location'])
-        : Location(address: '', coordinates: [0.0, 0.0]),
+      gymslogan: json['gymSlogan'] ?? '',
+      docs: json['verificationDocuments'] != null
+    ? List<Map<String, dynamic>>.from(json['verificationDocuments'])
+        .map((doc) => VerificationDocument.fromJson(doc))
+        .toList()
+    : [], 
+      location:
+          json['location'] != null && json['location'] is Map<String, dynamic>
+              ? Location.fromJson(json['location'])
+              : Location(address: '', coordinates: [0.0, 0.0]),
       openTime: json['openTime'] ?? '',
       closeTime: json['closeTime'] ?? '',
       contactEmail: json['contactEmail'] ?? '',
@@ -65,20 +76,16 @@ class Gym {
       capacity: (json['capacity'] as num?) ?? 0,
       isverified: json['isVerified'] ?? false,
       isDeleted: json['isDeleted'] ?? false,
-      media: json['media'] is List
-    ? (json['media'] as List)
-        .map((m) => m['mediaUrl']?.toString() ?? '')
-        .toList()
-    : json['media'] is Map
-        ? [json['media']['mediaUrl']?.toString() ?? '']
-        : [],
-     shifts: json['shifts'] is List
-        ? List<Map<String, dynamic>>.from(
-            (json['shifts'] as List).map(
-              (shift) => Map<String, dynamic>.from(shift),
-            ),
-          )
-        : [],
+      media: json['media'] != null && json['media'] is Map<String, dynamic>
+    ? GymMedia.fromJson(json['media'])
+    : null,
+      shifts: json['shifts'] is List
+          ? List<Map<String, dynamic>>.from(
+              (json['shifts'] as List).map(
+                (shift) => Map<String, dynamic>.from(shift),
+              ),
+            )
+          : [],
     );
   }
 }

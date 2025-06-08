@@ -13,6 +13,11 @@ class Authuser {
   final String? regDate;
   final int? walletBalance;
 
+  @override
+    String toString() {
+    return 'Authuser(name: $name, email: $email , role: $role)';
+  }
+
  const Authuser(
   {required this.name,
    required this.userid, 

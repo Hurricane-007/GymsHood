@@ -4,8 +4,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gymshood/Utilities/Dialogs/showdeletedialog.dart';
-import 'package:gymshood/pages/addGymMediaPage.dart';
-import 'package:gymshood/pages/fullScreenVideoPage.dart';
+import 'package:gymshood/pages/createServicesPages/addGymMediaPage.dart';
+import 'package:gymshood/pages/fullScreenVideoandImage/fullScreenVideoPage.dart';
 import 'package:gymshood/services/Models/gym.dart';
 import 'package:gymshood/services/fileserver.dart';
 import 'package:path_provider/path_provider.dart';
@@ -23,34 +23,37 @@ class _VideoTabBarState extends State<VideoTabBar> {
   List<String> _videoUrls = [];
   final Map<String, String> _thumbnails = {};
   bool _isLoading = true;
-  late Future<void> _futurefiles;
   bool _selectionMode = false;
   Set<String> _selectedVideos = {};
+
+  bool _isVideoFile(String url) {
+    final ext = url.toLowerCase().split('.').last;
+    return ext == 'mov' || ext == 'mp4';
+  }
 
   @override
   void initState() {
     super.initState();
-    _futurefiles = _loadVideosAndThumbnails();
+    _loadVideosAndThumbnails();
   }
 
   Future<void> refreshVideos() async {
     setState(() {
-      _futurefiles = _loadVideosAndThumbnails();
+      _loadVideosAndThumbnails();
     });
   }
 
   Future<void> _loadVideosAndThumbnails() async {
-    final urls = await Fileserver().fetchMediaUrls('video' , widget.gym.gymid);
-    _videoUrls = urls;
+    setState(() {
+      _isLoading = true;
+      _videoUrls = (widget.gym.media?.mediaUrls ?? [])
+          .where((url) => _isVideoFile(url))
+          .toList();
+    });
+
     final Map<String, String> thumbnails = {};
-    for (var url in urls) {
+    for (var url in _videoUrls) {
       final tempDir = await getTemporaryDirectory();
-      final httpClient = HttpClient();
-      final request = await httpClient.getUrl(Uri.parse(url));
-      final response = await request.close();
-      final bytes = await consolidateHttpClientResponseBytes(response);
-      final tempVideo = File('${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.mp4');
-      await tempVideo.writeAsBytes(bytes);
       final thumbPath = await VideoThumbnail.thumbnailFile(
         video: url,
         thumbnailPath: tempDir.path,
@@ -62,8 +65,8 @@ class _VideoTabBarState extends State<VideoTabBar> {
         thumbnails[url] = thumbPath;
       }
     }
+    
     setState(() {
-      _videoUrls = urls;
       _thumbnails.clear();
       _thumbnails.addAll(thumbnails);
       _isLoading = false;
@@ -137,9 +140,15 @@ class _VideoTabBarState extends State<VideoTabBar> {
                         ],
                       ),
                     )
-                  : GridView.count(
-                      crossAxisCount: 2,
-                      children: _videoUrls.map((url) {
+                  : GridView.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 8,
+                        mainAxisSpacing: 8,
+                      ),
+                      itemCount: _videoUrls.length,
+                      itemBuilder: (context, index) {
+                        final url = _videoUrls[index];
                         final thumbPath = _thumbnails[url];
                         final isSelected = _selectedVideos.contains(url);
                         return GestureDetector(
@@ -195,7 +204,7 @@ class _VideoTabBarState extends State<VideoTabBar> {
                             ],
                           ),
                         );
-                      }).toList(),
+                      },
                     ),
             ),
     );

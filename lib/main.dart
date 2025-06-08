@@ -1,36 +1,35 @@
 import 'dart:async';
-
-// import 'package:firebase_core/firebase_core.dart';
+import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:gymshood/Themes/theme.dart';
-import 'package:gymshood/pages/SignUpPage.dart';
-import 'package:gymshood/pages/bottomNavigationBar.dart';
-import 'package:gymshood/pages/firstScreen.dart';
-import 'package:gymshood/pages/forgotPassword.dart';
-import 'package:gymshood/pages/loginPage.dart';
-import 'package:gymshood/pages/resetPassword.dart';
-import 'package:gymshood/pages/splashscreen.dart';
-import 'package:gymshood/pages/verifyEmailview.dart';
+import 'package:gymshood/pages/AuthPages/SignUpPage.dart';
+import 'package:gymshood/pages/bottomNavigationPages/bottomNavigationBar.dart';
+import 'package:gymshood/pages/AuthPages/resetPassword.dart';
+import 'package:gymshood/pages/AuthPages/splashscreen.dart';
+import 'package:gymshood/pages/AuthPages/verifyEmailview.dart';
+import 'package:gymshood/services/Auth/auth_server_provider.dart';
+import 'package:uni_links/uni_links.dart';
+import 'package:gymshood/pages/AuthPages/firstScreen.dart';
+import 'package:gymshood/pages/AuthPages/loginPage.dart';
+import 'package:gymshood/pages/AuthPages/forgotPassword.dart';
 import 'package:gymshood/services/Auth/bloc/auth_bloc.dart';
 import 'package:gymshood/services/Auth/bloc/auth_event.dart';
 import 'package:gymshood/services/Auth/bloc/auth_state.dart';
-import 'package:gymshood/services/Auth/auth_server_provider.dart';
 
-// import 'dart:developer' as developer;
-
-// import 'package:uni_links/uni_links.dart';
 late Size mq;
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-    await dotenv.load(fileName: ".env");
-  // await Firebase.initializeApp();
-  await ServerProvider().init(); // Proper initialization
+  await dotenv.load(fileName: ".env");
+
+  final serverProvider = ServerProvider();
+  await serverProvider.init(); // ✅ Wait until cookie jar is restored
 
   runApp(
     BlocProvider<AuthBloc>(
-      create: (_) => AuthBloc(ServerProvider()),
+      create: (_) => AuthBloc(serverProvider)..add(const AuthEventInitialize()),
       child: const MyApp(),
     ),
   );
@@ -38,58 +37,53 @@ void main() async {
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
-  
+
   @override
   State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-    bool _isInitialized = false;
-      String? _resetToken;
-
+  bool _isInitialized = false;
+  String? _resetToken;
   StreamSubscription? _sub;
 
   @override
   void initState() {
     super.initState();
-    // _handleIncomingLinks();
-    // _handleInitialLink();
+    _handleIncomingLinks();
+    _handleInitialLink();
   }
 
-  // void _handleIncomingLinks() {
-  //   _sub = uriLinkStream.listen((Uri? uri) {
-  //     if (uri != null && uri.path.contains('resetpassword')) {
-  //       final token = uri.queryParameters['id'];
-  //       if (token != null) {
-  //         setState(() {
-  //           _resetToken = token;
-  //         });
-  //       }
-  //     }
-  //   }, onError: (err) {
-  //     developer.log("Deep link error: $err");
-  //   });
-  // }
+  void _handleIncomingLinks() {
+    _sub = uriLinkStream.listen((Uri? uri) {
+      if (uri != null && uri.path.contains('resetpassword')) {
+        final token = uri.queryParameters['id'];
+        if (token != null) {
+          setState(() {
+            _resetToken = token;
+          });
+        }
+      }
+    }, onError: (err) {
+      developer.log("Deep link error: $err");
+    });
+  }
 
-  // Future<void> _handleInitialLink() async {
-  //   final uri = await getInitialUri();
-  //   if (uri != null && uri.path.contains('resetpassword')) {
-  //     final token = uri.queryParameters['id'];
-  //     if (token != null) {
-  //       setState(() {
-  //         _resetToken = token;
-  //       });
-  //     }
-  //   }
-  // }
+  Future<void> _handleInitialLink() async {
+    final uri = await getInitialUri();
+    if (uri != null && uri.path.contains('resetpassword')) {
+      final token = uri.queryParameters['id'];
+      if (token != null) {
+        setState(() {
+          _resetToken = token;
+        });
+      }
+    }
+  }
 
-  @override
+@override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!_isInitialized) {
-      context.read<AuthBloc>().add(const AuthEventInitialize());
-      _isInitialized = true;
-    }
   }
 
   @override
@@ -98,67 +92,95 @@ class _MyAppState extends State<MyApp> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: "GymsHood",
-      theme: lightmode,
-      home: _resetToken != null
-          ? Resetpassword(token: _resetToken!)
-          : const HomePage(), // default route controlled by AuthBloc
-    );
-  }
+@override
+Widget build(BuildContext context) {
+  return MaterialApp(
+    debugShowCheckedModeBanner: false,
+    title: 'GymsHood',
+    theme: lightmode,
+    home: _resetToken != null ? Resetpassword(token: _resetToken!) : const RootPage(),
+  );
+}
 }
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
- 
+class RootPage extends StatefulWidget {
+  const RootPage({super.key});
+
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<RootPage> createState() => _RootPageState();
 }
 
-class _HomePageState extends State<HomePage> {
-  
-  @override
-  Widget build(BuildContext context) {
-    
-    return BlocBuilder<AuthBloc, AuthState>(
-      builder: (context, state) {
-        return _responseWiget(state, context);
-      },
-    );
-  }
+class _RootPageState extends State<RootPage> {
+  AuthState? _previousState;
+
+@override
+Widget build(BuildContext context) {
+  return BlocBuilder<AuthBloc, AuthState>(
+    builder: (context, state) {
+      final Widget newPage = _responseWidget(state);
+
+      final bool shouldAnimate = _previousState != null &&
+          _previousState.runtimeType != state.runtimeType &&
+          _shouldAnimate(_previousState!, state);
+
+      _previousState = state;
+      developer.log('previous state $_previousState');
+      if (shouldAnimate) {
+        return AnimatedSwitcher(
+          duration: const Duration(milliseconds: 1200),
+          transitionBuilder: (child, animation) {
+            const begin = Offset(1.0, 0.0);
+            const end = Offset.zero;
+            final tween = Tween(begin: begin, end: end)
+                .chain(CurveTween(curve: Curves.easeInOut));
+            final offsetAnimation = animation.drive(tween);
+            return SlideTransition(position: offsetAnimation, child: child);
+          },
+          child: KeyedSubtree(
+            key: ValueKey(state.runtimeType),
+            child: newPage,
+          ),
+        );
+      } else {
+        return newPage;
+      }
+    },
+  );
 }
 
-Widget _responseWiget(AuthState state, BuildContext context) {
-  //  developer.log(AuthService.firebase().currentUser.email.toString());
+}
+
+
+Widget _responseWidget(AuthState state) {
+  developer.log("🔁 Current AuthState: ${state.runtimeType}");
   if (state is AuthStateSplashScreen) {
     return const SplashScreen();
-  } else if (state is AuthStateLoggedOut) {
+  } else if (state is AuthStateFIrst) {
+    return const FirstScreen();
+  } else if (state is AuthStateLoggedOut ) {
     return const LoginPage();
-  } else if (state is AuthStateForgotPassword) {
-    return const ForgotPasswordView();
-  } else if (state is AuthStateNeedsVerification) {
-    // developer.log('idhar main mane page pe humn');
-    return const VerifyEmailView();
-  }  else if (state is AuthStateVerifyOtp) {
-    // developer.log('idhar main mane page pe humn part 2');
-    return const VerifyEmailView();
   } else if (state is AuthStateRegistering) {
     return const SignUpPage();
-  } else if (state is AuthStateResetPassword) {
+  } else if (state is AuthStateForgotPassword || state is AuthStateResetPassword) {
     return const ForgotPasswordView();
-  }
-   else if (state is AuthStateLoggedIn) {
+  } else if (state is AuthStateVerifyOtp || state is AuthStateNeedsVerification) {
+    return const VerifyEmailView();
+  } else if (state is AuthStateLoggedIn) {
     return const BottomNavigation();
-  } 
-   else if (state is AuthStateFIrst) {
-    return const FirstScreen();
-  } 
-  else {
-    return Scaffold(
-      body: Text("state is not changed ",
-          style: TextStyle(color: Colors.black12)),
+  } else {
+    return const Scaffold(
+      body: Center(child: Text("Unknown state")),
     );
   }
+}
+
+bool _shouldAnimate(AuthState oldState, AuthState newState) {
+  // Define transitions that should animate (customize as needed)
+  const animatedStates = {
+    AuthStateLoggedIn,
+    AuthStateLoggedOut,
+  };
+
+  return animatedStates.contains(oldState.runtimeType) &&
+         animatedStates.contains(newState.runtimeType);
 }

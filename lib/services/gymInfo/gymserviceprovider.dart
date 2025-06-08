@@ -1,6 +1,7 @@
 // import 'package:gymshood/sevices/Auth/auth_service.dart';
 import 'package:gymshood/services/Models/gym.dart';
 import 'package:gymshood/services/Models/planModel.dart';
+import 'package:gymshood/services/Models/gymDashboardStats.dart';
 import 'package:gymshood/services/gymInfo/gym_server_provider.dart';
 import 'package:gymshood/services/gymInfo/gymowner_info_provider.dart';
 
@@ -10,7 +11,7 @@ class Gymserviceprovider implements GymOwnerInfoProvider{
   factory Gymserviceprovider.server() => Gymserviceprovider(provider: GymServerProvider());
 
   @override
-  Future<String> addGymMedia({required String mediaType, required String mediaUrl, required String logourl , required String gymId}) {
+  Future<String> addGymMedia({required String mediaType, required List<String> mediaUrl, required String logourl , required String gymId}) {
    return provider.addGymMedia(mediaType: mediaType, mediaUrl: mediaUrl, logourl: logourl, gymId: gymId);
   }
 
@@ -20,8 +21,8 @@ class Gymserviceprovider implements GymOwnerInfoProvider{
   }
 
   @override
-  Future<Map<String,dynamic>> registerGym({required String role, required String name, required String location, required List<num> coordinates, required num capacity, required String openTime, required String closeTime, required String contactEmail, required String phone, required String about, required List<String> equipmentList, required List<Map<String, Object>> shifts, required String userid}) {
-    return provider.registerGym(role: role, name: name, location: location, capacity: capacity, openTime: openTime, closeTime: closeTime, contactEmail: contactEmail, phone: phone, about: about, equipmentList: equipmentList, shifts: shifts, userid: userid , coordinates: coordinates);
+  Future<Map<String,dynamic>> registerGym({required String role, required String name, required String location, required List<num> coordinates, required num capacity, required String openTime, required String closeTime, required String contactEmail, required String phone, required String about, required List<String> equipmentList, required List<Map<String, Object>> shifts, required String userid,required String gymSlogan}) {
+    return provider.registerGym(role: role, name: name, location: location,gymSlogan: gymSlogan, capacity: capacity, openTime: openTime, closeTime: closeTime, contactEmail: contactEmail, phone: phone, about: about, equipmentList: equipmentList, shifts: shifts, userid: userid , coordinates: coordinates);
   }
 
   @override
@@ -30,7 +31,7 @@ class Gymserviceprovider implements GymOwnerInfoProvider{
   }
   
   @override
-  Future<String> createPlan({required String name, required num validity, required num price, required num discountPercent, required String features, required String planType, required bool isTrainerIncluded, required String workoutDuration , required String gymId}) {
+  Future<String> createPlan({required String name, required num validity, required num price, required num discountPercent, required String features, required String planType, required bool isTrainerIncluded, required num workoutDuration , required String gymId}) {
     return provider.createPlan(name: name, validity: validity, price: price, discountPercent: discountPercent, features: features, planType: planType, isTrainerIncluded: isTrainerIncluded, workoutDuration: workoutDuration,gymId: gymId);
   }
   
@@ -55,7 +56,12 @@ class Gymserviceprovider implements GymOwnerInfoProvider{
   }
   
   @override
-  Future<bool> updatePlan({required String planId, required String name, required num price, required num discountPercent, required String features, required String workoutDuration, required bool isTrainerIncluded}) {
+  Future<bool> updatePlan({required String planId, required String name, required num price, required num discountPercent, required String features, required num workoutDuration, required bool isTrainerIncluded}) {
    return provider.updatePlan(planId: planId, name: name, price: price, discountPercent: discountPercent, features: features, workoutDuration: workoutDuration, isTrainerIncluded: isTrainerIncluded);
+  }
+  
+  @override
+  Future<GymDashboardStats> getgymDashBoardStatus(String gymId) {
+    return provider.getgymDashBoardStatus(gymId);
   }
 }

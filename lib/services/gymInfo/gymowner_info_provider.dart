@@ -1,13 +1,13 @@
-
-
 import 'package:gymshood/services/Models/gym.dart';
 import 'package:gymshood/services/Models/planModel.dart';
+import 'package:gymshood/services/Models/gymDashboardStats.dart';
 
 abstract class GymOwnerInfoProvider {
   Future<Map<String,dynamic>> registerGym({
     required String role , 
     required String name,
     required String location,
+    required String gymSlogan,
     required  List<num> coordinates,
     required num capacity,
     required String openTime,
@@ -21,21 +21,11 @@ abstract class GymOwnerInfoProvider {
      });
 
     Future<List<Gym>> getGymsByowner(String id);
-     
-  //    Future<Plan> updateGymPlan(
-  //   String name,
-  //   num price,
-  //   num discountPercent,
-  //   String features,
-  //   String workoutDuration,
-  //  bool isTrainerIncluded,
-  //   isActive,
-
-  //    )
      Future<String> addGymMedia({
         required String mediaType,//needed dropdown menu of photo , video
-        required String mediaUrl,
+        required List<String> mediaUrl,
         required String logourl,
+        required String gymId
      });
 
      Future<Gym> getGymDetails({
@@ -56,15 +46,6 @@ abstract class GymOwnerInfoProvider {
     required List<Map<String,dynamic>> shifts,
      });
 
-
-    // name,
-    // validity,
-    // price,
-    // discountPercent,
-    // features,
-    // planType,
-    // isTrainerIncluded,
-    // workoutDuration
   Future<String> createPlan({
     required String name ,
     required num validity,
@@ -73,7 +54,7 @@ abstract class GymOwnerInfoProvider {
     required String features,
     required String planType,
     required bool isTrainerIncluded,
-    required String workoutDuration,
+    required num workoutDuration,
     required String gymId
   });
 
@@ -81,19 +62,19 @@ abstract class GymOwnerInfoProvider {
   String? status,
   String? search,
   String? near, 
-// Format: "lat,lng,radius"
 }) ;
 
 Future<List<Plan>> getPlans(String gymId);
-
+Future<GymDashboardStats> getgymDashBoardStatus(String gymId);
 Future<bool> updatePlan({
   required String planId,
   required String    name,
    required num price,
-   required num discountPercent,
+  required num discountPercent,
     required String features,
-    required String workoutDuration,
+    required num workoutDuration,
     required bool isTrainerIncluded,
 
 });
+
 }

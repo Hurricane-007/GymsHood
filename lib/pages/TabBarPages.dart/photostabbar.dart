@@ -1,7 +1,9 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:gymshood/Utilities/Dialogs/showdeletedialog.dart';
-import 'package:gymshood/pages/FullScreenPage.dart';
-import 'package:gymshood/pages/addGymMediaPage.dart';
+import 'package:gymshood/pages/fullScreenVideoandImage/FullScreenPage.dart';
+import 'package:gymshood/pages/createServicesPages/addGymMediaPage.dart';
 import 'package:gymshood/services/Models/gym.dart';
 import 'package:gymshood/services/fileserver.dart';
 
@@ -14,29 +16,30 @@ class PhotosTabBar extends StatefulWidget {
 }
 
 class _PhotosTabBarState extends State<PhotosTabBar> {
-  late Future<List<String>> _futureImages;
   List<String> _imageUrls = [];
-
   bool _selectionMode = false;
   final Set<String> _selectedUrls = {};
+
+  bool _isImageFile(String url) {
+    final ext = url.toLowerCase().split('.').last;
+    return ext == 'jpg' || ext == 'jpeg' || ext == 'png';
+  }
 
   @override
   void initState() {
     super.initState();
-    _futureImages = _loadImages();
-  }
-
-  Future<List<String>> _loadImages() async {
-    final urls = await Fileserver().fetchMediaUrls('photo' , widget.gym.gymid);
-    setState(() {
-      _imageUrls = urls;
-    });
-    return urls;
+    _imageUrls = (widget.gym.media?.mediaUrls ?? [])
+        .where((url) => _isImageFile(url))
+        .toList();
+    developer.log("Images : $_imageUrls");
+    developer.log("gym : ${widget.gym.media}");
   }
 
   Future<void> _refreshImages() async {
     setState(() {
-      _futureImages = _loadImages();
+      _imageUrls = (widget.gym.media?.mediaUrls ?? [])
+          .where((url) => _isImageFile(url))
+          .toList();
       _selectedUrls.clear();
       _selectionMode = false;
     });
@@ -78,105 +81,109 @@ class _PhotosTabBarState extends State<PhotosTabBar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _selectionMode?  AppBar(
-        backgroundColor: Theme.of(context).primaryColor,
-             title: Text(_selectionMode
-            ? "${_selectedUrls.length} selected"
-            : "Photos" , style: TextStyle(color: Colors.white),),
-        actions: _selectionMode
-            ? [
-                IconButton(
-                  icon: Icon(Icons.delete , color: Colors.white,),
-                  onPressed: _deleteSelectedImages,
-                )
-              ]
-            : [],
-            ):null,
-      body: RefreshIndicator(
-        backgroundColor: Colors.white,
-        color: Theme.of(context).primaryColor,
-        onRefresh: _refreshImages,
-        child: FutureBuilder<List<String>>(
-          future: _futureImages,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            final imageUrls = snapshot.data ?? [];
-            if (imageUrls.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.photo_album, size: 60, color: Colors.grey),
-                    const SizedBox(height: 10),
-                    const Text("No Photos Available", style: TextStyle(fontSize: 18)),
-                    const SizedBox(height: 10),
-                    ElevatedButton.icon(
-                      onPressed: () async {
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => UploadMultipleImagesPage(gym: widget.gym,)),
-                        );
-                        _refreshImages();
-                      },
-                      icon: const Icon(Icons.add),
-                      label: const Text("Add Photo"),
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            return GridView.count(
-              crossAxisCount: 2,
-              children: imageUrls.map((url) {
-                final isSelected = _selectedUrls.contains(url);
-                return GestureDetector(
-                  onTap: () async{
-                    if (_selectionMode) {
-                      _toggleSelection(url);
-                    } else {
-                    await Navigator.push(
+      body: _imageUrls.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.photo , size: 60,),
+                  Text('No images available'),
+                  SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => FullScreenImagePage(imageUrl: url),
+                          builder: (context) => UploadMultipleImagesPage(
+                            gym: widget.gym,
+                          ),
                         ),
-                      );
-
-                        
-                          _refreshImages();
-                        
-                    }
-                  },
-                  onLongPress: () {
-                    _toggleSelection(url);
-                  },
+                      ).then((_) => _refreshImages());
+                    },
+                    child: Text('Add Images'),
+                  ),
+                ],
+              ),
+            )
+          : GridView.builder(
+              padding: EdgeInsets.all(8),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+              ),
+              itemCount: _imageUrls.length,
+              itemBuilder: (context, index) {
+                final url = _imageUrls[index];
+                return GestureDetector(
+                  onTap: _selectionMode
+                      ? () => _toggleSelection(url)
+                      : () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => FullScreenImagePage(
+                                imageUrl: url,
+                              ),
+                            ),
+                          );
+                        },
                   child: Stack(
                     children: [
-                      Positioned.fill(
-                        child: Image.network(
-                          url,
-                          fit: BoxFit.cover,
-                          color: isSelected ? Colors.black.withValues(alpha: 0.6) : null,
-                          colorBlendMode: isSelected ? BlendMode.darken : null,
-                        ),
+                      Image.network(
+                        url,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey[300],
+                            child: Icon(Icons.error),
+                          );
+                        },
                       ),
-                      if (isSelected)
-                        const Positioned(
-                          top: 8,
-                          right: 8,
-                          child: Icon(Icons.check_circle, color: Colors.white, size: 28),
+                      if (_selectionMode)
+                        Positioned(
+                          top: 4,
+                          right: 4,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: _selectedUrls.contains(url)
+                                  ? Colors.blue
+                                  : Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                            padding: EdgeInsets.all(4),
+                            child: Icon(
+                              Icons.check,
+                              color: _selectedUrls.contains(url)
+                                  ? Colors.white
+                                  : Colors.transparent,
+                              size: 16,
+                            ),
+                          ),
                         ),
                     ],
                   ),
                 );
-              }).toList(),
-            );
-          },
-        ),
-      ),
+              },
+            ),
+      floatingActionButton: _selectionMode
+          ? FloatingActionButton(
+              onPressed: _deleteSelectedImages,
+              child: Icon(Icons.delete),
+            )
+          : FloatingActionButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => UploadMultipleImagesPage(
+                      gym: widget.gym,
+                    ),
+                  ),
+                ).then((_) => _refreshImages());
+              },
+              child: Icon(Icons.add),
+            ),
     );
   }
 }
