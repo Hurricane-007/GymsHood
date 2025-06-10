@@ -3,7 +3,7 @@ enum MenuAction {
 }
 
 enum GymStatus{
-  pending,active,inactive ,maintenance,banned
+  open,closed ,maintenance
 }
 
 enum role{

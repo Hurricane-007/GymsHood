@@ -1,6 +1,7 @@
 import 'dart:developer' as developer;
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -112,48 +113,9 @@ class _ProfilePageState extends State<ProfilePage>
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
-        title: DropdownButtonHideUnderline(
-          child: DropdownButton<String>(
-            dropdownColor: Theme.of(context).colorScheme.primary,
-            value: dropdownValue.isNotEmpty ? dropdownValue : null,
-            hint: const Text(
-              'Select Gym',
-              style: TextStyle(color: Colors.white),
-            ),
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-            ),
-            icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
-            items: gyms.map((gym) {
-              return DropdownMenuItem<String>(
-                value: gym.name,
-                child: Text(
-                  gym.name,
-                  style: const TextStyle(color: Colors.white),
-                ),
-              );
-            }).toList(),
-            onChanged: (String? newValue) async {
-              if (newValue == null) return;
-
-              final Gym? selected = gyms.firstWhere(
-                (g) => g.name == newValue,
-              );
-
-              if (selected != null) {
-                setState(() {
-                  selectedGym = selected;
-                  dropdownValue = selected.name;
-                });
-
-                if (mounted) {
-                  _updateGymDetails(selected);
-                }
-              }
-            },
-          ),
+        title: Text(
+          "Gym Profile",
+          style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
         actions: [
@@ -233,31 +195,80 @@ class _ProfilePageState extends State<ProfilePage>
 
             if (selectedGym == null) {
               return Center(
+                child: Container(
+                  padding: EdgeInsets.all(24),
                   child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.fitness_center,
-                    size: 50,
-                  ),
-                  Text(
-                    "Please register your gym first",
-                    style:
-                        TextStyle(color: Theme.of(context).colorScheme.primary),
-                  ),
-                  ElevatedButton(
-                      onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => Gyminfopage(),
-                          )),
-                      child: Text(
-                        "Register gym",
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor.withAlpha(50),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.fitness_center,
+                          size: 60,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                      SizedBox(height: 24),
+                      Text(
+                        'No Gym Registered',
                         style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary),
-                      )),
-                ],
-              ));
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Start your fitness journey by registering your gym',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey[600],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 32),
+                      Container(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Gyminfopage(),
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context).primaryColor,
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 2,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.add_business),
+                              SizedBox(width: 8),
+                              Text(
+                                "Register Your Gym",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
             }
             return NestedScrollView(
               headerSliverBuilder: (context, innerBoxIsScrolled) => [
@@ -278,55 +289,82 @@ class _ProfilePageState extends State<ProfilePage>
                                         child: Material(
                                           color: Colors.transparent,
                                           child: InkWell(
-                                              onLongPress: () async {
-                                                final uri = Uri.parse(_image!);
-                                                final filename =
-                                                    uri.pathSegments.isNotEmpty
-                                                        ? uri.pathSegments.last
-                                                            .toLowerCase()
-                                                        : '';
-                                                final confirm =
-                                                    await showDeleteDialog(
-                                                        context);
-                                                if (confirm == true) {
-                                                  final success =
-                                                      await Fileserver()
-                                                          .deleteFileFromServer(
-                                                              filename);
-                                                  if (success) {
-                                                    ScaffoldMessenger.of(
-                                                            context)
-                                                        .showSnackBar(
-                                                      const SnackBar(
-                                                          content: Text(
-                                                              'profile photo deleted successfully')),
-                                                    );
-                                                    setState(() {
-                                                      _image = null;
-                                                    });
-                                                  } else {
-                                                    ScaffoldMessenger.of(
-                                                            context)
-                                                        .showSnackBar(
-                                                      const SnackBar(
-                                                          content: Text(
-                                                              'Failed to delete profile photo')),
-                                                    );
-                                                  }
+                                            onLongPress: () async {
+                                              final uri = Uri.parse(_image!);
+                                              final filename =
+                                                  uri.pathSegments.isNotEmpty
+                                                      ? uri.pathSegments.last
+                                                          .toLowerCase()
+                                                      : '';
+                                              final confirm =
+                                                  await showDeleteDialog(
+                                                      context);
+                                              if (confirm == true) {
+                                                final success =
+                                                    await Gymserviceprovider
+                                                            .server()
+                                                        .addGymMedia(
+                                                            mediaType: 'photo',
+                                                            mediaUrl:
+                                                                selectedGym!
+                                                                    .media!
+                                                                    .mediaUrls,
+                                                            logourl: '',
+                                                            gymId: selectedGym!
+                                                                .gymid);
+                                                if (success ==
+                                                    'Successfully added Media') {
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    const SnackBar(
+                                                        content: Text(
+                                                            'profile photo deleted successfully')),
+                                                  );
+                                                  setState(() {
+                                                    _image = null;
+                                                  });
+                                                } else {
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    const SnackBar(
+                                                        content: Text(
+                                                            'Failed to delete profile photo')),
+                                                  );
                                                 }
-                                              },
-                                              onTap: () => Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        FullScreenImagePage(
-                                                            imageUrl: _image!),
-                                                  )),
-                                              child: Image.network(
-                                                _image!,
-                                                height: mq.height * 0.2,
-                                                fit: BoxFit.cover,
-                                              )),
+                                              }
+                                            },
+                                            onTap: () => Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      FullScreenImagePage(
+                                                          gym: selectedGym!,
+                                                          imageUrl: _image!),
+                                                )),
+                                            child:
+                                                // Image.network(
+                                                //   _image!,
+                                                //   height: mq.height * 0.2,
+                                                //   fit: BoxFit.cover,
+                                                // )
+                                                (_image != null &&
+                                                        _image!.isNotEmpty)
+                                                    ? CachedNetworkImage(
+                                                        imageUrl: _image!,
+                                                        fit: BoxFit.cover,
+                                                        errorWidget: (context,
+                                                                url, error) =>
+                                                            Icon(
+                                                                CupertinoIcons
+                                                                    .person,
+                                                                size:
+                                                                    mq.height *
+                                                                        0.1),
+                                                      )
+                                                    : Icon(
+                                                        CupertinoIcons.person,
+                                                        size: mq.height * 0.1),
+                                          ),
                                         )))
                                 : ClipOval(
                                     child: Container(
@@ -358,15 +396,23 @@ class _ProfilePageState extends State<ProfilePage>
                         ),
                         SizedBox(height: mq.height * 0.01),
                         Text(
-                          name ?? 'GYM NAME',
+                          selectedGym?.name ?? 'GYM NAME',
                           style: TextStyle(
                             fontSize: mq.height * 0.025,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black,
+                            color: Theme.of(context).primaryColor,
                           ),
                         ),
-                        Text(selectedGym!.gymslogan,
-                            style: TextStyle(color: Colors.black54)),
+                        Text(
+                          selectedGym!.gymslogan,
+                          style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 14,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                        ),
                         SizedBox(height: mq.height * 0.01),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -419,7 +465,7 @@ class _ProfilePageState extends State<ProfilePage>
                         VideoTabBar(gym: selectedGym!),
                         EquipmentTabBar(list: equipment),
                         ReviewsTabBar(),
-                        AboutTabBar(aboutText: about),
+                        AboutTabBar(gym: selectedGym!),
                       ],
                     ),
             );
@@ -441,7 +487,7 @@ class _ProfilePageState extends State<ProfilePage>
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Pick Your Profile Picture',
+                'Pick Your Gym Logo',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 20,
@@ -464,7 +510,8 @@ class _ProfilePageState extends State<ProfilePage>
                           if (image != null) {
                             final url = await Fileserver().uploadToServer(
                                 File(image.path), 'Logo', selectedGym!.gymid);
-                            final res = await Gymserviceprovider.server().addGymMedia(
+                            final res =
+                                await Gymserviceprovider.server().addGymMedia(
                               mediaType: 'photo',
                               mediaUrl: [],
                               logourl: url,
@@ -506,7 +553,8 @@ class _ProfilePageState extends State<ProfilePage>
                           if (image != null) {
                             final url = await Fileserver().uploadToServer(
                                 File(image.path), 'Logo', selectedGym!.gymid);
-                            final res = await Gymserviceprovider.server().addGymMedia(
+                            final res =
+                                await Gymserviceprovider.server().addGymMedia(
                               mediaType: 'photo',
                               mediaUrl: [],
                               logourl: url,

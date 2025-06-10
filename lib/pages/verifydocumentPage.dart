@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:gymshood/services/Models/gym.dart';
+import 'package:gymshood/services/gymInfo/gymserviceprovider.dart';
 import '../services/fileserver.dart';
 
 class VerifyDocuments extends StatefulWidget {
@@ -68,6 +69,7 @@ class _VerifyDocumentsState extends State<VerifyDocuments> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please upload all required documents')),
       );
+     
       return;
     }
 
@@ -78,7 +80,7 @@ class _VerifyDocumentsState extends State<VerifyDocuments> {
     try {
       final fileServer = Fileserver();
       bool allUploaded = true;
-
+      List<String> uploadeddocsurl = [];
       for (int i = 0; i < _documents.length; i++) {
         if (!_documents[i]['uploaded']) {
           final file = _documents[i]['file'] as PlatformFile;
@@ -89,6 +91,7 @@ class _VerifyDocumentsState extends State<VerifyDocuments> {
           );
           
           if (result != null) {
+            uploadeddocsurl.add(result);
             setState(() {
               _documents[i]['uploaded'] = true;
             });
@@ -98,12 +101,14 @@ class _VerifyDocumentsState extends State<VerifyDocuments> {
               SnackBar(content: Text('Failed to upload ${_documents[i]['name']}')),
             );
           }
+
+
         }
       }
 
       if (allUploaded) {
       //here add the logic to send the verification docs // Todo() Implementation
-        widget.gym.docs?.addAll(_documents.map((_)=>_['file']));
+      await Gymserviceprovider.server().verificationdocsUpload(uploadeddocsurl);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('All documents uploaded successfully')),
         );

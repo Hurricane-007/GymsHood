@@ -188,36 +188,55 @@ class _PlansPageState extends State<PlansPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.event_busy,
-                            size: 60, color: Colors.grey),
-                        const SizedBox(height: 10),
-                        const Text("No Plans Available",
-                            style: TextStyle(fontSize: 18)),
-                        const SizedBox(height: 10),
+                        Icon(
+                          Icons.event_busy,
+                          size: 80,
+                          color: Theme.of(context).primaryColor.withAlpha(100),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          "No Plans Available",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).primaryColor,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          "Create your first plan to get started",
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
                         ElevatedButton.icon(
                           onPressed: () async {
                             final result = await Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) =>
-                                      const CreatePlansPage()),
+                                  builder: (context) => const CreatePlansPage()),
                             );
-                            // developer.log("CreatePlansPage returned: $result");
                             if (result == true) {
-                              // developer.log("Calling getPlans()...");
                               await getPlans();
-                            } else {
-                              developer.log("No refresh triggered");
                             }
                           },
-                          icon: const Icon(Icons.add),
-                          label: const Text("Create Plan"),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                            backgroundColor: Theme.of(context).primaryColor,
+                          ),
+                          icon: const Icon(Icons.add , color: Colors.white,),
+                          label: const Text(
+                            "Create Plan",
+                            style: TextStyle(fontSize: 16 , color: Colors.white),
+                          ),
                         ),
-                        const SizedBox(height: 10),
-                        const Text("Your gym is not created?",
-                            style: TextStyle(fontSize: 18)),
-                        const SizedBox(height: 10),
-                        ElevatedButton.icon(
+                        const SizedBox(height: 16),
+                        TextButton.icon(
                           onPressed: () {
                             Navigator.push(
                               context,
@@ -228,7 +247,7 @@ class _PlansPageState extends State<PlansPage> {
                               getPlans();
                             });
                           },
-                          icon: const Icon(Icons.add),
+                          icon: const Icon(Icons.business),
                           label: const Text("Register Gym"),
                         ),
                       ],
@@ -240,15 +259,15 @@ class _PlansPageState extends State<PlansPage> {
                   backgroundColor: Colors.white,
                   color: Theme.of(context).colorScheme.primary,
                   child: Padding(
-                    padding: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(16),
                     child: GridView.builder(
                       physics: const AlwaysScrollableScrollPhysics(),
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
-                        childAspectRatio: 3 / 2,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10,
+                        childAspectRatio: 0.85,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
                       ),
                       itemCount: plans.length,
                       itemBuilder: (context, index) {
@@ -276,81 +295,113 @@ class _PlansPageState extends State<PlansPage> {
                             children: [
                               Card(
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  side: isSelected ? BorderSide(color: Colors.blue, width: 2) : BorderSide.none,
+                                  borderRadius: BorderRadius.circular(20),
+                                  side: isSelected
+                                      ? BorderSide(
+                                          color: Theme.of(context).primaryColor,
+                                          width: 2)
+                                      : BorderSide.none,
                                 ),
                                 elevation: 4,
                                 child: Container(
                                   decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(16),
+                                    borderRadius: BorderRadius.circular(20),
                                     gradient: LinearGradient(
                                       begin: Alignment.topLeft,
                                       end: Alignment.bottomRight,
                                       colors: [
+                                        
                                         Colors.blue.shade900,
-                                        Colors.blueAccent.shade200,
+                                        Colors.blue.shade400,
                                       ],
                                     ),
                                   ),
                                   child: Stack(
                                     children: [
                                       Padding(
-                                        padding: const EdgeInsets.all(12),
+                                        padding: const EdgeInsets.all(16),
                                         child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(
+                                                horizontal: 8,
+                                                vertical: 4,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: Colors.white.withAlpha(50),
+                                                borderRadius: BorderRadius.circular(12),
+                                              ),
+                                              child: Text(
+                                                gymNames[plan.gymId] ?? "Loading...",
+                                                style: const TextStyle(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.white,
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 12),
                                             Text(
-                                              gymNames[plan.gymId] ?? "Loading...",
-                                              style: TextStyle(
-                                                fontSize: 12,
+                                              plan.name,
+                                              style: const TextStyle(
+                                                fontSize: 18,
                                                 fontWeight: FontWeight.bold,
                                                 color: Colors.white,
                                               ),
+                                              maxLines: 2,
                                               overflow: TextOverflow.ellipsis,
                                             ),
-                                            Row(
-                                              children: [
-                                                Icon(Icons.fitness_center, color: Colors.white),
-                                                const SizedBox(width: 8),
-                                                Expanded(
-                                                  child: Text(
-                                                    plan.name,
-                                                    style: const TextStyle(
-                                                      fontSize: 16,
-                                                      fontWeight: FontWeight.bold,
-                                                      color: Colors.white,
-                                                    ),
-                                                    overflow: TextOverflow.ellipsis,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 4),
+                                            const SizedBox(height: 8),
                                             Text(
                                               "₹${plan.price.toStringAsFixed(0)}",
                                               style: const TextStyle(
-                                                fontSize: 14,
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.bold,
                                                 color: Colors.white,
                                               ),
                                             ),
+                                            const Spacer(),
                                             Row(
                                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                               children: [
-                                                Text(
-                                                  plan.planType.toUpperCase(),
-                                                  style: const TextStyle(
-                                                    fontSize: 12,
-                                                    color: Colors.white70,
+                                                Container(
+                                                  padding: const EdgeInsets.symmetric(
+                                                    horizontal: 8,
+                                                    vertical: 4,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white.withAlpha(50),
+                                                    borderRadius: BorderRadius.circular(12),
+                                                  ),
+                                                  child: Text(
+                                                    "${plan.validity} days",
+                                                    style: const TextStyle(
+                                                      fontSize: 12,
+                                                      color: Colors.white,
+                                                    ),
                                                   ),
                                                 ),
-                                                Text(
-                                                  "${plan.validity} days",
-                                                  style: const TextStyle(
-                                                    fontSize: 12,
-                                                    color: Colors.white,
+                                                if (plan.discountPercent > 0)
+                                                  Container(
+                                                    padding: const EdgeInsets.symmetric(
+                                                      horizontal: 8,
+                                                      vertical: 4,
+                                                    ),
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.green.withAlpha(380),
+                                                      borderRadius: BorderRadius.circular(12),
+                                                    ),
+                                                    child: Text(
+                                                      "${plan.discountPercent}% OFF",
+                                                      style: const TextStyle(
+                                                        fontSize: 12,
+                                                        color: Colors.white,
+                                                        fontWeight: FontWeight.bold,
+                                                      ),
+                                                    ),
                                                   ),
-                                                ),
                                               ],
                                             ),
                                           ],
@@ -359,8 +410,8 @@ class _PlansPageState extends State<PlansPage> {
                                       if (isSelected)
                                         Container(
                                           decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(16),
-                                            color: Colors.blue.withAlpha(77),
+                                            borderRadius: BorderRadius.circular(20),
+                                            color: Colors.white.withOpacity(0.3),
                                           ),
                                           child: const Center(
                                             child: Icon(
@@ -381,22 +432,19 @@ class _PlansPageState extends State<PlansPage> {
                     ),
                   ),
                 ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           final result = await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const CreatePlansPage()),
           );
-          developer.log("CreatePlansPage returned: $result");
           if (result == true) {
-            developer.log("Calling getPlans()...");
             await getPlans();
-          } else {
-            developer.log("No refresh triggered");
           }
         },
         backgroundColor: Theme.of(context).primaryColor,
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        label: const Text("New Plan"),
       ),
     );
   }

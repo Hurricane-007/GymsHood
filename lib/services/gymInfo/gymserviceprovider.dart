@@ -1,4 +1,5 @@
 // import 'package:gymshood/sevices/Auth/auth_service.dart';
+import 'package:gymshood/services/Models/announcementModel.dart';
 import 'package:gymshood/services/Models/gym.dart';
 import 'package:gymshood/services/Models/planModel.dart';
 import 'package:gymshood/services/Models/gymDashboardStats.dart';
@@ -26,8 +27,8 @@ class Gymserviceprovider implements GymOwnerInfoProvider{
   }
 
   @override
-  Future<bool> updateGym({required String gymId,required String name, required Map<String,dynamic> location, required num capacity, required String openTime, required String closeTime, required String contactEmail, required String phone, required String about, required List<Map<String,dynamic>> shifts}) {
-   return provider.updateGym(gymId: gymId, name: name, location: location, capacity: capacity, openTime: openTime, closeTime: closeTime, contactEmail: contactEmail, phone: phone, about: about, shifts: shifts);
+  Future<bool> updateGym({required String gymId,required String name, required Map<String,dynamic> location, required num capacity, required String openTime, required String closeTime, required List<String> equipments,required String contactEmail, required String phone, required String about, required List<Map<String,dynamic>> shifts}) {
+   return provider.updateGym(gymId: gymId, name: name, location: location, capacity: capacity, openTime: openTime, closeTime: closeTime, contactEmail: contactEmail, phone: phone,equipments: equipments, about: about, shifts: shifts);
   }
   
   @override
@@ -63,5 +64,25 @@ class Gymserviceprovider implements GymOwnerInfoProvider{
   @override
   Future<GymDashboardStats> getgymDashBoardStatus(String gymId) {
     return provider.getgymDashBoardStatus(gymId);
+  }
+  
+  @override
+  Future<bool> verificationdocsUpload(List<String> docs) {
+  return  provider.verificationdocsUpload(docs);
+  }
+  
+  @override
+  Future<bool> toggleGymstatus() {
+return provider.toggleGymstatus();
+  }
+
+  @override
+  Future<GymAnnouncement> createGymAnnouncement(String message) {
+    return provider.createGymAnnouncement(message);
+  }
+  
+  @override
+  Future<List<GymAnnouncement>> getGymAnnouncements() {
+    return provider.getGymAnnouncements();
   }
 }

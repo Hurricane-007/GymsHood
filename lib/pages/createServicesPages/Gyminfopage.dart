@@ -141,6 +141,20 @@ class _GyminfopageState extends State<Gyminfopage>
   @override
   void dispose() {
     _tabController.dispose();
+    nameController.dispose();
+    locationController.dispose();
+    coordinatesController.dispose();
+    capacityController.dispose();
+    openTimeController.dispose();
+    closeTimeController.dispose();
+    contactEmailController.dispose();
+    phoneController.dispose();
+    aboutController.dispose();
+    equipmentController.dispose();
+    userIdController.dispose();
+    gymsloganController.dispose();
+    
+    // Dispose weekly shift controllers
     for (var dayShifts in weeklyShiftControllers) {
       for (var shift in dayShifts) {
         shift.forEach((_, controller) => controller.dispose());
@@ -176,9 +190,13 @@ class _GyminfopageState extends State<Gyminfopage>
 
   Future<void> pickTime(
       BuildContext context, TextEditingController controller) async {
+    if (!mounted) return;
+    
     final picked =
         await showTimePicker(context: context, initialTime: TimeOfDay.now());
-    if (picked != null) controller.text = formatTimeOfDay(picked);
+    if (picked != null && mounted) {
+      controller.text = formatTimeOfDay(picked);
+    }
   }
 
   @override
@@ -326,7 +344,7 @@ class _GyminfopageState extends State<Gyminfopage>
         ),
       ),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 35),
         child: SizedBox(
           width: 60,
           child: ElevatedButton(
@@ -334,11 +352,14 @@ class _GyminfopageState extends State<Gyminfopage>
                 backgroundColor: Theme.of(context).primaryColor,
                 overlayColor: Colors.white),
             onPressed: () async {
+              if (!mounted) return;
               if (_formKey.currentState!.validate()) {
                 Authuser? authuser = await AuthService.server().getUser();
                 if (!mounted) return;
+                
                 List<Map<String, Object>> allShifts = [];
                 for (int i = 0; i < weekdays.length; i++) {
+                  if (!mounted) return;
                   for (final shift in weeklyShiftControllers[i]) {
                     allShifts.add({
                       'day': weekdays[i].toLowerCase(),
@@ -350,23 +371,20 @@ class _GyminfopageState extends State<Gyminfopage>
                   }
                 }
 
+                if (!mounted) return;
                 final coords = coordinatesController.text
                     .split(',')
                     .map((e) => num.tryParse(e.trim()))
                     .whereType<num>()
                     .toList();
 
-                developer.log('Parsed coordinates: $coords'); // Debug
+                developer.log('Parsed coordinates: $coords');
 
                 final res = await Gymserviceprovider.server().registerGym(
                   role: role,
                   name: nameController.text,
                   location: locationController.text,
-                  coordinates: coordinatesController.text
-                      .split(',')
-                      .map((e) => num.tryParse(e.trim()))
-                      .whereType<num>()
-                      .toList(),
+                  coordinates: coords,
                   gymSlogan: gymsloganController.text,
                   capacity: num.parse(capacityController.text),
                   openTime: openTimeController.text,
@@ -385,6 +403,7 @@ class _GyminfopageState extends State<Gyminfopage>
 
                 if (res['success']) {
                   showInfoDialog(context, res['message']);
+                  if (!mounted) return;
                   _formKey.currentState!.reset();
                   nameController.clear();
                   locationController.clear();
@@ -396,7 +415,7 @@ class _GyminfopageState extends State<Gyminfopage>
                   phoneController.clear();
                   aboutController.clear();
                   equipmentController.clear();
-                  equipmentController.clear();
+                  gymsloganController.clear();
                   clearWeeklyShiftControllers();
                 } else {
                   showErrorDialog(context, res['message']);
@@ -412,23 +431,44 @@ class _GyminfopageState extends State<Gyminfopage>
 
   Widget buildTextField(TextEditingController controller, String label,
       {TextInputType keyboardType = TextInputType.text}) {
+    if (!mounted) return const SizedBox.shrink();
+    
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
       decoration: InputDecoration(
         labelText: label,
       ),
-      validator: (value) => value == null || value.trim().isEmpty
-          ? 'This field is required'
-          : null,
+      validator: (value) {
+        if (!mounted) return null;
+        return value == null || value.trim().isEmpty
+            ? 'This field is required'
+            : null;
+      },
     );
   }
 
   Widget buildTimeField(TextEditingController controller, String label) {
+    if (!mounted) return const SizedBox.shrink();
+    
     return GestureDetector(
-      onTap: () => pickTime(context, controller),
+      onTap: () {
+        if (!mounted) return;
+        pickTime(context, controller);
+      },
       child: AbsorbPointer(
-        child: buildTextField(controller, label),
+        child: TextFormField(
+          controller: controller,
+          decoration: InputDecoration(
+            labelText: label,
+          ),
+          validator: (value) {
+            if (!mounted) return null;
+            return value == null || value.trim().isEmpty
+                ? 'This field is required'
+                : null;
+          },
+        ),
       ),
     );
   }

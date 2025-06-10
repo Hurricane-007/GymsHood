@@ -1,5 +1,6 @@
 import 'dart:developer' as developer;
 import 'dart:io';
+import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:gymshood/pages/createServicesPages/addGymMediaPage.dart';
 import 'package:gymshood/pages/fullScreenVideoandImage/fullScreenVideoPage.dart';
 import 'package:gymshood/services/Models/gym.dart';
 import 'package:gymshood/services/fileserver.dart';
+import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
@@ -27,8 +29,18 @@ class _VideoTabBarState extends State<VideoTabBar> {
   Set<String> _selectedVideos = {};
 
   bool _isVideoFile(String url) {
-    final ext = url.toLowerCase().split('.').last;
-    return ext == 'mov' || ext == 'mp4';
+    try {
+      final uri = Uri.parse(url);
+      if (!uri.hasScheme || !uri.hasAuthority) {
+        developer.log("Invalid URL format: $url");
+        return false;
+      }
+      final ext = url.toLowerCase().split('.').last;
+      return ext == 'mov' || ext == 'mp4';
+    } catch (e) {
+      developer.log("Error parsing URL $url: $e");
+      return false;
+    }
   }
 
   @override
@@ -43,7 +55,8 @@ class _VideoTabBarState extends State<VideoTabBar> {
     });
   }
 
-  Future<void> _loadVideosAndThumbnails() async {
+Future<void> _loadVideosAndThumbnails() async {
+  try {
     setState(() {
       _isLoading = true;
       _videoUrls = (widget.gym.media?.mediaUrls ?? [])
@@ -52,20 +65,56 @@ class _VideoTabBarState extends State<VideoTabBar> {
     });
 
     final Map<String, String> thumbnails = {};
+    final tempDir = await getTemporaryDirectory();
+
     for (var url in _videoUrls) {
-      final tempDir = await getTemporaryDirectory();
-      final thumbPath = await VideoThumbnail.thumbnailFile(
-        video: url,
-        thumbnailPath: tempDir.path,
-        imageFormat: ImageFormat.JPEG,
-        maxWidth: 128,
-        quality: 75,
-      );
-      if (thumbPath != null) {
-        thumbnails[url] = thumbPath;
+      try {
+        developer.log("Downloading video for thumbnail: $url");
+
+        // Download the video file to a local temp file
+        final videoFileName = url.split('/').last;
+        final videoFilePath = "${tempDir.path}/$videoFileName";
+        final videoFile = File(videoFilePath);
+
+        // Only download if not already downloaded
+        if (!await videoFile.exists()) {
+          final response = await http.get(Uri.parse(url));
+          if (response.statusCode == 200) {
+            await videoFile.writeAsBytes(response.bodyBytes);
+          } else {
+            developer.log("Failed to download video: ${response.statusCode}");
+            continue;
+          }
+        }
+
+        // Generate thumbnail from the downloaded local file
+        final thumbPath = await VideoThumbnail.thumbnailFile(
+          video: videoFile.path,
+          thumbnailPath: tempDir.path,
+          imageFormat: ImageFormat.JPEG,
+          maxWidth: 128,
+          quality: 75,
+        ).timeout(
+          const Duration(seconds: 30),
+          onTimeout: () {
+            developer.log("Thumbnail generation timed out for: $url");
+            return null;
+          },
+        );
+
+        developer.log("Thumbnail path: ${thumbPath ?? "no path"}");
+
+        if (thumbPath != null) {
+          thumbnails[url] = thumbPath;
+          developer.log("Successfully generated thumbnail for: $url");
+        } else {
+          developer.log("Failed to generate thumbnail for: $url");
+        }
+      } catch (e) {
+        developer.log("Error processing video $url: $e");
       }
     }
-    
+
     setState(() {
       _thumbnails.clear();
       _thumbnails.addAll(thumbnails);
@@ -73,7 +122,14 @@ class _VideoTabBarState extends State<VideoTabBar> {
       _selectionMode = false;
       _selectedVideos.clear();
     });
+  } catch (e) {
+    developer.log("Error in _loadVideosAndThumbnails: $e");
+    setState(() {
+      _isLoading = false;
+    });
   }
+}
+
 
   Future<void> _deleteSelectedVideos() async {
     final confirmed = await showDeleteDialog(context);
@@ -174,7 +230,7 @@ class _VideoTabBarState extends State<VideoTabBar> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => FullScreenVideoPlayer(videoUrl: url),
+                                  builder: (_) => FullScreenVideoPlayer(videoUrl: url , gym: widget.gym,),
                                 ),
                               );
                             }
@@ -206,6 +262,25 @@ class _VideoTabBarState extends State<VideoTabBar> {
                         );
                       },
                     ),
+            ),
+
+            floatingActionButton: _selectionMode
+          ? FloatingActionButton(
+              onPressed: _deleteSelectedVideos,
+              child: Icon(Icons.delete),
+            )
+          : FloatingActionButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => UploadMultipleImagesPage(
+                      gym: widget.gym,
+                    ),
+                  ),
+                ).then((_) => _loadVideosAndThumbnails());
+              },
+              child: Icon(Icons.add),
             ),
     );
   }

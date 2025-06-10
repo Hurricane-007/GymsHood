@@ -7,6 +7,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:gymshood/services/Auth/auth_server_provider.dart';
 import 'package:gymshood/services/Auth/auth_service.dart';
 import 'package:gymshood/services/Models/AuthUser.dart';
+import 'package:gymshood/services/Models/announcementModel.dart';
 import 'package:gymshood/services/Models/gym.dart';
 import 'package:gymshood/services/Models/planModel.dart';
 import 'package:gymshood/services/Models/gymDashboardStats.dart';
@@ -25,13 +26,13 @@ class GymServerProvider implements GymOwnerInfoProvider {
       required String gymId}) async {
     // Authuser? user = await AuthService.server().getUser();
     try {
-
+        developer.log("Add gym media ${mediaUrl}");
+        developer.log(logourl);
       final response =
           await dio.post('$baseUrl/gymdb/gym/$gymId/media',
               data: {
-                'mediaType': mediaType,
                 'mediaUrls': mediaUrl,
-                'logourl': logourl,
+                'logoUrl': logourl,
               },
               options: Options(headers: {'Content-Type': 'application/json'}));
 
@@ -159,6 +160,7 @@ class GymServerProvider implements GymOwnerInfoProvider {
       required String contactEmail,
       required String phone,
       required String about,
+      required List<String> equipments,
       required List<Map<String,dynamic>> shifts}) async{
         
         try{
@@ -172,7 +174,8 @@ class GymServerProvider implements GymOwnerInfoProvider {
                 'contactEmail':contactEmail,
                 'phone':phone,
                 'about':about,
-                'shifts':shifts
+                'shifts':shifts,
+                'equipmentList':equipments
             },
 
           );
@@ -363,15 +366,89 @@ class GymServerProvider implements GymOwnerInfoProvider {
   @override
   Future<GymDashboardStats> getgymDashBoardStatus(String gymId) async {
     try {
-      final response = await dio.get('$baseUrl/dashboard/stats/$gymId');
+      final response = await dio.get('$baseUrl/gymdb/dashboard/stats/$gymId');
       if (response.statusCode == 200 && response.data['success'] == true) {
         return GymDashboardStats.fromJson(response.data['stats']);
       } else {
+        developer.log('get gym dashboard error${response.data['message']}');
         throw Exception('Failed to load dashboard stats');
       }
     } catch (e) {
       developer.log('Error fetching dashboard stats: $e');
       rethrow;
+    }
+  }
+  
+  @override
+  Future<bool> verificationdocsUpload(List<String> docs) async{
+    try{
+      final response = await dio.put("$baseUrl/gymdb/gyms/verification",
+      data: {
+          'documentUrls':docs
+      });
+      if(response.statusCode==200){
+        return true;
+      }else{
+        developer.log("error in verifying docs${response.data['message']}");
+        return false;
+      }
+    }catch(e){
+      developer.log("error response in verifying docs${e.toString()}");
+      return false;
+    }
+  }
+  
+  @override
+  Future<bool> toggleGymstatus() async{
+        try{
+      final response = await dio.put("$baseUrl/gymdb//gyms/status");
+      if(response.statusCode==200){
+        return true;
+      }else{
+        developer.log("error in verifying docs${response.data['message']}");
+        return false;
+      }
+    }catch(e){
+      developer.log("error response in verifying docs${e.toString()}");
+      return false;
+    }
+  }
+
+  @override
+  Future<GymAnnouncement> createGymAnnouncement(String message) async{
+    try{
+      final res = await dio.post("$baseUrl/gymdb/gyms/announcements" , data:{
+        'message':message
+      } );
+      if(res.data['success'] == true){
+        final announcement = res.data['announcement'];
+       
+        final GymAnnouncement gymAnnouncement = GymAnnouncement.fromJson(announcement);
+        return gymAnnouncement;
+      }else{
+        developer.log("Error in announcments ${res.data}");
+        throw(Exception("some error occurred"));
+      }
+    }catch(e){
+      developer.log(e.toString());
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<GymAnnouncement>> getGymAnnouncements() async {
+    try {
+      final response = await dio.get('$baseUrl/gymdb/announcements/gym');
+      developer.log("${response.data}");
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        final List<dynamic> data = response.data['announcements'];
+        return data.map((json) => GymAnnouncement.fromJson(json)).toList();
+      } else {
+        throw Exception("Failed to fetch announcements");
+      }
+    } catch (e) {
+      developer.log("Error fetching announcements: $e");
+      return [];
     }
   }
 }

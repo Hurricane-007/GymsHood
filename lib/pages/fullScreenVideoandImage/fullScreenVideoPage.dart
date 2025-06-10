@@ -1,13 +1,18 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:gymshood/Utilities/Dialogs/showdeletedialog.dart';
 import 'package:gymshood/main.dart';
+import 'package:gymshood/services/Models/gym.dart';
+import 'package:gymshood/services/gymInfo/gymserviceprovider.dart';
 import 'package:video_player/video_player.dart';
 import 'package:gymshood/services/fileserver.dart'; // Import your delete function
 
 class FullScreenVideoPlayer extends StatefulWidget {
   final String videoUrl;
-
-  const FullScreenVideoPlayer({super.key, required this.videoUrl});
+  final Gym gym;
+  const FullScreenVideoPlayer(
+      {super.key, required this.videoUrl, required this.gym});
 
   @override
   State<FullScreenVideoPlayer> createState() => _FullScreenVideoPlayerState();
@@ -19,6 +24,7 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
 
   @override
   void initState() {
+    developer.log(widget.videoUrl);
     super.initState();
     _controller = VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl))
       ..initialize().then((_) {
@@ -39,9 +45,14 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
     final confirm = await showDeleteDialog(context);
 
     if (confirm == true) {
-      final filename = widget.videoUrl.split('/').last;
-      final success = await Fileserver().deleteFileFromServer(filename);
-      if (success) {
+      List<String> mediaUrlsupdated = widget.gym.media!.mediaUrls;
+      mediaUrlsupdated.remove(widget.videoUrl);
+      final success = await Gymserviceprovider.server().addGymMedia(
+          mediaType: 'photo',
+          mediaUrl: mediaUrlsupdated,
+          logourl: widget.gym.media!.logoUrl,
+          gymId: widget.gym.gymid);
+      if (success == 'Successfully added Media') {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Video deleted successfully')),
         );
@@ -80,18 +91,20 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
       ),
       floatingActionButton: _isInitialized
           ? Padding(
-            padding:  EdgeInsets.only(right: mq.width*0.38 ),
-            child: FloatingActionButton(
+              padding: EdgeInsets.only(right: mq.width * 0.38),
+              child: FloatingActionButton(
                 onPressed: () {
                   setState(() {
-                    _controller.value.isPlaying ? _controller.pause() : _controller.play();
+                    _controller.value.isPlaying
+                        ? _controller.pause()
+                        : _controller.play();
                   });
                 },
                 child: Icon(
                   _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
                 ),
               ),
-          )
+            )
           : null,
     );
   }

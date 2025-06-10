@@ -5,7 +5,7 @@ import 'package:gymshood/pages/verifydocumentPage.dart';
 import 'package:gymshood/services/Helpers/enum.dart' show GymStatus;
 import 'package:gymshood/services/Models/gymMediaModel.dart';
 import 'package:gymshood/services/Models/location.dart';
-import 'package:gymshood/services/Models/verifydocModels.dart'; // Assuming GymStatus is defined there
+// Assuming GymStatus is defined there
 
 @immutable
 class Gym {
@@ -25,7 +25,7 @@ class Gym {
   final bool isverified;
   final bool isDeleted;
   final GymMedia? media;
-  final List<VerificationDocument>? docs;
+  final List<String>? docs;
   final List<Map<String, dynamic>> shifts;
   const Gym({
     required this.shifts,
@@ -57,10 +57,8 @@ class Gym {
       name: json['name'] ?? '',
       gymslogan: json['gymSlogan'] ?? '',
       docs: json['verificationDocuments'] != null
-    ? List<Map<String, dynamic>>.from(json['verificationDocuments'])
-        .map((doc) => VerificationDocument.fromJson(doc))
-        .toList()
-    : [], 
+    ? List<String>.from(json['verificationDocuments']['documentUrls'] ?? [])
+    : [],
       location:
           json['location'] != null && json['location'] is Map<String, dynamic>
               ? Location.fromJson(json['location'])
@@ -93,16 +91,14 @@ class Gym {
 // Helper function to parse GymStatus enum
 GymStatus _parseGymStatus(String? value) {
   switch (value) {
-    case 'pending':
-      return GymStatus.pending;
-    case 'inactive':
-      return GymStatus.inactive;
+    case 'open':
+      return GymStatus.open;
+    case 'closed':
+      return GymStatus.closed;
     case 'maintenance':
       return GymStatus.maintenance;
-    case 'active':
-      return GymStatus.active;
     default:
-      return GymStatus.pending; // default/fallback
+      return GymStatus.open; // default/fallback
   }
 }
 // [{location: {address: jagtiii, coordinates: [0, 0]}, _id: 682b6695d64293ae028027ed, name: aryansingh, capacity: 10, openTime: 09:34, closeTime: 10:34, contactEmail: aryan31122004@gmail.com, phone: 6005927659, about: I am here , equipmentList: [dumbbell, bench], status: pending, avgRating: 0, isVerified: false, isDeleted: false, owner: {_id: 682b5b2cd64293ae028027de, name: IITIAN GYM}, shifts: [{name: Mid day, startTime: 12:33, endTime: 16:33, capacity: 100, _id: 682b6695d64293ae028027ee, id: 682b6695d64293ae028027ee}], verificationDocuments: [], createdAt: 2025-05-19T17:12:53.276Z, updatedAt: 2025-05-20T08:18:15.645Z, __v: 0, media: {_id: 682c3ac717d0321758a7d906, gymId: 682b6695d64293ae028027ed, mediaType: photo, mediaUrl: https://yourserver.com/uploads/1000000043.jpg, createdAt: 2025-05-20T08:18:15.520Z, __v: 0}, formattedAddress: jagtiii (0, 0), id: 682b6695d64293ae028027ed}, {location: {address: jagtiii, coordinates: [0, 0]}, _id: 682b6786d64293ae028027f2, name: aryansingh, capacity: 10, openTime: 09:34, closeTime: 10:34, contactEmail: aryan31122004@gmail.com, phone: 6005927659, about: I am here , equipmentList: [dumbbell, bench], status: pending, avgRating: 0, isVerified: false, isDeleted: false, owner: {_id: 682b5b2cd64293ae028027de, name: IITIAN GYM}, shifts: [{name: Mid day, startTime: 12:33, endTime: 16:33, capacity: 100, _id: 682b6786d64293ae028027f3, id: 682b6786d64293ae028027f3}], verificationDocuments: [], createdAt: 2025-05-19T17:16:54.413Z, updatedAt: 2025-05-19T17:16:54.413Z, __v: 0, formattedAddress: jagtiii (0, 0), id: 682b6786d64293ae028027f2}, {location: {address: near jagti, coordinates: [0, 0]}, _id: 682c4c32908c087f78352ed3, name: IITIAN GYM, capacity: 100, openTime: 09:00, closeTime: 15:00, contactEmail: aryan31122004@gmail.com, phone: 6005927659, about: this is my app, equipmentList: [dumbbell, barbell], status: pending, avgRating: 0, isVerified: false, isDeleted: false, owner: {_id: 682b5b2cd64293ae028027de, name: IITIAN GYM}, shifts: [{name: Day shift, startTime: 10:01, endTime: 18:01, capacity: 50, _id: 682c4c32908c087f78352ed4, id: 682c4c32908c087f78352ed4}], verificationDocuments: [], createdAt: 2025-05-20T09:32:34.212Z, updatedAt: 2025-05-20T09:32:34.212Z, __v: 0, formattedAddress: near jagti (0, 0), id: 682c4c32908c087f78352ed3}]

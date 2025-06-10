@@ -111,39 +111,14 @@ class RootPage extends StatefulWidget {
 }
 
 class _RootPageState extends State<RootPage> {
-  AuthState? _previousState;
 
 @override
 Widget build(BuildContext context) {
   return BlocBuilder<AuthBloc, AuthState>(
     builder: (context, state) {
-      final Widget newPage = _responseWidget(state);
+      return _responseWidget(state);
 
-      final bool shouldAnimate = _previousState != null &&
-          _previousState.runtimeType != state.runtimeType &&
-          _shouldAnimate(_previousState!, state);
-
-      _previousState = state;
-      developer.log('previous state $_previousState');
-      if (shouldAnimate) {
-        return AnimatedSwitcher(
-          duration: const Duration(milliseconds: 1200),
-          transitionBuilder: (child, animation) {
-            const begin = Offset(1.0, 0.0);
-            const end = Offset.zero;
-            final tween = Tween(begin: begin, end: end)
-                .chain(CurveTween(curve: Curves.easeInOut));
-            final offsetAnimation = animation.drive(tween);
-            return SlideTransition(position: offsetAnimation, child: child);
-          },
-          child: KeyedSubtree(
-            key: ValueKey(state.runtimeType),
-            child: newPage,
-          ),
-        );
-      } else {
-        return newPage;
-      }
+     
     },
   );
 }

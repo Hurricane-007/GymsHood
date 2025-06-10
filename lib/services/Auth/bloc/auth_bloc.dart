@@ -47,13 +47,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 on<AuthEventInitialize>((event, emit) async {
   developer.log("✅ AuthEventInitialize triggered");
 
-    Future.delayed(Duration(seconds: 2));
+   
   try {
-
-  final token = await ServerProvider().getCookieToken();
-    if(token ==null){
-    emit(AuthStateFIrst());
-    return;
+    // Add splash screen delay
+    await Future.delayed(const Duration(seconds: 1));
+    
+    final token = await ServerProvider().getCookieToken();
+    if(token == null){
+      emit(AuthStateFIrst());
+      return;
     }
     final user = await AuthService.server().getUser();
 

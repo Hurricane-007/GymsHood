@@ -6,6 +6,7 @@ import 'package:gymshood/pages/fullScreenVideoandImage/FullScreenPage.dart';
 import 'package:gymshood/pages/createServicesPages/addGymMediaPage.dart';
 import 'package:gymshood/services/Models/gym.dart';
 import 'package:gymshood/services/fileserver.dart';
+import 'package:gymshood/services/gymInfo/gymserviceprovider.dart';
 
 class PhotosTabBar extends StatefulWidget {
   final Gym gym;
@@ -27,6 +28,7 @@ class _PhotosTabBarState extends State<PhotosTabBar> {
 
   @override
   void initState() {
+    
     super.initState();
     _imageUrls = (widget.gym.media?.mediaUrls ?? [])
         .where((url) => _isImageFile(url))
@@ -62,11 +64,19 @@ class _PhotosTabBarState extends State<PhotosTabBar> {
     if (!confirm) return;
 
     bool allSuccess = true;
+    List<String> mediaUrls;
+    mediaUrls = widget.gym.media!.mediaUrls;
+    // mediaUrls = [];
     for (var url in _selectedUrls) {
-      final filename = url.split('/').last;
-      final success = await Fileserver().deleteFileFromServer(filename);
-      if (!success) allSuccess = false;
+     mediaUrls.remove(url);
     }
+    final success = await Gymserviceprovider.server().addGymMedia(
+      mediaType: 'photo',
+      mediaUrl: mediaUrls,
+      logourl: widget.gym.media!.logoUrl,
+      gymId: widget.gym.gymid
+    );
+    if (success != 'Successfully added Media') allSuccess = false;
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -124,19 +134,30 @@ class _PhotosTabBarState extends State<PhotosTabBar> {
                             MaterialPageRoute(
                               builder: (context) => FullScreenImagePage(
                                 imageUrl: url,
+                                gym: widget.gym,
                               ),
                             ),
                           );
                         },
+                  onLongPress: () {
+                    if (!_selectionMode) {
+                      setState(() {
+                        _selectionMode = true;
+                        _selectedUrls.add(url);
+                      });
+                    }
+                  },
                   child: Stack(
                     children: [
                       Image.network(
                         url,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
+                          
                           return Container(
                             color: Colors.grey[300],
                             child: Icon(Icons.error),
+                            
                           );
                         },
                       ),

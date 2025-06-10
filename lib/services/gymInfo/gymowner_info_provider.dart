@@ -1,3 +1,4 @@
+import 'package:gymshood/services/Models/announcementModel.dart';
 import 'package:gymshood/services/Models/gym.dart';
 import 'package:gymshood/services/Models/planModel.dart';
 import 'package:gymshood/services/Models/gymDashboardStats.dart';
@@ -43,6 +44,7 @@ abstract class GymOwnerInfoProvider {
     required String contactEmail,
     required String phone,
     required String about,
+    required List<String> equipments,
     required List<Map<String,dynamic>> shifts,
      });
 
@@ -76,5 +78,9 @@ Future<bool> updatePlan({
     required bool isTrainerIncluded,
 
 });
+Future<bool> toggleGymstatus();
+Future<bool> verificationdocsUpload(List<String> docs);
+Future<GymAnnouncement> createGymAnnouncement(String message);
+Future<List<GymAnnouncement>> getGymAnnouncements();
 
 }

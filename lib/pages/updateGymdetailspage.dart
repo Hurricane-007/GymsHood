@@ -6,7 +6,7 @@ import 'package:gymshood/pages/mapPickerPage.dart';
 import 'package:gymshood/services/Auth/auth_service.dart';
 import 'package:gymshood/services/Models/AuthUser.dart';
 import 'package:gymshood/services/Models/gym.dart';
-import 'package:gymshood/services/Models/location.dart';
+// import 'package:gymshood/services/Models/location.dart';
 import 'package:gymshood/services/gymInfo/gymserviceprovider.dart';
 
 class UpdateGymDetailsPage extends StatefulWidget {
@@ -150,6 +150,10 @@ class _UpdateGymDetailsPageState extends State<UpdateGymDetailsPage>
       phone: phoneController.text,
       about: aboutController.text,
       shifts: allShifts,
+      equipments: equipmentController.text
+                      .split(',')
+                      .map((e) => e.trim())
+                      .toList(),
     );
 
     if (!mounted) return;
@@ -170,7 +174,7 @@ class _UpdateGymDetailsPageState extends State<UpdateGymDetailsPage>
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: TextFormField(
         controller: controller,
-        decoration: InputDecoration(labelText: label, border: const OutlineInputBorder()),
+        decoration: InputDecoration(labelText: label),
         validator: validator,
         keyboardType: keyboardType,
         readOnly: readOnly,
@@ -221,7 +225,7 @@ class _UpdateGymDetailsPageState extends State<UpdateGymDetailsPage>
                       },
                       decoration: const InputDecoration(
                         labelText: 'Select Gym',
-                        border: OutlineInputBorder(),
+                        
                       ),
                       validator: (value) => value == null ? 'Please select a gym' : null,
                     ),
@@ -229,26 +233,23 @@ class _UpdateGymDetailsPageState extends State<UpdateGymDetailsPage>
                     
                     buildTextField(nameController, 'Gym Name', (val) => val!.isEmpty ? "Required" : null),
                     buildTextField(locationController, 'Address', (val) => val!.isEmpty ? "Required" : null),
-                     ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).primaryColor),
-                  onPressed: () async {
-                    final picked = await Navigator.of(context).push(
-                      MaterialPageRoute(
-                          builder: (_) => const LocationPickerPage()),
-                    );
+                    buildTextField(
+                      coordinatesController, 
+                      'Coordinates (click to pick from map)', 
+                      (val) => val!.isEmpty ? "Required" : null,
+                      readOnly: true,
+                      onTap: () async {
+                        final picked = await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const LocationPickerPage(),
+                          ),
+                        );
 
-                    if (picked is LatLng) {
-                      coordinatesController.text =
-                          "${picked.longitude},${picked.latitude}";
-                    }
-                  },
-                  child: const Text(
-                    'Pick Coordinates from Map',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-                    buildTextField(coordinatesController, 'Coordinates', (val) => val!.isEmpty ? "Required" : null),
+                        if (picked is LatLng) {
+                          coordinatesController.text = "${picked.longitude},${picked.latitude}";
+                        }
+                      },
+                    ),
                     buildTextField(capacityController, 'Capacity', (val) => val!.isEmpty ? "Required" : null, keyboardType: TextInputType.number),
                     buildTextField(openTimeController, 'Open Time', (val) => val!.isEmpty ? "Required" : null, readOnly: true, onTap: () => pickTime(context, openTimeController)),
                     buildTextField(closeTimeController, 'Close Time', (val) => val!.isEmpty ? "Required" : null, readOnly: true, onTap: () => pickTime(context, closeTimeController)),
@@ -326,7 +327,7 @@ class _UpdateGymDetailsPageState extends State<UpdateGymDetailsPage>
       ),
 
       bottomNavigationBar:  Padding(
-        padding: const EdgeInsets.only(bottom: 30),
+        padding:  EdgeInsets.symmetric(vertical: 30 ,horizontal: 12),
         child: ElevatedButton(
                         onPressed: updateGymInfo,
                         style: ElevatedButton.styleFrom(

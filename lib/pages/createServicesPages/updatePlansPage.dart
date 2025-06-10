@@ -30,7 +30,7 @@ int? workoutDuration;
 num? customDuration;
 late TextEditingController customDurationController;
 
-  final List<String> workoutDurationOptions = ['1hr', '2hr', 'Flexible'];
+
 
   @override
   void initState() {
@@ -39,13 +39,21 @@ late TextEditingController customDurationController;
     priceController = TextEditingController(text: widget.plan.price.toString());
     discountController = TextEditingController(text: widget.plan.discountPercent.toString());
     featuresController = TextEditingController(text: widget.plan.features?.join(', ') ?? '');
-    workoutDuration = widget.plan.workoutDuration.toInt();
-customDurationController = TextEditingController(
-  text: widget.plan.workoutDuration == 0 ? widget.plan.workoutDuration.toString() : '',
-);
+    customDurationController = TextEditingController(
+      text: widget.plan.workoutDuration == 0 ? widget.plan.workoutDuration.toString() : '',
+    );
     isTrainerIncluded = widget.plan.isTrainerIncluded;
-
-    // default to plan value or first dropdown items
+    
+    // Initialize workoutDuration with the plan's value, ensuring it matches our options
+    final planDuration = widget.plan.workoutDuration.toInt();
+    if (durationOptions.containsKey(planDuration)) {
+      workoutDuration = planDuration;
+    } else {
+      // If the plan's duration doesn't match our options, default to Flexible (0)
+      workoutDuration = 0;
+      customDuration = num.tryParse(planDuration.toString());
+      customDurationController.text = planDuration.toString();
+    }
   }
 
   @override
@@ -146,7 +154,7 @@ Widget _buildWorkoutDurationDropdown() {
         value: workoutDuration,
         decoration: InputDecoration(
           labelText: 'Workout Duration',
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+          
         ),
         items: durationOptions.entries.map((entry) {
           return DropdownMenuItem<int>(
@@ -158,6 +166,7 @@ Widget _buildWorkoutDurationDropdown() {
           );
         }).toList(),
         onChanged: (val) {
+          if (val == null) return;
           setState(() {
             workoutDuration = val;
             if (val != 0) {
@@ -168,41 +177,37 @@ Widget _buildWorkoutDurationDropdown() {
         },
         validator: (val) => val == null ? 'Select workout duration' : null,
       ),
-      if (workoutDuration == 0) // Flexible selected
-        Padding(
-          padding: const EdgeInsets.only(top: 10.0),
-          child: TextFormField(
-            controller: customDurationController,
-            keyboardType: TextInputType.numberWithOptions(decimal: true),
-            decoration: InputDecoration(
-              labelText: 'Enter Custom Duration (in hrs)',
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-            ),
-            validator: (value) {
-              if (workoutDuration == 0) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter custom duration';
-                }
-                final parsed = num.tryParse(value);
-                if (parsed == null || parsed <= 0) {
-                  return 'Enter a valid number > 0';
-                }
-              }
-              return null;
-            },
-            onChanged: (val) {
-              setState(() {
-                customDuration = num.tryParse(val);
-              });
-            },
+      if (workoutDuration == 0) ...[
+        const SizedBox(height: 16),
+        TextFormField(
+          controller: customDurationController,
+          decoration: InputDecoration(
+            labelText: 'Enter custom duration (in hours)',
+        
           ),
+          keyboardType: TextInputType.number,
+          onChanged: (val) {
+            setState(() {
+              customDuration = num.tryParse(val);
+            });
+          },
+          validator: (val) {
+            if (workoutDuration == 0 && (val == null || val.isEmpty)) {
+              return 'Please enter a custom duration';
+            }
+            if (val != null && val.isNotEmpty) {
+              final parsed = num.tryParse(val);
+              if (parsed == null || parsed <= 0) {
+                return 'Please enter a valid number greater than 0';
+              }
+            }
+            return null;
+          },
         ),
+      ],
     ],
   );
 }
-
-
-
 
   Widget _buildTextField(TextEditingController controller, String label, {bool isNumber = false}) {
     return Padding(
@@ -213,7 +218,7 @@ Widget _buildWorkoutDurationDropdown() {
         validator: (value) => value == null || value.isEmpty ? "Required" : null,
         decoration: InputDecoration(
           labelText: label,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+          
         ),
       ),
     );
