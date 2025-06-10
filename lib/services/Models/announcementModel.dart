@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class GymAnnouncement {
+  final String? title;
   final String id;
   final String gymId;
   final String createdBy;
@@ -9,7 +10,9 @@ class GymAnnouncement {
   final DateTime createdAt;
   final List<String> targetUsers;
 
-  const GymAnnouncement({
+  const GymAnnouncement(
+    {
+    required this.title,
     required this.id,
     required this.gymId,
     required this.createdBy,
@@ -21,6 +24,7 @@ class GymAnnouncement {
   factory GymAnnouncement.fromJson(Map<String, dynamic> json) {
     try {
       return GymAnnouncement(
+        title: json['title']?.toString() ?? "",
         id: json['_id']?.toString() ?? '',
         gymId: json['gymId'] is Map
             ? json['gymId']['_id']?.toString() ?? ''

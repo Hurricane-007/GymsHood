@@ -1,8 +1,10 @@
 // import 'package:gymshood/sevices/Auth/auth_service.dart';
+import 'package:gymshood/services/Models/ActiveUsersModel.dart';
 import 'package:gymshood/services/Models/announcementModel.dart';
 import 'package:gymshood/services/Models/gym.dart';
 import 'package:gymshood/services/Models/planModel.dart';
 import 'package:gymshood/services/Models/gymDashboardStats.dart';
+import 'package:gymshood/services/Models/ratingsModel.dart';
 import 'package:gymshood/services/gymInfo/gym_server_provider.dart';
 import 'package:gymshood/services/gymInfo/gymowner_info_provider.dart';
 
@@ -84,5 +86,15 @@ return provider.toggleGymstatus();
   @override
   Future<List<GymAnnouncement>> getGymAnnouncements() {
     return provider.getGymAnnouncements();
+  }
+
+  @override
+  Future<GymRating> getgymrating(String gymID) {
+    return provider.getgymrating(gymID);
+  }
+
+  @override
+  Future<ActiveUsersResponse> getactiveUserResponse(String gymId) {
+    return provider.getactiveUserResponse(gymId);
   }
 }

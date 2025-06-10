@@ -57,6 +57,7 @@ class _ProfilePageState extends State<ProfilePage>
     super.initState();
     _tabController = TabController(length: 5, vsync: this);
     _profileFuture = _initializeProfile();
+    
   }
 
   Future<void> _initializeProfile() async {
@@ -73,7 +74,8 @@ class _ProfilePageState extends State<ProfilePage>
           await Gymserviceprovider.server().getGymsByowner(authuser!.userid!);
       if (gyms.isNotEmpty) {
         selectedGym = gyms[0];
-        developer.log('profile page gym id ${selectedGym!.gymid}');
+        
+        // developer.log('profile page gym id ${selectedGym!.gymid}');
         dropdownValue = selectedGym!.name;
 
         name = authuser?.name ?? 'NAME';

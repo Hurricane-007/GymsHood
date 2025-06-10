@@ -5,6 +5,7 @@ import 'package:gymshood/Utilities/Dialogs/showdeletedialog.dart';
 import 'package:gymshood/pages/fullScreenVideoandImage/FullScreenPage.dart';
 import 'package:gymshood/pages/createServicesPages/addGymMediaPage.dart';
 import 'package:gymshood/services/Models/gym.dart';
+import 'package:gymshood/services/Models/ratingsModel.dart';
 import 'package:gymshood/services/fileserver.dart';
 import 'package:gymshood/services/gymInfo/gymserviceprovider.dart';
 
@@ -30,6 +31,7 @@ class _PhotosTabBarState extends State<PhotosTabBar> {
   void initState() {
     
     super.initState();
+ 
     _imageUrls = (widget.gym.media?.mediaUrls ?? [])
         .where((url) => _isImageFile(url))
         .toList();
@@ -62,7 +64,7 @@ class _PhotosTabBarState extends State<PhotosTabBar> {
   Future<void> _deleteSelectedImages() async {
     final confirm = await showDeleteDialog(context);
     if (!confirm) return;
-
+    
     bool allSuccess = true;
     List<String> mediaUrls;
     mediaUrls = widget.gym.media!.mediaUrls;

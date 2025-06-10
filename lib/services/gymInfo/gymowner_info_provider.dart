@@ -1,7 +1,9 @@
+import 'package:gymshood/services/Models/ActiveUsersModel.dart';
 import 'package:gymshood/services/Models/announcementModel.dart';
 import 'package:gymshood/services/Models/gym.dart';
 import 'package:gymshood/services/Models/planModel.dart';
 import 'package:gymshood/services/Models/gymDashboardStats.dart';
+import 'package:gymshood/services/Models/ratingsModel.dart';
 
 abstract class GymOwnerInfoProvider {
   Future<Map<String,dynamic>> registerGym({
@@ -82,5 +84,6 @@ Future<bool> toggleGymstatus();
 Future<bool> verificationdocsUpload(List<String> docs);
 Future<GymAnnouncement> createGymAnnouncement(String message);
 Future<List<GymAnnouncement>> getGymAnnouncements();
-
+Future<GymRating> getgymrating(String gymID);
+Future<ActiveUsersResponse> getactiveUserResponse(String gymId);
 }

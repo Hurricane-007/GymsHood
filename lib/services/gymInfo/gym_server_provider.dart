@@ -6,11 +6,14 @@ import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:gymshood/services/Auth/auth_server_provider.dart';
 import 'package:gymshood/services/Auth/auth_service.dart';
+import 'package:gymshood/services/Models/ActiveUsersModel.dart';
 import 'package:gymshood/services/Models/AuthUser.dart';
 import 'package:gymshood/services/Models/announcementModel.dart';
 import 'package:gymshood/services/Models/gym.dart';
 import 'package:gymshood/services/Models/planModel.dart';
 import 'package:gymshood/services/Models/gymDashboardStats.dart';
+import 'package:gymshood/services/Models/ratingsModel.dart';
+import 'package:gymshood/services/Models/registerModel.dart';
 import 'package:gymshood/services/gymInfo/gymowner_info_provider.dart';
 import 'package:gymshood/services/gymInfo/gymserviceprovider.dart';
 
@@ -401,11 +404,11 @@ class GymServerProvider implements GymOwnerInfoProvider {
   @override
   Future<bool> toggleGymstatus() async{
         try{
-      final response = await dio.put("$baseUrl/gymdb//gyms/status");
+      final response = await dio.put("$baseUrl/gymdb/gyms/status");
       if(response.statusCode==200){
         return true;
       }else{
-        developer.log("error in verifying docs${response.data['message']}");
+        developer.log("error in verifying docs ${response.data['message']}");
         return false;
       }
     }catch(e){
@@ -437,18 +440,64 @@ class GymServerProvider implements GymOwnerInfoProvider {
 
   @override
   Future<List<GymAnnouncement>> getGymAnnouncements() async {
-    try {
-      final response = await dio.get('$baseUrl/gymdb/announcements/gym');
-      developer.log("${response.data}");
+  try {
+      final response = await dio.get('$baseUrl/admin/announcements/user');
+      developer.log("user announcement ${response.data['announcements']}");
       if (response.statusCode == 200 && response.data['success'] == true) {
         final List<dynamic> data = response.data['announcements'];
         return data.map((json) => GymAnnouncement.fromJson(json)).toList();
       } else {
+        developer.log("fetching error ");
         throw Exception("Failed to fetch announcements");
       }
     } catch (e) {
       developer.log("Error fetching announcements: $e");
       return [];
+    }
+  }
+
+  @override
+  Future<GymRating> getgymrating(String gymID) async{
+    try{
+      final res = await dio.get(
+        "$baseUrl/gymdb/ratings/gym/$gymID"
+      );
+      if(res.data['success']){
+        developer.log("data ${res.data}");
+        return GymRating.fromJson(res.data['average']);
+      }else{
+        throw(Exception("error in fetching rating"));
+      }
+
+    }catch(e){
+      rethrow;
+    }
+  }
+@override
+  Future<ActiveUsersResponse> getactiveUserResponse(String gymId)async{
+    try{
+      final response = await dio.get("$baseUrl/gymdb/gym/$gymId/active-users");
+      if(response.statusCode==200){
+        final Map<String,dynamic> data = {
+        'activeUsers': (response.data['activeUsers'] as List)
+        .map((json) => RegisterEntry.fromJson(json))
+        .toList(),
+        'expiredUsers': (response.data['expiredUsers'] as List)
+        .map((json) => RegisterEntry.fromJson(json))
+        .toList(),
+        'activeCount': response.data['activeCount'],
+        'expiredCount': response.data['expiredCount'],
+      };
+      return ActiveUsersResponse.fromJson(data);
+      }
+      else{
+        developer.log(response.data['message']);
+        throw(Exception("error in fetching gymregister"));
+      }
+    }
+    catch(e){
+      developer.log(e.toString());
+      rethrow;
     }
   }
 }
