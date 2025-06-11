@@ -148,14 +148,3 @@ Widget _responseWidget(AuthState state) {
     );
   }
 }
-
-bool _shouldAnimate(AuthState oldState, AuthState newState) {
-  // Define transitions that should animate (customize as needed)
-  const animatedStates = {
-    AuthStateLoggedIn,
-    AuthStateLoggedOut,
-  };
-
-  return animatedStates.contains(oldState.runtimeType) &&
-         animatedStates.contains(newState.runtimeType);
-}

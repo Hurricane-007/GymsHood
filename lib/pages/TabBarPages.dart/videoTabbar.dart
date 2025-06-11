@@ -9,6 +9,7 @@ import 'package:gymshood/pages/createServicesPages/addGymMediaPage.dart';
 import 'package:gymshood/pages/fullScreenVideoandImage/fullScreenVideoPage.dart';
 import 'package:gymshood/services/Models/gym.dart';
 import 'package:gymshood/services/fileserver.dart';
+import 'package:gymshood/services/gymInfo/gymserviceprovider.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
@@ -134,12 +135,18 @@ Future<void> _loadVideosAndThumbnails() async {
   Future<void> _deleteSelectedVideos() async {
     final confirmed = await showDeleteDialog(context);
     if (!confirmed) return;
-
+        List<String> mediaUrls;
+    mediaUrls = widget.gym.media!.mediaUrls;
+    // mediaUrls = [];
     for (var url in _selectedVideos) {
-      final filename = url.split('/').last;
-      await Fileserver().deleteFileFromServer(filename);
+     mediaUrls.remove(url);
     }
-
+     await Gymserviceprovider.server().addGymMedia(
+      mediaType: 'video',
+      mediaUrl: mediaUrls,
+      logourl: widget.gym.media!.logoUrl,
+      gymId: widget.gym.gymid
+    );
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Deleted ${_selectedVideos.length} videos')),
     );

@@ -44,98 +44,16 @@ class _GyminfopageState extends State<Gyminfopage>
     'Sunday'
   ];
   List<List<Map<String, TextEditingController>>> weeklyShiftControllers = [];
-  void clearWeeklyShiftControllers() {
-    for (var day in weeklyShiftControllers) {
-      for (var shift in day) {
-        for (var controller in shift.values) {
-          controller.dispose();
-        }
-      }
-    }
-    weeklyShiftControllers.clear(); // Now safe to clear
-  }
-
-  void copyShiftsToOtherDays(int fromDayIndex) async {
-    final selectedDays = await showDialog<List<int>>(
-      context: context,
-      builder: (context) {
-        final selected = <int>{};
-        return AlertDialog(
-          title: const Text("Copy shifts to days"),
-          content: StatefulBuilder(
-            builder: (context, setState) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: List.generate(weekdays.length, (i) {
-                  if (i == fromDayIndex) {
-                    return const SizedBox.shrink();
-                  } // Skip source day
-                  return CheckboxListTile(
-                    title: Text(weekdays[i],
-                        style:
-                            TextStyle(color: Theme.of(context).primaryColor)),
-                    value: selected.contains(i),
-                    onChanged: (val) {
-                      setState(() {
-                        if (val == true) {
-                          selected.add(i);
-                        } else {
-                          selected.remove(i);
-                        }
-                      });
-                    },
-                  );
-                }),
-              );
-            },
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, null),
-              child: const Text("Cancel" , style: TextStyle(color:   Color(0xFF071952),),),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, selected.toList()),
-              child: const Text("Copy" , style: TextStyle(color:   Color(0xFF071952),),),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (selectedDays == null || selectedDays.isEmpty) return;
-
-    final sourceShifts = weeklyShiftControllers[fromDayIndex];
-    for (final targetDay in selectedDays) {
-      // Clear existing
-      for (var shift in weeklyShiftControllers[targetDay]) {
-        shift.forEach((_, c) => c.dispose());
-      }
-      weeklyShiftControllers[targetDay].clear();
-
-      // Copy shifts
-      for (final shift in sourceShifts) {
-        weeklyShiftControllers[targetDay].add({
-          'name': TextEditingController(text: shift['name']!.text),
-          'startTime': TextEditingController(text: shift['startTime']!.text),
-          'endTime': TextEditingController(text: shift['endTime']!.text),
-          'capacity': TextEditingController(text: shift['capacity']!.text),
-        });
-      }
-    }
-
-    if (mounted) setState(() {});
-  }
-
-  // List<Map<String, TextEditingController>> shiftControllers = [];
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: weekdays.length, vsync: this);
-    for (int i = 0; i < weekdays.length; i++) {
-      weeklyShiftControllers.add([]);
-    } // Add 1 default shift to each dayd one default shift on start
+    // Initialize with empty lists
+    weeklyShiftControllers = List.generate(
+      weekdays.length,
+      (_) => [],
+    );
   }
 
   @override
@@ -154,7 +72,7 @@ class _GyminfopageState extends State<Gyminfopage>
     userIdController.dispose();
     gymsloganController.dispose();
     
-    // Dispose weekly shift controllers
+    // Dispose all shift controllers
     for (var dayShifts in weeklyShiftControllers) {
       for (var shift in dayShifts) {
         shift.forEach((_, controller) => controller.dispose());
@@ -165,21 +83,110 @@ class _GyminfopageState extends State<Gyminfopage>
 
   void addShift(int dayIndex) {
     if (!mounted) return;
-    weeklyShiftControllers[dayIndex].add({
-      'name': TextEditingController(),
-      'startTime': TextEditingController(),
-      'endTime': TextEditingController(),
-      'capacity': TextEditingController(),
+    setState(() {
+      weeklyShiftControllers[dayIndex].add({
+        'name': TextEditingController(),
+        'startTime': TextEditingController(),
+        'endTime': TextEditingController(),
+        'capacity': TextEditingController(),
+      });
     });
-    setState(() {});
   }
 
   void removeShift(int dayIndex, int index) {
     if (!mounted) return;
-    weeklyShiftControllers[dayIndex][index]
-        .forEach((_, controller) => controller.dispose());
-    weeklyShiftControllers[dayIndex].removeAt(index);
-    setState(() {});
+    setState(() {
+      // Dispose controllers before removing
+      final shift = weeklyShiftControllers[dayIndex][index];
+      shift.forEach((_, controller) => controller.dispose());
+      weeklyShiftControllers[dayIndex].removeAt(index);
+    });
+  }
+
+  void clearWeeklyShiftControllers() {
+    if (!mounted) return;
+    setState(() {
+      for (var day in weeklyShiftControllers) {
+        for (var shift in day) {
+          shift.forEach((_, controller) => controller.dispose());
+        }
+      }
+      weeklyShiftControllers = List.generate(
+        weekdays.length,
+        (_) => [],
+      );
+    });
+  }
+
+  void copyShiftsToOtherDays(int fromDayIndex) async {
+    if (!mounted) return;
+    
+    final selectedDays = await showDialog<List<int>>(
+      context: context,
+      builder: (context) {
+        final selected = <int>{};
+        return AlertDialog(
+          title: const Text("Copy shifts to days"),
+          content: StatefulBuilder(
+            builder: (context, setState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: List.generate(weekdays.length, (i) {
+                  if (i == fromDayIndex) return const SizedBox.shrink();
+                  return CheckboxListTile(
+                    title: Text(weekdays[i],
+                        style: TextStyle(color: Theme.of(context).primaryColor)),
+                    value: selected.contains(i),
+                    onChanged: (val) {
+                      setState(() {
+                        if (val == true) {
+                          selected.add(i);
+                        } else {
+                          selected.remove(i);
+                        }
+                      });
+                    },
+                  );
+                }),
+              );
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, null),
+              child: const Text("Cancel", style: TextStyle(color: Color(0xFF071952))),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, selected.toList()),
+              child: const Text("Copy", style: TextStyle(color: Color(0xFF071952))),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (!mounted || selectedDays == null || selectedDays.isEmpty) return;
+
+    setState(() {
+      final sourceShifts = weeklyShiftControllers[fromDayIndex];
+      for (final targetDay in selectedDays) {
+        // Dispose existing controllers
+        for (var shift in weeklyShiftControllers[targetDay]) {
+          shift.forEach((_, controller) => controller.dispose());
+        }
+        weeklyShiftControllers[targetDay].clear();
+
+        // Copy shifts with new controllers
+        for (final shift in sourceShifts) {
+          weeklyShiftControllers[targetDay].add({
+            'name': TextEditingController(text: shift['name']!.text),
+            'startTime': TextEditingController(text: shift['startTime']!.text),
+            'endTime': TextEditingController(text: shift['endTime']!.text),
+            'capacity': TextEditingController(text: shift['capacity']!.text),
+          });
+        }
+      }
+    });
   }
 
   String formatTimeOfDay(TimeOfDay time) {

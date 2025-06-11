@@ -5,6 +5,7 @@ import 'package:gymshood/services/Models/gym.dart';
 import 'package:gymshood/services/Models/planModel.dart';
 import 'package:gymshood/services/Models/gymDashboardStats.dart';
 import 'package:gymshood/services/Models/ratingsModel.dart';
+import 'package:gymshood/services/Models/revenueDataModel.dart';
 import 'package:gymshood/services/gymInfo/gym_server_provider.dart';
 import 'package:gymshood/services/gymInfo/gymowner_info_provider.dart';
 
@@ -96,5 +97,30 @@ return provider.toggleGymstatus();
   @override
   Future<ActiveUsersResponse> getactiveUserResponse(String gymId) {
     return provider.getactiveUserResponse(gymId);
+  }
+  
+  @override
+  Future<List<RevenueData>> fetchRevenueData(String gymId , {String period = 'monthly'}) {
+    return provider.fetchRevenueData(gymId , period: period);
+  }
+  
+  @override
+  Future<List<GymAnnouncement>> getGymAnnouncementsbygym() {
+    return provider.getGymAnnouncementsbygym();
+  }
+  
+  @override
+  Future<bool> createFundaccount(String upiId, String accountNumber, String ifscCode, String accountHolder) {
+    return provider.createFundaccount(upiId, accountNumber, ifscCode, accountHolder);
+  }
+  
+  @override
+  Future<bool> deleteAnnouncement(String announcementId) {
+  return provider.deleteAnnouncement(announcementId);
+  }
+  
+  @override
+  Future<bool> recreateFundaccount(String upiId, String accountNumber, String ifscCode, String accountHolder) {
+    return provider.recreateFundaccount(upiId, accountNumber, ifscCode, accountHolder);
   }
 }

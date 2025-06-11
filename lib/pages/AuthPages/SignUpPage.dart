@@ -24,7 +24,7 @@ class _SignUpPageState extends State<SignUpPage> {
   late final TextEditingController password;
   late final TextEditingController confirmPassword;
 
-  final List<String> roles = [ 'GymOwner', 'Admin'];
+  // final List<String> roles = [ 'GymOwner', 'Admin'];
   String? selectedRole;
 
   void _handleSaveEmail() async {
@@ -102,42 +102,42 @@ class _SignUpPageState extends State<SignUpPage> {
               SizedBox(height: mq.height * 0.025),
 
               // Role Dropdown Styled Like TextField
-              DropdownButtonFormField<String>(
-                value: selectedRole,
-                onChanged: (value) {
-                  setState(() {
-                    selectedRole = value;
-                    role.text = value!;
-                  });
-                },
-                items: roles.map((role) {
-                  return DropdownMenuItem<String>(
-                    value: role,
-                    child: Text(role),
-                  );
-                }).toList(),
-                decoration: InputDecoration(
-                  hintText: "Select Role",
-                  hintStyle:
-                      GoogleFonts.mulish(fontSize: 18, color: Colors.grey),
-                  isDense: true,
-                  contentPadding:
-                      const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide:
-                        BorderSide(color: Theme.of(context).primaryColor),
-                  ),
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(
-                        color: Theme.of(context).primaryColor, width: 2),
-                  ),
-                ),
-                style: GoogleFonts.mulish(fontSize: 18, color: Colors.black),
-                validator: (value) =>
-                    value == null ? 'Please select a role' : null,
-              ),
+              // DropdownButtonFormField<String>(
+              //   value: selectedRole,
+              //   onChanged: (value) {
+              //     setState(() {
+              //       selectedRole = value;
+              //       role.text = value!;
+              //     });
+              //   },
+              //   items: roles.map((role) {
+              //     return DropdownMenuItem<String>(
+              //       value: role,
+              //       child: Text(role),
+              //     );
+              //   }).toList(),
+              //   decoration: InputDecoration(
+              //     hintText: "Select Role",
+              //     hintStyle:
+              //         GoogleFonts.mulish(fontSize: 18, color: Colors.grey),
+              //     isDense: true,
+              //     contentPadding:
+              //         const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+              //     enabledBorder: UnderlineInputBorder(
+              //       borderSide:
+              //           BorderSide(color: Theme.of(context).primaryColor),
+              //     ),
+              //     focusedBorder: UnderlineInputBorder(
+              //       borderSide: BorderSide(
+              //           color: Theme.of(context).primaryColor, width: 2),
+              //     ),
+              //   ),
+              //   style: GoogleFonts.mulish(fontSize: 18, color: Colors.black),
+              //   validator: (value) =>
+              //       value == null ? 'Please select a role' : null,
+              // ),
 
-              SizedBox(height: mq.height * 0.025),
+              // SizedBox(height: mq.height * 0.025),
 
               // Email
               buildTextField(
@@ -219,7 +219,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               email: email.text.trim(),
                               password: password.text.trim(),
                               name: gymName.text.trim(),
-                              role: selectedRole!,
+                              role: "GymOwner",
                             ),
                           );
                     }

@@ -14,6 +14,7 @@ import 'package:gymshood/services/Models/planModel.dart';
 import 'package:gymshood/services/Models/gymDashboardStats.dart';
 import 'package:gymshood/services/Models/ratingsModel.dart';
 import 'package:gymshood/services/Models/registerModel.dart';
+import 'package:gymshood/services/Models/revenueDataModel.dart';
 import 'package:gymshood/services/gymInfo/gymowner_info_provider.dart';
 import 'package:gymshood/services/gymInfo/gymserviceprovider.dart';
 
@@ -29,15 +30,14 @@ class GymServerProvider implements GymOwnerInfoProvider {
       required String gymId}) async {
     // Authuser? user = await AuthService.server().getUser();
     try {
-        developer.log("Add gym media ${mediaUrl}");
-        developer.log(logourl);
-      final response =
-          await dio.post('$baseUrl/gymdb/gym/$gymId/media',
-              data: {
-                'mediaUrls': mediaUrl,
-                'logoUrl': logourl,
-              },
-              options: Options(headers: {'Content-Type': 'application/json'}));
+      developer.log("Add gym media ${mediaUrl}");
+      developer.log(logourl);
+      final response = await dio.post('$baseUrl/gymdb/gym/$gymId/media',
+          data: {
+            'mediaUrls': mediaUrl,
+            'logoUrl': logourl,
+          },
+          options: Options(headers: {'Content-Type': 'application/json'}));
 
       if (response.statusCode == 201) {
         return 'Successfully added Media';
@@ -79,12 +79,12 @@ class GymServerProvider implements GymOwnerInfoProvider {
   }
 
   @override
-  Future<Map<String,dynamic>> registerGym(
+  Future<Map<String, dynamic>> registerGym(
       {required String role,
       required String name,
       required String location,
-     required List<num> coordinates,
-     required String gymSlogan,
+      required List<num> coordinates,
+      required String gymSlogan,
       required num capacity,
       required String openTime,
       required String closeTime,
@@ -103,7 +103,7 @@ class GymServerProvider implements GymOwnerInfoProvider {
             'role': user!.role,
             'name': name,
             'location': location,
-            'coordinates':coordinates,
+            'coordinates': coordinates,
             'capacity': capacity,
             'openTime': openTime,
             'closeTime': closeTime,
@@ -118,45 +118,38 @@ class GymServerProvider implements GymOwnerInfoProvider {
 
       if (response.statusCode == 201) {
         return {
-            'success':true,
-            'message':"Successfully registered the gym will be notified once it's verified"
+          'success': true,
+          'message':
+              "Successfully registered the gym will be notified once it's verified"
         };
       } else {
         developer.log(response.data['message']);
-        return {
-            'success':false,
-            'message':response.data['message']
-        };
+        return {'success': false, 'message': response.data['message']};
       }
     } on DioException catch (e) {
       if (e.response != null) {
         developer.log('Error response: ${e.response?.data}');
         return {
-            'success':false,
-            'message':"Successfully registered the gym will be notified once it's verified"
+          'success': false,
+          'message':
+              "Successfully registered the gym will be notified once it's verified"
         };
       } else {
         developer.log('Dio error: ${e.message}');
-        return  {
-            'success':false,
-            'message':"${e.message}"
-        };
+        return {'success': false, 'message': "${e.message}"};
       }
     } catch (e) {
       developer.log(e.toString());
-       return {
-            'success':false,
-            'message':e.toString()
-        };
+      return {'success': false, 'message': e.toString()};
       // developer.log(e.toString());
     }
   }
 
   @override
   Future<bool> updateGym(
-      { required String gymId,
-        required String name,
-      required Map<String,dynamic> location,
+      {required String gymId,
+      required String name,
+      required Map<String, dynamic> location,
       required num capacity,
       required String openTime,
       required String closeTime,
@@ -164,35 +157,33 @@ class GymServerProvider implements GymOwnerInfoProvider {
       required String phone,
       required String about,
       required List<String> equipments,
-      required List<Map<String,dynamic>> shifts}) async{
-        
-        try{
-          final response = await dio.put('$baseUrl/gymdb/gym/$gymId',
-            data: {
-                'name':name,
-                'location':location,
-                'capacity':capacity,
-                'openTime':openTime,
-                'closeTime':closeTime,
-                'contactEmail':contactEmail,
-                'phone':phone,
-                'about':about,
-                'shifts':shifts,
-                'equipmentList':equipments
-            },
-
-          );
-          if(response.statusCode == 200){
-            return true;
-          }else{
-            developer.log(response.data['message']);
-            return false;
-          }
-
-        }catch(e){
-          developer.log(e.toString());
-            return false;
-        }
+      required List<Map<String, dynamic>> shifts}) async {
+    try {
+      final response = await dio.put(
+        '$baseUrl/gymdb/gym/$gymId',
+        data: {
+          'name': name,
+          'location': location,
+          'capacity': capacity,
+          'openTime': openTime,
+          'closeTime': closeTime,
+          'contactEmail': contactEmail,
+          'phone': phone,
+          'about': about,
+          'shifts': shifts,
+          'equipmentList': equipments
+        },
+      );
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        developer.log(response.data['message']);
+        return false;
+      }
+    } catch (e) {
+      developer.log(e.toString());
+      return false;
+    }
   }
 
   @override
@@ -205,10 +196,8 @@ class GymServerProvider implements GymOwnerInfoProvider {
       required String planType,
       required bool isTrainerIncluded,
       required num workoutDuration,
-      required String gymId
-     }) async {
+      required String gymId}) async {
     try {
-
       final response = await dio.post(
         '$baseUrl/gymdb/$gymId/plans',
         data: {
@@ -287,7 +276,6 @@ class GymServerProvider implements GymOwnerInfoProvider {
 
   @override
   Future<List<Plan>> getPlans(String gymId) async {
-       
     try {
       final response = await dio.get('$baseUrl/gymdb/plans/gym/$gymId');
       // developer.log(',GymID: $gymId');
@@ -302,70 +290,75 @@ class GymServerProvider implements GymOwnerInfoProvider {
       throw Exception("Error fetching plans: $e");
     }
   }
-  
+
   @override
-  Future<bool> deletePlan({required String planId}) async{
-        try {
-      final response = await dio.put('$baseUrl/gymdb/plans/$planId' , data: {
-        'isActive':false
-      });
+  Future<bool> deletePlan({required String planId}) async {
+    try {
+      final response = await dio
+          .put('$baseUrl/gymdb/plans/$planId', data: {'isActive': false});
       if (response.statusCode == 200 && response.data['success'] == true) {
         return true;
       } else {
         throw Exception(response.data['message'] ?? "Failed to delete plan");
       }
-    } catch (e) {      return false;
+    } catch (e) {
+      return false;
     }
-    }
-@override
-  Future<List<Gym>> getGymsByowner(String id)async{
-    try{
-        final response = await dio.get('$baseUrl/gymdb/gym/owner/$id');
-        List<Gym> gyms = [];
-        if(response.statusCode==200){
-          final gymsjson = response.data['gyms'] as List<dynamic>;
+  }
 
-          
-          gyms = gymsjson.map<Gym>((json) => Gym.fromJson(json as Map<String,dynamic>)).toList();
-          developer.log(gyms[0].gymid);
-          return gyms;
-        }
-        else{
-          developer.log(response.data['message'].toString());
-          throw(Exception());
-        }
-    }catch(e){
+  @override
+  Future<List<Gym>> getGymsByowner(String id) async {
+    try {
+      final response = await dio.get('$baseUrl/gymdb/gym/owner/$id');
+      List<Gym> gyms = [];
+      if (response.statusCode == 200) {
+        final gymsjson = response.data['gyms'] as List<dynamic>;
+
+        gyms = gymsjson
+            .map<Gym>((json) => Gym.fromJson(json as Map<String, dynamic>))
+            .toList();
+        developer.log(gyms[0].gymid);
+        return gyms;
+      } else {
+        developer.log(response.data['message'].toString());
+        throw (Exception());
+      }
+    } catch (e) {
       developer.log(e.toString());
       return [];
     }
   }
-  
+
   @override
-  Future<bool> updatePlan({required String planId, required String name, required num price, required num discountPercent, required String features, required num workoutDuration, required bool isTrainerIncluded}) async{
-    try{
-      final response = await dio.put(
-          '$baseUrl/gymdb/plans/$planId',
-          data: {
-             'name':name,
-              'price':price,
-              'discountPercent':discountPercent,
-              'features':features,
-              'duration':workoutDuration,
-              'isTrainerIncluded':isTrainerIncluded
-          }
-      );
-      if(response.statusCode==200){
+  Future<bool> updatePlan(
+      {required String planId,
+      required String name,
+      required num price,
+      required num discountPercent,
+      required String features,
+      required num workoutDuration,
+      required bool isTrainerIncluded}) async {
+    try {
+      final response = await dio.put('$baseUrl/gymdb/plans/$planId', data: {
+        'name': name,
+        'price': price,
+        'discountPercent': discountPercent,
+        'features': features,
+        'duration': workoutDuration,
+        'isTrainerIncluded': isTrainerIncluded
+      });
+      if (response.statusCode == 200) {
         return true;
-      }else{
+      } else {
         developer.log(response.data['message']);
         return false;
       }
-    }catch(e){
+    } catch (e) {
       developer.log(e.toString());
-            return false;
-          }
+      return false;
+    }
   }
-  
+
   @override
   Future<GymDashboardStats> getgymDashBoardStatus(String gymId) async {
     try {
@@ -381,58 +374,56 @@ class GymServerProvider implements GymOwnerInfoProvider {
       rethrow;
     }
   }
-  
+
   @override
-  Future<bool> verificationdocsUpload(List<String> docs) async{
-    try{
+  Future<bool> verificationdocsUpload(List<String> docs) async {
+    try {
       final response = await dio.put("$baseUrl/gymdb/gyms/verification",
-      data: {
-          'documentUrls':docs
-      });
-      if(response.statusCode==200){
+          data: {'documentUrls': docs});
+      if (response.statusCode == 200) {
         return true;
-      }else{
+      } else {
         developer.log("error in verifying docs${response.data['message']}");
         return false;
       }
-    }catch(e){
-      developer.log("error response in verifying docs${e.toString()}");
-      return false;
-    }
-  }
-  
-  @override
-  Future<bool> toggleGymstatus() async{
-        try{
-      final response = await dio.put("$baseUrl/gymdb/gyms/status");
-      if(response.statusCode==200){
-        return true;
-      }else{
-        developer.log("error in verifying docs ${response.data['message']}");
-        return false;
-      }
-    }catch(e){
+    } catch (e) {
       developer.log("error response in verifying docs${e.toString()}");
       return false;
     }
   }
 
   @override
-  Future<GymAnnouncement> createGymAnnouncement(String message) async{
-    try{
-      final res = await dio.post("$baseUrl/gymdb/gyms/announcements" , data:{
-        'message':message
-      } );
-      if(res.data['success'] == true){
-        final announcement = res.data['announcement'];
-       
-        final GymAnnouncement gymAnnouncement = GymAnnouncement.fromJson(announcement);
-        return gymAnnouncement;
-      }else{
-        developer.log("Error in announcments ${res.data}");
-        throw(Exception("some error occurred"));
+  Future<bool> toggleGymstatus() async {
+    try {
+      final response = await dio.put("$baseUrl/gymdb/gyms/status");
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        developer.log("error in verifying docs ${response.data['message']}");
+        return false;
       }
-    }catch(e){
+    } catch (e) {
+      developer.log("error response in verifying docs${e.toString()}");
+      return false;
+    }
+  }
+
+  @override
+  Future<GymAnnouncement> createGymAnnouncement(String message) async {
+    try {
+      final res = await dio.post("$baseUrl/gymdb/gyms/announcements",
+          data: {'message': message});
+      if (res.data['success'] == true) {
+        final announcement = res.data['announcement'];
+
+        final GymAnnouncement gymAnnouncement =
+            GymAnnouncement.fromJson(announcement);
+        return gymAnnouncement;
+      } else {
+        developer.log("Error in announcments ${res.data}");
+        throw (Exception("some error occurred"));
+      }
+    } catch (e) {
       developer.log(e.toString());
       rethrow;
     }
@@ -440,7 +431,7 @@ class GymServerProvider implements GymOwnerInfoProvider {
 
   @override
   Future<List<GymAnnouncement>> getGymAnnouncements() async {
-  try {
+    try {
       final response = await dio.get('$baseUrl/admin/announcements/user');
       developer.log("user announcement ${response.data['announcements']}");
       if (response.statusCode == 200 && response.data['success'] == true) {
@@ -457,47 +448,146 @@ class GymServerProvider implements GymOwnerInfoProvider {
   }
 
   @override
-  Future<GymRating> getgymrating(String gymID) async{
-    try{
-      final res = await dio.get(
-        "$baseUrl/gymdb/ratings/gym/$gymID"
-      );
-      if(res.data['success']){
+  Future<List<GymAnnouncement>> getGymAnnouncementsbygym() async {
+    try {
+      final response = await dio.get('$baseUrl/gymdb/announcements/gym');
+      developer.log("user announcement ${response.data['announcements']}");
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        final List<dynamic> data = response.data['announcements'];
+        return data.map((json) => GymAnnouncement.fromJson(json)).toList();
+      } else {
+        developer.log("fetching error ");
+        throw Exception("Failed to fetch announcements");
+      }
+    } catch (e) {
+      developer.log("Error fetching announcements: $e");
+      return [];
+    }
+  }
+
+  @override
+  Future<GymRating> getgymrating(String gymID) async {
+    try {
+      final res = await dio.get("$baseUrl/gymdb/ratings/gym/$gymID");
+      if (res.data['success']) {
         developer.log("data ${res.data}");
         return GymRating.fromJson(res.data['average']);
-      }else{
-        throw(Exception("error in fetching rating"));
+      } else {
+        throw (Exception("error in fetching rating"));
       }
-
-    }catch(e){
+    } catch (e) {
       rethrow;
     }
   }
-@override
-  Future<ActiveUsersResponse> getactiveUserResponse(String gymId)async{
-    try{
+
+  @override
+  Future<ActiveUsersResponse> getactiveUserResponse(String gymId) async {
+    try {
       final response = await dio.get("$baseUrl/gymdb/gym/$gymId/active-users");
-      if(response.statusCode==200){
-        final Map<String,dynamic> data = {
-        'activeUsers': (response.data['activeUsers'] as List)
-        .map((json) => RegisterEntry.fromJson(json))
-        .toList(),
-        'expiredUsers': (response.data['expiredUsers'] as List)
-        .map((json) => RegisterEntry.fromJson(json))
-        .toList(),
-        'activeCount': response.data['activeCount'],
-        'expiredCount': response.data['expiredCount'],
-      };
-      return ActiveUsersResponse.fromJson(data);
-      }
-      else{
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = {
+          'activeUsers': (response.data['activeUsers'] as List)
+              .map((json) => RegisterEntry.fromJson(json))
+              .toList(),
+          'expiredUsers': (response.data['expiredUsers'] as List)
+              .map((json) => RegisterEntry.fromJson(json))
+              .toList(),
+          'activeCount': response.data['activeCount'],
+          'expiredCount': response.data['expiredCount'],
+        };
+        return ActiveUsersResponse.fromJson(data);
+      } else {
         developer.log(response.data['message']);
-        throw(Exception("error in fetching gymregister"));
+        throw (Exception("error in fetching gymregister"));
       }
-    }
-    catch(e){
+    } catch (e) {
       developer.log(e.toString());
       rethrow;
+    }
+  }
+
+  @override
+  Future<List<RevenueData>> fetchRevenueData(String gymId,
+      {String period = 'monthly'}) async {
+    try {
+      final res = await dio.get(
+        "$baseUrl/gymdb/dashboard/revenue/$gymId",
+        queryParameters: {"period": period},
+      );
+
+      if (res.statusCode == 200 && res.data['success']) {
+        final periodData = res.data['data'][period]; // <-- Fix here
+
+        final planSeries = periodData['planSeries'] as Map<String, dynamic>;
+
+        final List<RevenueData> revenue = [];
+
+        for (final planName in planSeries.keys) {
+          final series = planSeries[planName] as List<dynamic>;
+
+          for (final entry in series) {
+            revenue.add(RevenueData.fromJson({
+              ...entry,
+              'planName': planName, // attach planName manually
+            }));
+          }
+        }
+
+        return revenue;
+      } else {
+        developer.log("error in revenue analytics ${res.data}");
+        throw Exception("An error occurred");
+      }
+    } catch (e) {
+      developer.log("error in revenue analytics $e");
+      rethrow;
+    }
+  }
+
+  @override
+  Future<bool> createFundaccount(String upiId, String accountNumber,
+      String ifscCode, String accountHolder) async {
+    try {
+      final res = await dio.post("$baseUrl/gymdb/create-paymentContactinfo");
+      if (res.statusCode == 201 && res.data['success']) {
+        return true;
+      } else {
+        throw (Exception("error occured in creating the account"));
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+  @override
+  Future<bool> recreateFundaccount(String upiId, String accountNumber,
+      String ifscCode, String accountHolder) async {
+    try {
+      final res = await dio.post("$baseUrl/gymdb/udpate-paymentContactInfo");
+      if (res.statusCode == 201 && res.data['success']) {
+        return true;
+      } else {
+        throw (Exception("error occured in creating the account"));
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+  
+  @override
+  Future<bool> deleteAnnouncement(String announcementId) async{
+    try{
+      final res = await dio.delete(
+        "$baseUrl/gymdb/announcements/gym/$announcementId"
+      );
+      if(res.statusCode == 200){
+        return true;
+      }else{
+        developer.log("error in deleting announcement ${res.data}");
+        return false;
+      }
+    }catch(e){
+      developer.log("error in deleting announcement $e");
+      return false;
     }
   }
 }

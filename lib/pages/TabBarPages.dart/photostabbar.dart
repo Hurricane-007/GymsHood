@@ -78,8 +78,8 @@ class _PhotosTabBarState extends State<PhotosTabBar> {
       logourl: widget.gym.media!.logoUrl,
       gymId: widget.gym.gymid
     );
-    if (success != 'Successfully added Media') allSuccess = false;
-
+    if (success != 'Media updated successfully') allSuccess = false;
+    developer.log(success);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -120,9 +120,10 @@ class _PhotosTabBarState extends State<PhotosTabBar> {
           : GridView.builder(
               padding: EdgeInsets.all(8),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
+                crossAxisCount: 2,
                 crossAxisSpacing: 8,
                 mainAxisSpacing: 8,
+                childAspectRatio: 1,
               ),
               itemCount: _imageUrls.length,
               itemBuilder: (context, index) {
@@ -150,18 +151,22 @@ class _PhotosTabBarState extends State<PhotosTabBar> {
                     }
                   },
                   child: Stack(
+                    fit: StackFit.expand,
                     children: [
-                      Image.network(
-                        url,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          
-                          return Container(
-                            color: Colors.grey[300],
-                            child: Icon(Icons.error),
-                            
-                          );
-                        },
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                        ),
+                        child: Image.network(
+                          url,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              color: Colors.grey[300],
+                              child: Icon(Icons.error),
+                            );
+                          },
+                        ),
                       ),
                       if (_selectionMode)
                         Positioned(

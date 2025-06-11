@@ -1,10 +1,13 @@
 import 'dart:developer' as developer;
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:gymshood/Utilities/Dialogs/showdeletedialog.dart';
 import 'package:gymshood/main.dart';
 import 'package:gymshood/services/Models/gym.dart';
 import 'package:gymshood/services/gymInfo/gymserviceprovider.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 import 'package:video_player/video_player.dart';
 import 'package:gymshood/services/fileserver.dart'; // Import your delete function
 
@@ -23,17 +26,49 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
   bool _isInitialized = false;
 
   @override
-  void initState() {
-    developer.log(widget.videoUrl);
-    super.initState();
-    _controller = VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl))
+void initState() {
+  super.initState();
+  _prepareAndPlayVideo();
+}
+
+Future<void> _prepareAndPlayVideo() async {
+  try {
+    final tempDir = await getTemporaryDirectory();
+    final videoFileName = widget.videoUrl.split('/').last;
+    final videoFilePath = "${tempDir.path}/$videoFileName";
+    final videoFile = File(videoFilePath);
+
+    if (!await videoFile.exists()) {
+      developer.log("Downloading video: ${widget.videoUrl}");
+      final response = await http.get(Uri.parse(widget.videoUrl));
+      if (response.statusCode == 200) {
+        await videoFile.writeAsBytes(response.bodyBytes);
+        developer.log("Video downloaded to: $videoFilePath");
+      } else {
+        developer.log("Failed to download video: ${response.statusCode}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to download video')),
+        );
+        return;
+      }
+    } else {
+      developer.log("Video already downloaded: $videoFilePath");
+    }
+
+    _controller = VideoPlayerController.file(videoFile)
       ..initialize().then((_) {
         setState(() {
           _isInitialized = true;
           _controller.play();
         });
       });
+  } catch (e) {
+    developer.log('Error while loading video: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Error loading video')),
+    );
   }
+}
 
   @override
   void dispose() {
@@ -48,7 +83,7 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
       List<String> mediaUrlsupdated = widget.gym.media!.mediaUrls;
       mediaUrlsupdated.remove(widget.videoUrl);
       final success = await Gymserviceprovider.server().addGymMedia(
-          mediaType: 'photo',
+          mediaType: 'video',
           mediaUrl: mediaUrlsupdated,
           logourl: widget.gym.media!.logoUrl,
           gymId: widget.gym.gymid);
@@ -60,7 +95,7 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Failed to delete video')),
-        );
+      );
       }
     }
   }

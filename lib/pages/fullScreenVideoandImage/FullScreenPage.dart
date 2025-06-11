@@ -28,7 +28,7 @@ class FullScreenImagePage extends StatelessWidget {
                 mediaUrlsupdated.remove(imageUrl);
                 final success = await Gymserviceprovider.server().addGymMedia(
                   mediaType: 'photo', mediaUrl: mediaUrlsupdated , logourl: gym.media!.logoUrl, gymId: gym.gymid);
-                if (success == 'Successfully added Media') {
+                if (success == 'Media updated successfully') {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Image deleted successfully')),
                   );

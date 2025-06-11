@@ -4,6 +4,7 @@ import 'package:gymshood/services/Models/gym.dart';
 import 'package:gymshood/services/Models/planModel.dart';
 import 'package:gymshood/services/Models/gymDashboardStats.dart';
 import 'package:gymshood/services/Models/ratingsModel.dart';
+import 'package:gymshood/services/Models/revenueDataModel.dart';
 
 abstract class GymOwnerInfoProvider {
   Future<Map<String,dynamic>> registerGym({
@@ -84,6 +85,11 @@ Future<bool> toggleGymstatus();
 Future<bool> verificationdocsUpload(List<String> docs);
 Future<GymAnnouncement> createGymAnnouncement(String message);
 Future<List<GymAnnouncement>> getGymAnnouncements();
+Future<List<GymAnnouncement>> getGymAnnouncementsbygym();
 Future<GymRating> getgymrating(String gymID);
 Future<ActiveUsersResponse> getactiveUserResponse(String gymId);
+Future <List<RevenueData>> fetchRevenueData(String gymId , {String period = 'monthly'});
+Future<bool> deleteAnnouncement(String announcementId);
+Future<bool> createFundaccount(String upiId, String accountNumber , String ifscCode , String accountHolder );
+Future<bool> recreateFundaccount(String upiId, String accountNumber , String ifscCode , String accountHolder );
 }

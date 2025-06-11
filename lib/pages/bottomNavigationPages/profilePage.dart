@@ -27,6 +27,7 @@ import 'package:gymshood/services/Models/gym.dart';
 import 'package:gymshood/services/fileserver.dart';
 import 'package:gymshood/services/gymInfo/gymserviceprovider.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:gymshood/pages/settingsPage.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -121,69 +122,16 @@ class _ProfilePageState extends State<ProfilePage>
         ),
         centerTitle: true,
         actions: [
-          PopupMenuButton<MenuAction>(
-            color: Theme.of(context).colorScheme.primary,
-            iconColor: Colors.white,
-            onSelected: (value) async {
-              switch (value) {
-                case MenuAction.addGyminfo:
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Gyminfopage(),
-                      ));
-                case MenuAction.updateGymInfo:
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => UpdateGymDetailsPage(),
-                      ));
-                case MenuAction.addGymMedia:
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => UploadMultipleImagesPage(
-                          gym: selectedGym!,
-                        ),
-                      ));
-                case MenuAction.createPlan:
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CreatePlansPage(),
-                      ));
-                case MenuAction.logout:
-                  context.read<AuthBloc>().add(AuthEventLogOut());
-              }
-            },
-            itemBuilder: (context) => const [
-              PopupMenuItem(
-                value: MenuAction.addGyminfo,
-                child:
-                    Text('Register Gym', style: TextStyle(color: Colors.white)),
-              ),
-              PopupMenuItem(
-                value: MenuAction.updateGymInfo,
-                child: Text(
-                  "Update Gym Info",
-                  style: TextStyle(color: Colors.white),
+          IconButton(
+            icon: Icon(Icons.settings, color: Colors.white),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SettingsPage(selectedGym: selectedGym),
                 ),
-              ),
-              PopupMenuItem(
-                value: MenuAction.addGymMedia,
-                child: Text('Add Gym Media',
-                    style: TextStyle(color: Colors.white)),
-              ),
-              PopupMenuItem(
-                value: MenuAction.createPlan,
-                child: Text('Create Gym Plans',
-                    style: TextStyle(color: Colors.white)),
-              ),
-              PopupMenuItem(
-                value: MenuAction.logout,
-                child: Text('Logout', style: TextStyle(color: Colors.white)),
-              ),
-            ],
+              );
+            },
           ),
         ],
       ),
@@ -515,7 +463,7 @@ class _ProfilePageState extends State<ProfilePage>
                             final res =
                                 await Gymserviceprovider.server().addGymMedia(
                               mediaType: 'photo',
-                              mediaUrl: [],
+                              mediaUrl: selectedGym!.media?.mediaUrls ?? [],
                               logourl: url,
                               gymId: selectedGym!.gymid,
                             );
@@ -558,7 +506,7 @@ class _ProfilePageState extends State<ProfilePage>
                             final res =
                                 await Gymserviceprovider.server().addGymMedia(
                               mediaType: 'photo',
-                              mediaUrl: [],
+                              mediaUrl: selectedGym!.media?.mediaUrls ?? [],
                               logourl: url,
                               gymId: selectedGym!.gymid,
                             );

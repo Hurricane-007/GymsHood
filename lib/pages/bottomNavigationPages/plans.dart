@@ -372,7 +372,7 @@ class _PlansPageState extends State<PlansPage> {
                                                     vertical: 4,
                                                   ),
                                                   decoration: BoxDecoration(
-                                                    color: Colors.white.withAlpha(50),
+                                                    color: Colors.black.withAlpha(100),
                                                     borderRadius: BorderRadius.circular(12),
                                                   ),
                                                   child: Text(
@@ -390,7 +390,7 @@ class _PlansPageState extends State<PlansPage> {
                                                       vertical: 4,
                                                     ),
                                                     decoration: BoxDecoration(
-                                                      color: Colors.green.withAlpha(380),
+                                                      color: Colors.green.withAlpha(460),
                                                       borderRadius: BorderRadius.circular(12),
                                                     ),
                                                     child: Text(

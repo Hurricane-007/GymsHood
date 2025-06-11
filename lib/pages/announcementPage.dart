@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gymshood/Utilities/Dialogs/error_dialog.dart';
+import 'package:gymshood/Utilities/Dialogs/showdeletedialog.dart';
 import 'package:gymshood/services/Models/announcementModel.dart';
 import 'package:gymshood/services/Models/gym.dart';
 import 'package:gymshood/services/gymInfo/gymserviceprovider.dart';
@@ -15,6 +16,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
   final _formKey = GlobalKey<FormState>();
   final _messageController = TextEditingController();
   bool _isLoading = false;
+  bool _isFetchingAnnouncements = false;
   List<GymAnnouncement> announcements = [];
 
   @override
@@ -51,15 +53,43 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
   }
 
   Future<void> getGymAnnouncements() async {
+    setState(() => _isFetchingAnnouncements = true);
     try {
-      final res = await Gymserviceprovider.server().getGymAnnouncements();
+      final res = await Gymserviceprovider.server().getGymAnnouncementsbygym();
       setState(() {
         announcements = res;
       });
     } catch (e) {
       showErrorDialog(context, "Error occurred");
+    } finally {
+      setState(() => _isFetchingAnnouncements = false);
     }
   }
+
+  Future<void> _deleteAnnouncement(String announcementId) async {
+    try {
+      final success = await Gymserviceprovider.server().deleteAnnouncement(announcementId);
+      if (mounted) {
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Announcement deleted successfully')),
+          );
+          getGymAnnouncements(); // Refresh the list
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to delete announcement')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to delete announcement: $e')),
+        );
+      }
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -69,10 +99,18 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
         leading: GestureDetector(
           onTap: () => Navigator.pop(context),
           child: Icon(Icons.arrow_back , color: Colors.white,)),
-        title: Text('Announcements', style: TextStyle(color: Colors.white)),
+        title: Text(' Your Announcements', style: TextStyle(color: Colors.white)),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
+      body: _isFetchingAnnouncements
+          ? Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  Theme.of(context).primaryColor,
+                ),
+              ),
+            )
+          : SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -233,10 +271,19 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                                       style: TextStyle(
                                         fontSize: 20,
                                         fontWeight: FontWeight.bold,
-                                    
                                         color: Theme.of(context).primaryColor,
                                       ),
                                     ),
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.delete, color: Theme.of(context).primaryColor),
+                                    onPressed: () async{
+                                      final res = await showDeleteDialog(context);
+                                      if(res){
+                                          _deleteAnnouncement(announcement.id);
+                                      }
+                                    },
+                                    tooltip: 'Delete announcement',
                                   ),
                                 ],
                               ),
