@@ -289,6 +289,59 @@ class _UpdateGymDetailsPageState extends State<UpdateGymDetailsPage>
                                                   Text("Shift ${index + 1}"),
                                                   const Spacer(),
                                                   IconButton(
+                                                    icon: const Icon(Icons.copy, color: Colors.blue),
+                                                    tooltip: 'Copy to Other Days',
+                                                    onPressed: () {
+                                                      List<bool> selectedDays = List.generate(7, (index) => false);
+                                                      showDialog(
+                                                        context: context,
+                                                        builder: (context) => StatefulBuilder(
+                                                          builder: (context, setState) => AlertDialog(
+                                                            title: Text('Copy to Other Days'),
+                                                            content: Column(
+                                                              mainAxisSize: MainAxisSize.min,
+                                                              children: weekdays.asMap().entries.map((entry) {
+                                                                if (entry.key == dayIndex) return SizedBox.shrink();
+                                                                return CheckboxListTile(
+                                                                  title: Text(entry.value),
+                                                                  value: selectedDays[entry.key],
+                                                                  onChanged: (bool? value) {
+                                                                    setState(() {
+                                                                      selectedDays[entry.key] = value ?? false;
+                                                                    });
+                                                                  },
+                                                                );
+                                                              }).toList(),
+                                                            ),
+                                                            actions: [
+                                                              TextButton(
+                                                                onPressed: () => Navigator.pop(context),
+                                                                child: Text('Cancel'),
+                                                              ),
+                                                              TextButton(
+                                                                onPressed: () {
+                                                                  for (int i = 0; i < selectedDays.length; i++) {
+                                                                    if (selectedDays[i] && i != dayIndex) {
+                                                                      weeklyShiftControllers[i].add({
+                                                                        'name': TextEditingController(text: shift['name']!.text),
+                                                                        'startTime': TextEditingController(text: shift['startTime']!.text),
+                                                                        'endTime': TextEditingController(text: shift['endTime']!.text),
+                                                                        'capacity': TextEditingController(text: shift['capacity']!.text),
+                                                                      });
+                                                                    }
+                                                                  }
+                                                                  Navigator.pop(context);
+                                                                  this.setState(() {});
+                                                                },
+                                                                child: Text('Copy'),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      );
+                                                    },
+                                                  ),
+                                                  IconButton(
                                                     icon: const Icon(Icons.delete, color: Colors.red),
                                                     onPressed: () => removeShift(dayIndex, index),
                                                   ),

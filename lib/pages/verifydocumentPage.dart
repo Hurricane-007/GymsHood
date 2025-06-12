@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:gymshood/Utilities/Dialogs/info_dialog.dart';
 import 'package:gymshood/services/Models/gym.dart';
 import 'package:gymshood/services/gymInfo/gymserviceprovider.dart';
 import '../services/fileserver.dart';
@@ -112,6 +113,7 @@ class _VerifyDocumentsState extends State<VerifyDocuments> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('All documents uploaded successfully')),
         );
+        showInfoDialog(context, " your status of pending verification will be changed once verified! ");
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

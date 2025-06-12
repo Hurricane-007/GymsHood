@@ -40,7 +40,7 @@ class GymServerProvider implements GymOwnerInfoProvider {
           options: Options(headers: {'Content-Type': 'application/json'}));
 
       if (response.statusCode == 201) {
-        return 'Successfully added Media';
+        return 'Media updated successfully';
       } else {
         return response.data['message'];
       }
@@ -132,11 +132,11 @@ class GymServerProvider implements GymOwnerInfoProvider {
         return {
           'success': false,
           'message':
-              "Successfully registered the gym will be notified once it's verified"
+              "sorry gym cannot be created! try again"
         };
       } else {
         developer.log('Dio error: ${e.message}');
-        return {'success': false, 'message': "${e.message}"};
+        return {'success': false, 'message': "sorry gym cannot be created! try again"};
       }
     } catch (e) {
       developer.log(e.toString());

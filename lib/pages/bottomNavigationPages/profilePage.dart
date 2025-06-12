@@ -122,8 +122,10 @@ class _ProfilePageState extends State<ProfilePage>
         ),
         centerTitle: true,
         actions: [
+          selectedGym !=null?
           IconButton(
             icon: Icon(Icons.settings, color: Colors.white),
+            iconSize: 30 ,
             onPressed: () {
               Navigator.push(
                 context,
@@ -132,7 +134,7 @@ class _ProfilePageState extends State<ProfilePage>
                 ),
               );
             },
-          ),
+          ):IconButton(icon:Icon(Icons.logout , color: Colors.white,) , onPressed: () => context.read<AuthBloc>().add(AuthEventLogOut()),)
         ],
       ),
       backgroundColor: Colors.white,
@@ -240,12 +242,7 @@ class _ProfilePageState extends State<ProfilePage>
                                           color: Colors.transparent,
                                           child: InkWell(
                                             onLongPress: () async {
-                                              final uri = Uri.parse(_image!);
-                                              final filename =
-                                                  uri.pathSegments.isNotEmpty
-                                                      ? uri.pathSegments.last
-                                                          .toLowerCase()
-                                                      : '';
+                                            
                                               final confirm =
                                                   await showDeleteDialog(
                                                       context);
@@ -263,7 +260,7 @@ class _ProfilePageState extends State<ProfilePage>
                                                             gymId: selectedGym!
                                                                 .gymid);
                                                 if (success ==
-                                                    'Successfully added Media') {
+                                                    'Media updated successfully') {
                                                   ScaffoldMessenger.of(context)
                                                       .showSnackBar(
                                                     const SnackBar(
@@ -369,9 +366,13 @@ class _ProfilePageState extends State<ProfilePage>
                           children: [
                             Icon(Icons.star, color: Colors.amber),
                             SizedBox(width: 4),
-                            Text("$rating"),
-                            Spacer(),
-                            Text(""),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text("$rating",),
+                              ],
+                            ),
+                            
                           ],
                         ),
                         SizedBox(height: mq.height * 0.01),

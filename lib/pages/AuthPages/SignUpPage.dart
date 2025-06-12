@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gymshood/Utilities/Dialogs/error_dialog.dart';
+import 'package:gymshood/Utilities/Dialogs/info_dialog.dart';
 import 'package:gymshood/main.dart';
 import 'package:gymshood/services/Auth/bloc/auth_bloc.dart';
 import 'package:gymshood/services/Auth/bloc/auth_event.dart';
@@ -66,13 +67,16 @@ class _SignUpPageState extends State<SignUpPage> {
 
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) async {
-          if(state is AuthStateRegistering){
+        if(state is AuthStateRegistering){
           developer.log(state.error!);
-         await showErrorDialog(context, state.error!);
+          await showErrorDialog(context, state.error!);
         }
         else if(state is AuthStateErrors){
           developer.log(state.error!);
-         await showErrorDialog(context, state.error!);
+          await showErrorDialog(context, state.error!);
+        }
+        else if(state is AuthStateNeedsVerification) {
+          await showInfoDialog(context, "OTP has been sent to your email. Please check your inbox and verify your account.");
         }
       },
       child: Scaffold(

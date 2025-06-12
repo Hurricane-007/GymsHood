@@ -29,12 +29,10 @@ class _PlansPageState extends State<CreatePlansPage> {
   List<Gym> gyms = [];
   String? selectedPlanType;
   int? workoutDuration; // Stores 1, 2, or 0
-  String? customDuration; // Only used if workoutDuration == 0 (Flexible)
-
   final Map<int, String> durationOptions = {
     1: '1hr',
     2: '2hr',
-    0: 'Flexible',
+    5: 'Flexible',
   };
 
   bool isTrainerIncluded = false;
@@ -179,6 +177,15 @@ class _PlansPageState extends State<CreatePlansPage> {
               SizedBox(height: 10),
 
               // Date Picker
+              Text(
+                "Validity Period",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              SizedBox(height: 8),
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text("Start Date"),
@@ -299,9 +306,8 @@ class _PlansPageState extends State<CreatePlansPage> {
                     onChanged: (val) {
                       setState(() {
                         workoutDuration = val;
-                        if (val != 0) {
-                          customDuration =
-                              null; // clear custom value if not Flexible
+                        if (val == 0) {
+                          workoutDuration = 5; // Set to 5 hours for Flexible
                         }
                       });
                     },
@@ -309,24 +315,6 @@ class _PlansPageState extends State<CreatePlansPage> {
                         val == null ? 'Select workout duration' : null,
                   ),
                   SizedBox(height: 16),
-                  if (workoutDuration == 0)
-                    TextFormField(
-                      decoration: InputDecoration(
-                        labelText: 'Enter custom duration (in hours)',
-                        // border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.number,
-                      onChanged: (val) {
-                        customDuration = val;
-                      },
-                      validator: (val) {
-                        if (workoutDuration == 0 &&
-                            (val == null || val.isEmpty)) {
-                          return 'Please enter a custom duration';
-                        }
-                        return null;
-                      },
-                    ),
                 ],
               ),
               SizedBox(height: 20),
@@ -357,8 +345,6 @@ class _PlansPageState extends State<CreatePlansPage> {
                     Duration validity = enddate!.difference(startdate!);
                     developer.log(
                         'Sending workoutDuration: $workoutDuration (${workoutDuration.runtimeType})');
-                    developer.log(
-                        'Sending workoutDuration: $customDuration (${customDuration.runtimeType})');
 
                     final response = await Gymserviceprovider.server()
                         .createPlan(
@@ -369,9 +355,7 @@ class _PlansPageState extends State<CreatePlansPage> {
                             features: featuresController.text,
                             planType: selectedPlanType!,
                             isTrainerIncluded: isTrainerIncluded,
-                            workoutDuration: workoutDuration == 0
-                                ? double.parse(customDuration!)
-                                : workoutDuration!.toDouble(),
+                            workoutDuration: workoutDuration!.toDouble(),
                             gymId: selectedGym!.gymid);
                     //  developer.log(response);
                     if (response == 'Successfull') {

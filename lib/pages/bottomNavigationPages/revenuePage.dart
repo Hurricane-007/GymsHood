@@ -4,8 +4,10 @@ import 'package:gymshood/main.dart';
 import 'package:gymshood/services/Auth/auth_service.dart';
 import 'package:gymshood/services/Models/AuthUser.dart';
 import 'package:gymshood/services/Models/revenueDataModel.dart';
+import 'package:gymshood/services/Models/gym.dart';
 import 'package:gymshood/services/gymInfo/gymserviceprovider.dart';
 import 'package:gymshood/pages/createServicesPages/createplansPage.dart';
+import 'package:gymshood/pages/createServicesPages/Gyminfopage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
@@ -24,8 +26,8 @@ class _RevenuePageState extends State<RevenuePage> {
   bool isLoading = true;
   String? error;
   String selectedChartType = 'bar'; // 'bar' or 'line'
-
-  @override
+  
+  @override 
   void initState() {
     super.initState();
     fetchRevenueData();
@@ -39,19 +41,30 @@ class _RevenuePageState extends State<RevenuePage> {
       });
       Authuser? authuser = await AuthService.server().getUser();
       final gyms = await Gymserviceprovider.server().getGymsByowner(authuser!.userid!);
-      final gymId = gyms[0].gymid;
-
-      final data = await Gymserviceprovider.server().fetchRevenueData(gymId , period: selectedPeriod);
-      setState(() {
-            revenueData =  data;
-            isLoading = false;
-          });} catch(e){
-            isLoading = false;
-           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("error in fetching the revenue data"))
-           );
-          }
       
+      if (gyms.isEmpty) {
+        setState(() {
+          isLoading = false;
+          revenueData = [];
+        });
+        return;
+      }
+
+      final gymId = gyms[0].gymid;
+      final data = await Gymserviceprovider.server().fetchRevenueData(gymId, period: selectedPeriod);
+      setState(() {
+        revenueData = data;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+        error = "Error fetching revenue data";
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Error in fetching the revenue data"))
+      );
+    }
   }
 
   String formatPeriod(Map<String, dynamic> period) {
@@ -431,7 +444,126 @@ class _RevenuePageState extends State<RevenuePage> {
           ? const Center(child: CircularProgressIndicator())
           : error != null
               ? Center(child: Text(error!, style: const TextStyle(color: Colors.red)))
-              : SingleChildScrollView(
+              : revenueData.isEmpty
+                  ? FutureBuilder<List<Gym>>(
+                      future: AuthService.server().getUser().then((user) => 
+                        Gymserviceprovider.server().getGymsByowner(user!.userid!)
+                      ),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Center(child: CircularProgressIndicator());
+                        }
+                        
+                        if (snapshot.hasError) {
+                          return Center(child: Text('Error: ${snapshot.error}'));
+                        }
+
+                        final gyms = snapshot.data ?? [];
+                        
+                        if (gyms.isEmpty) {
+                          return Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.business,
+                                  size: 80,
+                                  color: Colors.grey[400],
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'No Gym Found',
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                                  child: Text(
+                                    'Create a gym to start tracking your revenue analytics',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => Gyminfopage()),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.add_business),
+                                  label: const Text('Create Gym'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Theme.of(context).primaryColor,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        } else {
+                          return Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.bar_chart,
+                                  size: 80,
+                                  color: Colors.grey[400],
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'No Revenue Data Available',
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                                  child: Text(
+                                    'Start creating gym plans and accepting payments to see your revenue analytics here.',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => CreatePlansPage()),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.add),
+                                  label: const Text('Create Gym Plans'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Theme.of(context).primaryColor,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                      },
+                    )
+                  : SingleChildScrollView(
                       child: Column(
                         children: [
                           _buildChart(),

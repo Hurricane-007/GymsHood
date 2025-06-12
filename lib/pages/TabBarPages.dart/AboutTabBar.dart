@@ -161,8 +161,7 @@ class _AboutTabBarState extends State<AboutTabBar> {
                           ),
                           const SizedBox(height: 15),
                           SizedBox(
-                            height: mq.height*0.25,
-                            child: Flexible(
+                            height: mq.height*0.2,
                               child: ListView.builder(
                                 scrollDirection: Axis.horizontal,
                                 itemCount: widget.gym.shifts.length,
@@ -244,7 +243,7 @@ class _AboutTabBarState extends State<AboutTabBar> {
                                   );
                                 },
                               ),
-                            ),
+                            
                           ),
                         ],
                       ),

@@ -23,7 +23,7 @@ class _UpdatePlanPageState extends State<UpdatePlanPage> {
 final Map<int, String> durationOptions = {
   1: '1hr',
   2: '2hr',
-  0: 'Flexible',
+  5: 'Flexible',
 };
 
 int? workoutDuration;
@@ -177,34 +177,6 @@ Widget _buildWorkoutDurationDropdown() {
         },
         validator: (val) => val == null ? 'Select workout duration' : null,
       ),
-      if (workoutDuration == 0) ...[
-        const SizedBox(height: 16),
-        TextFormField(
-          controller: customDurationController,
-          decoration: InputDecoration(
-            labelText: 'Enter custom duration (in hours)',
-        
-          ),
-          keyboardType: TextInputType.number,
-          onChanged: (val) {
-            setState(() {
-              customDuration = num.tryParse(val);
-            });
-          },
-          validator: (val) {
-            if (workoutDuration == 0 && (val == null || val.isEmpty)) {
-              return 'Please enter a custom duration';
-            }
-            if (val != null && val.isNotEmpty) {
-              final parsed = num.tryParse(val);
-              if (parsed == null || parsed <= 0) {
-                return 'Please enter a valid number greater than 0';
-              }
-            }
-            return null;
-          },
-        ),
-      ],
     ],
   );
 }

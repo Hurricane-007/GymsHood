@@ -104,22 +104,9 @@ Widget build(BuildContext context) {
                 ),
               ),
               SizedBox(height: 40),
-              Text(
-                "Continue with",
-                style: GoogleFonts.inter(fontSize: 20),
-              ),
-              SizedBox(height: 10),
-              SizedBox(
-                width: mq.width * 0.12,
-                height: mq.height * 0.12,
-                child: GestureDetector(
-                  onTap: () {
-                    context.read<AuthBloc>().add(AuthEventGoogleLogIn());
-                  },
-                  child: Image.asset("assets/images/google.png"),
-                ),
-              ),
-              SizedBox(height: 40),
+              Text("Made with" , style: TextStyle(fontSize: 25),),
+              
+              Text("❤" , style: TextStyle(fontSize: 30),),
             ],
           ),
         ),

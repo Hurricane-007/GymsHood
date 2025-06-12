@@ -87,7 +87,7 @@ Future<void> _prepareAndPlayVideo() async {
           mediaUrl: mediaUrlsupdated,
           logourl: widget.gym.media!.logoUrl,
           gymId: widget.gym.gymid);
-      if (success == 'Successfully added Media') {
+      if (success == 'Media updated successfully') {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Video deleted successfully')),
         );
