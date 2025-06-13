@@ -44,7 +44,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to create announcement: $e')),
+          SnackBar(content: Text('Failed to create announcement')),
         );
       }
     } finally {

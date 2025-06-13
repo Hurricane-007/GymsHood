@@ -507,42 +507,215 @@ class GymServerProvider implements GymOwnerInfoProvider {
   }
 
   @override
-  Future<List<RevenueData>> fetchRevenueData(String gymId,
-      {String period = 'monthly'}) async {
-    try {
-      final res = await dio.get(
-        "$baseUrl/gymdb/dashboard/revenue/$gymId",
-        queryParameters: {"period": period},
-      );
+Future<List<RevenueData>> fetchRevenueData(String gymId, {String period = 'monthly'}) async {
+  try {
+    final res = await dio.get(
+      "$baseUrl/gymdb/dashboard/revenue/$gymId",
+      queryParameters: {"period": period},
+    );
 
-      if (res.statusCode == 200 && res.data['success']) {
-        final periodData = res.data['data'][period]; // <-- Fix here
-
-        final planSeries = periodData['planSeries'] as Map<String, dynamic>;
-
-        final List<RevenueData> revenue = [];
-
-        for (final planName in planSeries.keys) {
-          final series = planSeries[planName] as List<dynamic>;
-
-          for (final entry in series) {
-            revenue.add(RevenueData.fromJson({
-              ...entry,
-              'planName': planName, // attach planName manually
-            }));
-          }
-        }
-
-        return revenue;
+    if (res.statusCode == 200 && res.data['success'] == true) {
+      final revenueData = res.data['revenueData'];
+      
+      if (revenueData is List) {
+        return revenueData
+            .map((json) => RevenueData.fromJson(json))
+            .toList();
       } else {
-        developer.log("error in revenue analytics ${res.data}");
-        throw Exception("An error occurred");
+        developer.log("revenueData is not a list: $revenueData");
+        return [];
       }
-    } catch (e) {
-      developer.log("error in revenue analytics $e");
-      rethrow;
+    } else {
+      developer.log("error in revenue analytics ${res.data}");
+      throw Exception("An error occurred");
     }
+  } catch (e) {
+    developer.log("error in revenue analytics $e");
+    rethrow;
   }
+}
+
+// Future<List<RevenueData>> fetchRevenueData(String gymId, {String period = 'monthly'}) async {
+//   await Future.delayed(const Duration(milliseconds: 500)); // Simulate network delay
+
+//   final fixedDate = DateTime(2025, 6, 13); // Fixed current date for consistency
+//   final currentYear = fixedDate.year;
+
+//   // Helper for ISO week number
+//   int getWeekNumber(DateTime date) {
+//     final firstDayOfYear = DateTime(date.year, 1, 1);
+//     final daysPassed = date.difference(firstDayOfYear).inDays;
+//     return ((daysPassed + firstDayOfYear.weekday) / 7).ceil();
+//   }
+
+//   switch (period) {
+//     case 'daily':
+//       final month = fixedDate.month;
+//       final day = fixedDate.day;
+//       return [
+//         RevenueData(
+//           period: {"year": currentYear, "month": month, "day": day},
+//           planId: "plan_basic_001",
+//           planName: "Basic Fitness",
+//           totalRevenue: 1400,
+//           transactionCount: 3,
+//         ),
+//         RevenueData(
+//           period: {"year": currentYear, "month": month, "day": day},
+//           planId: "plan_premium_001",
+//           planName: "Premium Plus",
+//           totalRevenue: 2700,
+//           transactionCount: 5,
+//         ),
+//         RevenueData(
+//           period: {"year": currentYear, "month": month, "day": day},
+//           planId: "plan_annual_001",
+//           planName: "Annual Pro",
+//           totalRevenue: 3300,
+//           transactionCount: 2,
+//         ),
+//         RevenueData(
+//           period: {"year": currentYear, "month": month, "day": day},
+//           planId: "plan_student_001",
+//           planName: "Student Saver",
+//           totalRevenue: 900,
+//           transactionCount: 2,
+//         ),
+//       ];
+
+//     case 'weekly':
+//       return [
+//         // Week 22 (End of May)
+//         RevenueData(
+//           period: {"year": 2025, "week": 22},
+//           planId: "plan_basic_001",
+//           planName: "Basic Fitness",
+//           totalRevenue: 3000,
+//           transactionCount: 4,
+//         ),
+//         RevenueData(
+//           period: {"year": 2025, "week": 22},
+//           planId: "plan_premium_001",
+//           planName: "Premium Plus",
+//           totalRevenue: 5200,
+//           transactionCount: 3,
+//         ),
+
+//         // Week 23 (Start of June)
+//         RevenueData(
+//           period: {"year": 2025, "week": 23},
+//           planId: "plan_annual_001",
+//           planName: "Annual Pro",
+//           totalRevenue: 7600,
+//           transactionCount: 3,
+//         ),
+//         RevenueData(
+//           period: {"year": 2025, "week": 23},
+//           planId: "plan_student_001",
+//           planName: "Student Saver",
+//           totalRevenue: 1900,
+//           transactionCount: 2,
+//         ),
+//       ];
+
+//     case 'monthly':
+//     default:
+//       return [
+//         // April 2025
+//         RevenueData(
+//           period: {"year": 2025, "month": 4},
+//           planId: "plan_basic_001",
+//           planName: "Basic Fitness",
+//           totalRevenue: 4500,
+//           transactionCount: 5,
+//         ),
+//         RevenueData(
+//           period: {"year": 2025, "month": 4},
+//           planId: "plan_premium_001",
+//           planName: "Premium Plus",
+//           totalRevenue: 7000,
+//           transactionCount: 4,
+//         ),
+
+//         // May 2025
+//         RevenueData(
+//           period: {"year": 2025, "month": 5},
+//           planId: "plan_annual_001",
+//           planName: "Annual Pro",
+//           totalRevenue: 8800,
+//           transactionCount: 3,
+//         ),
+//         RevenueData(
+//           period: {"year": 2025, "month": 5},
+//           planId: "plan_student_001",
+//           planName: "Student Saver",
+//           totalRevenue: 2200,
+//           transactionCount: 2,
+//         ),
+
+//         // June 2025
+//         RevenueData(
+//           period: {"year": 2025, "month": 6},
+//           planId: "plan_basic_001",
+//           planName: "Basic Fitness",
+//           totalRevenue: 6200,
+//           transactionCount: 7,
+//         ),
+//         RevenueData(
+//           period: {"year": 2025, "month": 6},
+//           planId: "plan_premium_001",
+//           planName: "Premium Plus",
+//           totalRevenue: 11500,
+//           transactionCount: 6,
+//         ),
+//       ];
+//   }
+// }
+
+
+
+//   Future<List<RevenueData>> fetchRevenueData(String gymId,
+//     {String period = 'monthly'}) async {
+//   await Future.delayed(const Duration(milliseconds: 500)); // simulate network delay
+
+//   final List<Map<String, dynamic>> mockRevenueData = [
+//     // Monthly - Plan A
+//     {
+//       "period": { "year": 2025, "month": 5, "planId": "plan123" },
+//       "planId": "plan123",
+//       "planName": "Monthly Pro Plan",
+//       "totalRevenue": 12000.0,
+//       "transactionCount": 48
+//     },
+//     // Monthly - Plan B
+//     {
+//       "period": { "year": 2025, "month": 5, "planId": "plan456" },
+//       "planId": "plan456",
+//       "planName": "Monthly Basic Plan",
+//       "totalRevenue": 4500.0,
+//       "transactionCount": 30
+//     },
+//     // Weekly - Plan A
+//     {
+//       "period": { "year": 2025, "week": 22, "planId": "plan123" },
+//       "planId": "plan123",
+//       "planName": "Monthly Pro Plan",
+//       "totalRevenue": 3000.0,
+//       "transactionCount": 12
+//     },
+//     // Daily - Plan B
+//     {
+//       "period": { "year": 2025, "month": 6, "day": 10, "planId": "plan456" },
+//       "planId": "plan456",
+//       "planName": "Monthly Basic Plan",
+//       "totalRevenue": 500.0,
+//       "transactionCount": 3
+//     }
+//   ];
+
+//   return mockRevenueData.map((e) => RevenueData.fromJson(e)).toList();
+// }
+
 
   @override
   Future<bool> createFundaccount(String upiId, String accountNumber,
