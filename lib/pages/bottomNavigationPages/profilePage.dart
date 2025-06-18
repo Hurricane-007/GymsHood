@@ -231,114 +231,100 @@ class _ProfilePageState extends State<ProfilePage>
                       children: [
                         Stack(
                           children: [
-                            _image != null
-                                ? ClipRRect(
-                                    borderRadius:
-                                        BorderRadius.circular(mq.height * .1),
-                                    child: SizedBox(
-                                        width: mq.height * 0.15,
-                                        height: mq.height * 0.15,
-                                        child: Material(
-                                          color: Colors.transparent,
-                                          child: InkWell(
-                                            onLongPress: () async {
-                                            
-                                              final confirm =
-                                                  await showDeleteDialog(
-                                                      context);
-                                              if (confirm == true) {
-                                                final success =
-                                                    await Gymserviceprovider
-                                                            .server()
-                                                        .addGymMedia(
-                                                            mediaType: 'photo',
-                                                            mediaUrl:
-                                                                selectedGym!
-                                                                    .media!
-                                                                    .mediaUrls,
-                                                            logourl: '',
-                                                            gymId: selectedGym!
-                                                                .gymid);
-                                                if (success ==
-                                                    'Media updated successfully') {
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(
-                                                    const SnackBar(
-                                                        content: Text(
-                                                            'profile photo deleted successfully')),
-                                                  );
-                                                  setState(() {
-                                                    _image = null;
-                                                  });
-                                                } else {
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(
-                                                    const SnackBar(
-                                                        content: Text(
-                                                            'Failed to delete profile photo')),
-                                                  );
-                                                }
-                                              }
-                                            },
-                                            onTap: () => Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      FullScreenImagePage(
-                                                          gym: selectedGym!,
-                                                          imageUrl: _image!),
-                                                )),
-                                            child:
-                                                // Image.network(
-                                                //   _image!,
-                                                //   height: mq.height * 0.2,
-                                                //   fit: BoxFit.cover,
-                                                // )
-                                                (_image != null &&
-                                                        _image!.isNotEmpty)
-                                                    ? CachedNetworkImage(
-                                                        imageUrl: _image!,
-                                                        fit: BoxFit.cover,
-                                                        errorWidget: (context,
-                                                                url, error) =>
-                                                            Icon(
-                                                                CupertinoIcons
-                                                                    .person,
-                                                                size:
-                                                                    mq.height *
-                                                                        0.1),
-                                                      )
-                                                    : Icon(
-                                                        CupertinoIcons.person,
-                                                        size: mq.height * 0.1),
-                                          ),
-                                        )))
-                                : ClipOval(
-                                    child: Container(
-                                      width: mq.height * 0.15,
-                                      height: mq.height * 0.15,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        border: Border.all(color: Colors.grey),
-                                      ),
-                                      child: Icon(CupertinoIcons.person,
-                                          size: mq.height * 0.1),
-                                    ),
-                                  ),
-                            Positioned(
-                              top: 70,
-                              left: 75,
-                              child: Material(
-                                shape: CircleBorder(),
-                                elevation: 2,
-                                color: Colors.white,
-                                child: IconButton(
-                                  onPressed: () => _showBottomSheet(),
-                                  icon: Icon(Icons.edit),
+                            Container(
+                              width: mq.height * 0.15,
+                              height: mq.height * 0.15,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
                                   color: Theme.of(context).primaryColor,
+                                  width: 2,
                                 ),
                               ),
-                            )
+                              child: _image != null
+                                  ? ClipRRect(
+                                      borderRadius: BorderRadius.circular(mq.height * .1),
+                                      child: Material(
+                                        color: Colors.transparent,
+                                        child: InkWell(
+                                          onLongPress: () async {
+                                            final confirm = await showDeleteDialog(context);
+                                            if (confirm == true) {
+                                              final success = await Gymserviceprovider.server().addGymMedia(
+                                                mediaType: 'photo',
+                                                mediaUrl: selectedGym!.media!.mediaUrls,
+                                                logourl: '',
+                                                gymId: selectedGym!.gymid);
+                                              if (success == 'Media updated successfully') {
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  const SnackBar(content: Text('profile photo deleted successfully')),
+                                                );
+                                                setState(() {
+                                                  _image = null;
+                                                });
+                                              } else {
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  const SnackBar(content: Text('Failed to delete profile photo')),
+                                                );
+                                              }
+                                            }
+                                          },
+                                          onTap: () => Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => FullScreenImagePage(
+                                                gym: selectedGym!,
+                                                imageUrl: _image!,
+                                              ),
+                                            ),
+                                          ),
+                                          child: CachedNetworkImage(
+                                            imageUrl: _image!,
+                                            fit: BoxFit.cover,
+                                            errorWidget: (context, url, error) => Icon(
+                                              CupertinoIcons.person,
+                                              size: mq.height * 0.1,
+                                              color: Colors.grey[400],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                  : Icon(
+                                      CupertinoIcons.person,
+                                      size: mq.height * 0.1,
+                                      color: Colors.grey[400],
+                                    ),
+                            ),
+                            Positioned(
+                              right: 0,
+                              bottom: 0,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).primaryColor,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 2,
+                                  ),
+                                ),
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    onTap: () => _showBottomSheet(),
+                                    borderRadius: BorderRadius.circular(20),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Icon(
+                                        Icons.edit,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                         SizedBox(height: mq.height * 0.01),
@@ -415,7 +401,7 @@ class _ProfilePageState extends State<ProfilePage>
                         PhotosTabBar(gym: selectedGym!),
                         VideoTabBar(gym: selectedGym!),
                         EquipmentTabBar(list: equipment),
-                        ReviewsTabBar(),
+                        ReviewsTabBar(gymId: selectedGym!.gymid),
                         AboutTabBar(gym: selectedGym!),
                       ],
                     ),

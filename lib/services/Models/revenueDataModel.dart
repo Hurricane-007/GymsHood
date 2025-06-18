@@ -1,25 +1,21 @@
-class RevenueData {
-  final Map<String, dynamic> period;
-  final String planId;
-  final String planName;
-  final double totalRevenue;
-  final int transactionCount;
+class RevenueAnalytics {
+  final List<String> dates;
+  final List<double> totals;
+  final Map<String, List<double>> planSeries;
 
-  RevenueData({
-    required this.period,
-    required this.planId,
-    required this.planName,
-    required this.totalRevenue,
-    required this.transactionCount,
+  RevenueAnalytics({
+    required this.dates,
+    required this.totals,
+    required this.planSeries,
   });
 
-  factory RevenueData.fromJson(Map<String, dynamic> json) {
-    return RevenueData(
-      period: json['period'] ?? {},
-      planId: json['planId'] ?? '',
-      planName: json['planName'] ?? '',
-      totalRevenue: (json['totalRevenue'] ?? 0).toDouble(),
-      transactionCount: (json['transactionCount'] ?? 0),
+  factory RevenueAnalytics.fromJson(Map<String, dynamic> json) {
+    return RevenueAnalytics(
+      dates: List<String>.from(json['dates']),
+      totals: List<double>.from((json['totals'] as List).map((e) => (e as num).toDouble())),
+      planSeries: (json['planSeries'] as Map<String, dynamic>).map(
+        (k, v) => MapEntry(k, List<double>.from((v as List).map((e) => (e as num).toDouble()))),
+      ),
     );
   }
 }

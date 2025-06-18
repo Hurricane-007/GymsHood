@@ -100,7 +100,7 @@ return provider.toggleGymstatus();
   }
   
   @override
-  Future<List<RevenueData>> fetchRevenueData(String gymId , {String period = 'monthly'}) {
+  Future<RevenueAnalytics?> fetchRevenueData(String gymId, {String period = 'monthly'}){
     return provider.fetchRevenueData(gymId , period: period);
   }
   
@@ -122,5 +122,10 @@ return provider.toggleGymstatus();
   @override
   Future<bool> recreateFundaccount(String upiId, String accountNumber, String ifscCode, String accountHolder) {
     return provider.recreateFundaccount(upiId, accountNumber, ifscCode, accountHolder);
+  }
+  
+  @override
+  Future<List<GymRating>> getratings(String gymId) {
+    return provider.getratings(gymId);
   }
 }

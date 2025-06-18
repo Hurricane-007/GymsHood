@@ -21,12 +21,12 @@ class RevenuePage extends StatefulWidget {
 
 class _RevenuePageState extends State<RevenuePage> {
   String selectedPeriod = 'monthly';
-  List<RevenueData> revenueData = [];
+  RevenueAnalytics? revenueData;
   bool isLoading = true;
   String? error;
   String selectedChartType = 'bar'; // 'bar' or 'pie'
-  DateTime selectedDate = DateTime.now();
-  Map<String, dynamic>? selectedPeriodData;
+  String? selectedPeriodData;
+  late Size mq;
 
   @override
   void initState() {
@@ -47,7 +47,7 @@ class _RevenuePageState extends State<RevenuePage> {
       if (gyms.isEmpty) {
         setState(() {
           isLoading = false;
-          revenueData = [];
+          revenueData = null;
         });
         return;
       }
@@ -69,35 +69,28 @@ class _RevenuePageState extends State<RevenuePage> {
     }
   }
 
-  String formatPeriod(Map<String, dynamic> period) {
-    if (period.containsKey('day')) {
-      return '${period['year']}-${period['month']}-${period['day']}';
-    } else if (period.containsKey('week')) {
-      return 'Week ${period['week']}, ${period['year']}';
+  String formatPeriod(String period) {
+    final parts = period.split('-');
+    if (parts.length == 3) {
+      // Daily format: YYYY-MM-DD
+      return DateFormat('MMM dd, yyyy').format(DateTime(
+        int.parse(parts[0]),
+        int.parse(parts[1]),
+        int.parse(parts[2])
+      ));
+    } else if (parts.length == 2) {
+      // Monthly format: YYYY-MM
+      return DateFormat('MMMM yyyy').format(DateTime(
+        int.parse(parts[0]),
+        int.parse(parts[1])
+      ));
     } else {
-      return '${DateFormat('MMMM').format(DateTime(2000, period['month']))} ${period['year']}';
+      return period;
     }
-  }
-
-  List<DateTime> getAvailableMonths() {
-    Set<String> uniqueMonths = {};
-    for (var data in revenueData) {
-      if (data.period['year'] != null && data.period['month'] != null) {
-        uniqueMonths.add('${data.period['year']}-${data.period['month']}');
-      }
-    }
-    return uniqueMonths.map((dateStr) {
-      final parts = dateStr.split('-');
-      return DateTime(int.parse(parts[0]), int.parse(parts[1]));
-    }).toList()..sort((a, b) => b.compareTo(a));
-  }
-
-  String formatMonth(DateTime date) {
-    return DateFormat('MMMM yyyy').format(date);
   }
 
   Widget _buildChart() {
-    if (revenueData.isEmpty) {
+    if (revenueData == null) {
       return Column(
         children: [
           const SizedBox(height: 20),
@@ -139,21 +132,25 @@ class _RevenuePageState extends State<RevenuePage> {
       );
     }
 
-    // Group data by planName
-    final Map<String, List<RevenueData>> planGroups = {};
-    for (final data in revenueData) {
-      planGroups.putIfAbsent(data.planName, () => []).add(data);
-    }
+    final dates = revenueData!.dates;
+    final totals = revenueData!.totals;
+    final planSeries = revenueData!.planSeries;
 
-    // Sort each plan's data chronologically
-    for (final entries in planGroups.values) {
-      entries.sort((a, b) {
-        String keyA =
-            "${a.period['year'] ?? ''}${a.period['month'] ?? ''}${a.period['week'] ?? ''}${a.period['day'] ?? ''}";
-        String keyB =
-            "${b.period['year'] ?? ''}${b.period['month'] ?? ''}${b.period['week'] ?? ''}${b.period['day'] ?? ''}";
-        return keyA.compareTo(keyB);
-      });
+    if (dates.isEmpty) {
+      return Column(
+        children: [
+          const SizedBox(height: 20),
+          Icon(Icons.bar_chart, size: 80, color: Colors.grey[400]),
+          const SizedBox(height: 16),
+          Text(
+            'No Revenue Data Available',
+            style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[600]),
+          ),
+        ],
+      );
     }
 
     return Column(
@@ -191,8 +188,8 @@ class _RevenuePageState extends State<RevenuePage> {
             key: ValueKey(selectedChartType),
             height: 300,
             child: selectedChartType == 'bar'
-                ? _buildBarChart(planGroups)
-                : _buildPieChart(planGroups),
+                ? _buildBarChart(dates, totals, planSeries)
+                : _buildPieChart(dates, totals, planSeries),
           ),
         ),
         const SizedBox(height: 20),
@@ -200,8 +197,8 @@ class _RevenuePageState extends State<RevenuePage> {
           spacing: 16,
           runSpacing: 8,
           alignment: WrapAlignment.center,
-          children: planGroups.keys.map((planName) {
-            final index = planGroups.keys.toList().indexOf(planName);
+          children: planSeries.keys.map((planId) {
+            final index = planSeries.keys.toList().indexOf(planId);
             return Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -214,7 +211,7 @@ class _RevenuePageState extends State<RevenuePage> {
                   ),
                 ),
                 const SizedBox(width: 4),
-                Text(planName, style: const TextStyle(fontSize: 12)),
+                Text(planId, style: const TextStyle(fontSize: 12)),
               ],
             );
           }).toList(),
@@ -223,37 +220,18 @@ class _RevenuePageState extends State<RevenuePage> {
     );
   }
 
-  Widget _buildBarChart(Map<String, List<RevenueData>> planGroups) {
-    // Get unique periods for x-axis labels
-    List<Map<String, dynamic>> uniquePeriods = [];
-    for (var data in revenueData) {
-      if (!uniquePeriods.any((period) => 
-          period['year'] == data.period['year'] && 
-          period['month'] == data.period['month'] &&
-          period['week'] == data.period['week'] &&
-          period['day'] == data.period['day'])) {
-        uniquePeriods.add(data.period);
-      }
-    }
-
-    // Sort periods chronologically
-    uniquePeriods.sort((a, b) {
-      String keyA = "${a['year'] ?? ''}${a['month'] ?? ''}${a['week'] ?? ''}${a['day'] ?? ''}";
-      String keyB = "${b['year'] ?? ''}${b['month'] ?? ''}${b['week'] ?? ''}${b['day'] ?? ''}";
-      return keyA.compareTo(keyB);
-    });
-
+  Widget _buildBarChart(List<String> dates, List<double> totals, Map<String, List<double>> planSeries) {
     return BarChart(
       BarChartData(
         alignment: BarChartAlignment.spaceAround,
-        maxY: _getMaxRevenue(planGroups) * 1.2,
+        maxY: _getMaxRevenue(totals, planSeries) * 1.2,
         barTouchData: BarTouchData(
           enabled: true,
           touchTooltipData: BarTouchTooltipData(
             tooltipBorder: const BorderSide(color: Colors.blueGrey),
             getTooltipItem: (group, groupIndex, rod, rodIndex) {
               return BarTooltipItem(
-                '${rod.toY.toStringAsFixed(2)}',
+                '₹${rod.toY.toStringAsFixed(2)}',
                 const TextStyle(color: Colors.white),
               );
             },
@@ -265,11 +243,11 @@ class _RevenuePageState extends State<RevenuePage> {
             sideTitles: SideTitles(
               showTitles: true,
               getTitlesWidget: (value, meta) {
-                if (value.toInt() >= uniquePeriods.length) return const Text('');
+                if (value.toInt() >= dates.length) return const Text('');
                 return Padding(
                   padding: const EdgeInsets.only(top: 8.0),
                   child: Text(
-                    formatPeriod(uniquePeriods[value.toInt()]),
+                    formatPeriod(dates[value.toInt()]),
                     style: const TextStyle(fontSize: 10),
                   ),
                 );
@@ -296,41 +274,36 @@ class _RevenuePageState extends State<RevenuePage> {
           ),
         ),
         borderData: FlBorderData(show: false),
-        barGroups: _createBarGroups(planGroups, uniquePeriods),
+        barGroups: _createBarGroups(dates, totals, planSeries),
       ),
     );
   }
 
-  Widget _buildPieChart(Map<String, List<RevenueData>> planGroups) {
-    if (planGroups.isEmpty) return const SizedBox();
+  Widget _buildPieChart(List<String> dates, List<double> totals, Map<String, List<double>> planSeries) {
+    if (dates.isEmpty) return const SizedBox();
 
-    // Get the selected period from the cards section
-    final groupedPeriods = _getGroupedPeriods();
-    if (groupedPeriods.isEmpty) return const SizedBox();
-
-    // Use the selected period data or default to first period
-    final currentPeriod = selectedPeriodData ?? groupedPeriods[0]['period'] as Map<String, dynamic>;
-    String periodLabel = formatPeriod(currentPeriod);
-
-    // Calculate total revenue for each plan for the selected period
-    Map<String, double> planTotals = {};
-    double grandTotal = 0;
+    // Use the selected period or default to the most recent
+    final currentIndex = selectedPeriodData != null 
+        ? dates.indexOf(selectedPeriodData!) 
+        : dates.length - 1;
     
-    for (var entry in planGroups.entries) {
-      final periodData = entry.value.where((data) =>
-          data.period['year'] == currentPeriod['year'] &&
-          data.period['month'] == currentPeriod['month'] &&
-          (selectedPeriod == 'monthly' || data.period['week'] == currentPeriod['week']) &&
-          (selectedPeriod == 'daily' ? data.period['day'] == currentPeriod['day'] : true)).toList();
+    if (currentIndex < 0) return const SizedBox();
 
-      if (periodData.isNotEmpty) {
-        double total = periodData.fold(0, (sum, data) => sum + data.totalRevenue);
-        planTotals[entry.key] = total;
-        grandTotal += total;
+    final currentDate = dates[currentIndex];
+    final currentTotal = totals[currentIndex];
+    
+    // Calculate plan revenues for the selected period
+    Map<String, double> planRevenues = {};
+    double totalRevenue = 0;
+    
+    planSeries.forEach((planId, revenues) {
+      if (currentIndex < revenues.length) {
+        planRevenues[planId] = revenues[currentIndex];
+        totalRevenue += revenues[currentIndex];
       }
-    }
+    });
 
-    if (planTotals.isEmpty) {
+    if (planRevenues.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -338,7 +311,7 @@ class _RevenuePageState extends State<RevenuePage> {
             Icon(Icons.pie_chart, size: 80, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
-              'No Revenue Data for $periodLabel',
+              'No Revenue Data for ${formatPeriod(currentDate)}',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -353,12 +326,12 @@ class _RevenuePageState extends State<RevenuePage> {
     // Create pie chart sections
     List<PieChartSectionData> sections = [];
     int index = 0;
-    planTotals.forEach((planName, total) {
-      final percentage = (total / grandTotal * 100);
+    planRevenues.forEach((planId, revenue) {
+      final percentage = (revenue / totalRevenue * 100);
       sections.add(
         PieChartSectionData(
           color: _getColorForIndex(index),
-          value: total,
+          value: revenue,
           title: '${percentage.toStringAsFixed(1)}%',
           radius: 100,
           titleStyle: const TextStyle(
@@ -378,7 +351,7 @@ class _RevenuePageState extends State<RevenuePage> {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              'Revenue Distribution for $periodLabel',
+              'Revenue Distribution for ${formatPeriod(currentDate)}',
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -405,9 +378,9 @@ class _RevenuePageState extends State<RevenuePage> {
           ),
           const SizedBox(height: 20),
           // Legend with plan details
-          ...planTotals.entries.map((entry) {
-            final index = planTotals.keys.toList().indexOf(entry.key);
-            final percentage = (entry.value / grandTotal * 100);
+          ...planRevenues.entries.map((entry) {
+            final index = planRevenues.keys.toList().indexOf(entry.key);
+            final percentage = (entry.value / totalRevenue * 100);
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 4.0),
               child: Row(
@@ -435,7 +408,7 @@ class _RevenuePageState extends State<RevenuePage> {
           }).toList(),
           const SizedBox(height: 16),
           Text(
-            'Total Revenue for $periodLabel: ₹${grandTotal.toStringAsFixed(2)}',
+            'Total Revenue: ₹${totalRevenue.toStringAsFixed(2)}',
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -448,59 +421,58 @@ class _RevenuePageState extends State<RevenuePage> {
     );
   }
 
-  List<BarChartGroupData> _createBarGroups(
-      Map<String, List<RevenueData>> planGroups, List<Map<String, dynamic>> uniquePeriods) {
-    if (planGroups.isEmpty || revenueData.isEmpty) return [];
-
+  List<BarChartGroupData> _createBarGroups(List<String> dates, List<double> totals, Map<String, List<double>> planSeries) {
     List<BarChartGroupData> barGroups = [];
-    final plans = planGroups.keys.toList();
+    final planIds = planSeries.keys.toList();
 
-    for (int i = 0; i < uniquePeriods.length; i++) {
+    for (int i = 0; i < dates.length; i++) {
       List<BarChartRodData> rods = [];
-      for (int j = 0; j < plans.length; j++) {
-        final planData = planGroups[plans[j]]!;
-        final matchingData = planData.where((data) =>
-            data.period['year'] == uniquePeriods[i]['year'] &&
-            data.period['month'] == uniquePeriods[i]['month'] &&
-            data.period['week'] == uniquePeriods[i]['week'] &&
-            data.period['day'] == uniquePeriods[i]['day']).toList();
-
-        if (matchingData.isNotEmpty) {
-          rods.add(
-            BarChartRodData(
-              toY: matchingData[0].totalRevenue,
-              color: _getColorForIndex(j),
-              width: 8,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
-            ),
-          );
-        }
-      }
-      if (rods.isNotEmpty) {
-        barGroups.add(
-          BarChartGroupData(
-            x: i,
-            barRods: rods,
-            barsSpace: 4,
+      for (int j = 0; j < planIds.length; j++) {
+        final planId = planIds[j];
+        final revenues = planSeries[planId] ?? [];
+        final revenue = i < revenues.length ? revenues[i] : 0.0;
+        
+        rods.add(
+          BarChartRodData(
+            toY: revenue,
+            color: _getColorForIndex(j),
+            width: 8,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
           ),
         );
       }
+      
+      barGroups.add(
+        BarChartGroupData(
+          x: i,
+          barRods: rods,
+          barsSpace: 4,
+        ),
+      );
     }
     return barGroups;
   }
 
-  double _getMaxRevenue(Map<String, List<RevenueData>> planGroups) {
-    if (planGroups.isEmpty) return 100.0; // Default max value if no data
-
+  double _getMaxRevenue(List<double> totals, Map<String, List<double>> planSeries) {
     double maxRevenue = 0;
-    for (var planData in planGroups.values) {
-      for (var data in planData) {
-        if (data.totalRevenue > maxRevenue) {
-          maxRevenue = data.totalRevenue;
+    
+    // Check totals
+    for (var total in totals) {
+      if (total > maxRevenue) {
+        maxRevenue = total;
+      }
+    }
+    
+    // Check plan series
+    for (var revenues in planSeries.values) {
+      for (var revenue in revenues) {
+        if (revenue > maxRevenue) {
+          maxRevenue = revenue;
         }
       }
     }
-    return maxRevenue > 0 ? maxRevenue : 100.0; // Return default if no revenue
+    
+    return maxRevenue > 0 ? maxRevenue : 100.0;
   }
 
   Color _getColorForIndex(int index) {
@@ -515,295 +487,177 @@ class _RevenuePageState extends State<RevenuePage> {
     return colors[index % colors.length];
   }
 
-  List<Map<String, dynamic>> _getGroupedPeriods() {
-    Map<String, List<RevenueData>> groupedData = {};
-    
-    for (var data in revenueData) {
-      String key = '${data.period['year']}-${data.period['month']}';
-      if (selectedPeriod == 'weekly') {
-        key += '-${data.period['week']}';
-      } else if (selectedPeriod == 'daily') {
-        key += '-${data.period['day']}';
-      }
-      
-      if (!groupedData.containsKey(key)) {
-        groupedData[key] = [];
-      }
-      groupedData[key]!.add(data);
-    }
-
-    List<Map<String, dynamic>> result = [];
-    groupedData.forEach((key, data) {
-      result.add({
-        'period': data.first.period,
-        'data': data,
-      });
-    });
-
-    // Sort in descending order
-    result.sort((a, b) {
-      String keyA = '${a['period']['year']}${a['period']['month']}${a['period']['week'] ?? ''}${a['period']['day'] ?? ''}';
-      String keyB = '${b['period']['year']}${b['period']['month']}${b['period']['week'] ?? ''}${b['period']['day'] ?? ''}';
-      return keyB.compareTo(keyA);
-    });
-
-    return result;
-  }
-
-  // Add this method to get the selected period data
-  Map<String, dynamic> _getSelectedPeriodData() {
-    if (revenueData.isEmpty) return {};
-    
-    // Get unique periods
-    Set<String> uniquePeriods = {};
-    for (var data in revenueData) {
-      String key = '${data.period['year']}-${data.period['month']}';
-      if (selectedPeriod == 'weekly') {
-        key += '-${data.period['week']}';
-      } else if (selectedPeriod == 'daily') {
-        key += '-${data.period['day']}';
-      }
-      uniquePeriods.add(key);
-    }
-
-    // Sort periods in descending order
-    List<String> sortedPeriods = uniquePeriods.toList()..sort((a, b) => b.compareTo(a));
-    
-    // Get the first period's data
-    String firstPeriod = sortedPeriods.first;
-    final parts = firstPeriod.split('-');
-    
-    return {
-      'year': int.parse(parts[0]),
-      'month': int.parse(parts[1]),
-      if (selectedPeriod == 'weekly') 'week': int.parse(parts[2]),
-      if (selectedPeriod == 'daily') 'day': int.parse(parts[2]),
-    };
-  }
-
-  // Add this method to get available periods
-  List<Map<String, dynamic>> _getAvailablePeriods() {
-    if (revenueData.isEmpty) return [];
-
-    Set<String> uniquePeriods = {};
-    for (var data in revenueData) {
-      String key = '${data.period['year']}-${data.period['month']}';
-      if (selectedPeriod == 'weekly') {
-        key += '-${data.period['week']}';
-      } else if (selectedPeriod == 'daily') {
-        key += '-${data.period['day']}';
-      }
-      uniquePeriods.add(key);
-    }
-
-    List<String> sortedPeriods = uniquePeriods.toList()..sort((a, b) => b.compareTo(a));
-    
-    return sortedPeriods.map((period) {
-      final parts = period.split('-');
-      return {
-        'year': int.parse(parts[0]),
-        'month': int.parse(parts[1]),
-        if (selectedPeriod == 'weekly') 'week': int.parse(parts[2]),
-        if (selectedPeriod == 'daily') 'day': int.parse(parts[2]),
-      };
-    }).toList();
-  }
-
   @override
   Widget build(BuildContext context) {
     mq = MediaQuery.of(context).size;
     return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).primaryColor,
-          title: const Text(
-            "Revenue Analytics",
-            style: TextStyle(color: Colors.white),
-          ),
-          centerTitle: true,
-          actions: [
-            PopupMenuButton<String>(
-              // color: Colors.white,
-              iconColor: Colors.white,
-              onSelected: (String value) {
-                setState(() {
-                  selectedPeriod = value;
-                  fetchRevenueData();
-                });
-              },
-              itemBuilder: (BuildContext context) => [
-                const PopupMenuItem(
-                  value: 'daily',
-                  child: Text('Daily'),
-                ),
-                const PopupMenuItem(
-                  value: 'weekly',
-                  child: Text('Weekly'),
-                ),
-                const PopupMenuItem(
-                  value: 'monthly',
-                  child: Text('Monthly'),
-                ),
-              ],
-            ),
-          ],
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).primaryColor,
+        title: const Text(
+          "Revenue Analytics",
+          style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: Colors.white,
-        body: isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : error != null
-                ? Center(
-                    child:
-                        Text(error!, style: const TextStyle(color: Colors.red)))
-                : revenueData.isEmpty
-                    ? FutureBuilder<List<Gym>>(
-                        future: AuthService.server().getUser().then((user) =>
-                            Gymserviceprovider.server()
-                                .getGymsByowner(user!.userid!)),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const Center(
-                                child: CircularProgressIndicator());
-                          }
+        centerTitle: true,
+        actions: [
+          PopupMenuButton<String>(
+            iconColor: Colors.white,
+            onSelected: (String value) {
+              setState(() {
+                selectedPeriod = value;
+                fetchRevenueData();
+              });
+            },
+            itemBuilder: (BuildContext context) => [
+              const PopupMenuItem(
+                value: 'daily',
+                child: Text('Daily'),
+              ),
+              const PopupMenuItem(
+                value: 'weekly',
+                child: Text('Weekly'),
+              ),
+              const PopupMenuItem(
+                value: 'monthly',
+                child: Text('Monthly'),
+              ),
+              const PopupMenuItem(
+                value: 'yearly',
+                child: Text('Yearly'),
+              ),
+            ],
+          ),
+        ],
+      ),
+      backgroundColor: Colors.white,
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : error != null
+              ? Center(child: Text(error!, style: const TextStyle(color: Colors.red)))
+              : revenueData == null
+                  ? FutureBuilder<List<Gym>>(
+                      future: AuthService.server().getUser().then((user) =>
+                          Gymserviceprovider.server()
+                              .getGymsByowner(user!.userid!)),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Center(child: CircularProgressIndicator());
+                        }
 
-                          if (snapshot.hasError) {
-                            return Center(
-                                child: Text('Error: ${snapshot.error}'));
-                          }
+                        if (snapshot.hasError) {
+                          return Center(child: Text('Error: ${snapshot.error}'));
+                        }
 
-                          final gyms = snapshot.data ?? [];
+                        final gyms = snapshot.data ?? [];
 
-                          if (gyms.isEmpty) {
-                            return Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.business,
-                                    size: 80,
-                                    color: Colors.grey[400],
+                        if (gyms.isEmpty) {
+                          return Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.business, size: 80, color: Colors.grey[400]),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'No Gym Found',
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey[600],
                                   ),
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    'No Gym Found',
+                                ),
+                                const SizedBox(height: 8),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                                  child: Text(
+                                    'Create a gym to start tracking your revenue analytics',
+                                    textAlign: TextAlign.center,
                                     style: TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
                                       color: Colors.grey[600],
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 32.0),
-                                    child: Text(
-                                      'Create a gym to start tracking your revenue analytics',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.grey[600],
-                                      ),
-                                    ),
+                                ),
+                                const SizedBox(height: 24),
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => Gyminfopage()),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.add_business),
+                                  label: const Text('Create Gym'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Theme.of(context).primaryColor,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                                   ),
-                                  const SizedBox(height: 24),
-                                  ElevatedButton.icon(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                Gyminfopage()),
-                                      );
-                                    },
-                                    icon: const Icon(Icons.add_business),
-                                    label: const Text('Create Gym'),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor:
-                                          Theme.of(context).primaryColor,
-                                      foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 24, vertical: 12),
-                                    ),
+                                ),
+                              ],
+                            ),
+                          );
+                        } else {
+                          return Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.bar_chart, size: 80, color: Colors.grey[400]),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'No Revenue Data Available',
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey[600],
                                   ),
-                                ],
-                              ),
-                            );
-                          } else {
-                            return Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.bar_chart,
-                                    size: 80,
-                                    color: Colors.grey[400],
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Text(
-                                    'No Revenue Data Available',
+                                ),
+                                const SizedBox(height: 8),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                                  child: Text(
+                                    'Start creating gym plans and accepting payments to see your revenue analytics here.',
+                                    textAlign: TextAlign.center,
                                     style: TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
                                       color: Colors.grey[600],
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 32.0),
-                                    child: Text(
-                                      'Start creating gym plans and accepting payments to see your revenue analytics here.',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.grey[600],
-                                      ),
-                                    ),
+                                ),
+                                const SizedBox(height: 24),
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => CreatePlansPage()),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.add),
+                                  label: const Text('Create Gym Plans'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Theme.of(context).primaryColor,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                                   ),
-                                  const SizedBox(height: 24),
-                                  ElevatedButton.icon(
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                CreatePlansPage()),
-                                      );
-                                    },
-                                    icon: const Icon(Icons.add),
-                                    label: const Text('Create Gym Plans'),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor:
-                                          Theme.of(context).primaryColor,
-                                      foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 24, vertical: 12),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }
-                        },
-                      )
-                    : SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            _buildChart(),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                      },
+                    )
+                  : SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          _buildChart(),
+                          if (revenueData != null)
                             ListView.builder(
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
                               padding: const EdgeInsets.all(16),
-                              itemCount: _getGroupedPeriods().length,
+                              itemCount: revenueData!.dates.length,
                               itemBuilder: (context, index) {
-                                final periodGroup = _getGroupedPeriods()[index];
-                                final periodLabel = formatPeriod(periodGroup['period']!);
-                                final periodData = periodGroup['data'] as List<RevenueData>;
+                                final date = revenueData!.dates[index];
+                                final total = revenueData!.totals[index];
                                 
-                                // Calculate total revenue for this period
-                                double periodTotal = periodData.fold(
-                                    0, (sum, data) => sum + data.totalRevenue);
-
                                 return Card(
                                   elevation: 4,
                                   margin: const EdgeInsets.only(bottom: 16),
@@ -811,7 +665,7 @@ class _RevenuePageState extends State<RevenuePage> {
                                     onExpansionChanged: (expanded) {
                                       if (expanded) {
                                         setState(() {
-                                          selectedPeriodData = periodGroup['period'] as Map<String, dynamic>;
+                                          selectedPeriodData = date;
                                         });
                                       }
                                     },
@@ -819,14 +673,14 @@ class _RevenuePageState extends State<RevenuePage> {
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
-                                          periodLabel,
+                                          formatPeriod(date),
                                           style: const TextStyle(
                                             fontSize: 18,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
                                         Text(
-                                          '₹${periodTotal.toStringAsFixed(2)}',
+                                          '₹${total.toStringAsFixed(2)}',
                                           style: const TextStyle(
                                             fontSize: 18,
                                             fontWeight: FontWeight.bold,
@@ -835,68 +689,53 @@ class _RevenuePageState extends State<RevenuePage> {
                                         ),
                                       ],
                                     ),
-                                    children: periodData.map((data) {
+                                    children: revenueData!.planSeries.entries.map((entry) {
+                                      final planId = entry.key;
+                                      final revenues = entry.value;
+                                      final revenue = index < revenues.length ? revenues[index] : 0.0;
+                                      
                                       return Card(
-                                        margin: const EdgeInsets.symmetric(
-                                            horizontal: 16, vertical: 4),
+                                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                                         child: Padding(
                                           padding: const EdgeInsets.all(16),
                                           child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
+                                            crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                'Plan: ${data.planName}',
+                                                'Plan: $planId',
                                                 style: const TextStyle(
                                                   fontSize: 16,
                                                   fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 8),
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      const Text(
+                                                        'Revenue',
+                                                        style: TextStyle(
+                                                          fontSize: 14,
+                                                          color: Colors.grey,
+                                                        ),
+                                                      ),
+                                                      Text(
+                                                        '₹${revenue.toStringAsFixed(2)}',
+                                                        style: const TextStyle(
+                                                          fontSize: 18,
+                                                          fontWeight: FontWeight.bold,
+                                                          color: Colors.green,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
                                           ),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                      const Text('Revenue',
-                                                    style: TextStyle(
-                                                        fontSize: 14,
-                                                        color: Colors.grey)),
-                                                Text(
-                                                  '₹${data.totalRevenue.toStringAsFixed(2)}',
-                                                  style: const TextStyle(
-                                                            fontSize: 18,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      color: Colors.green),
-                                                ),
-                                              ],
-                                            ),
-                                            Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.end,
-                                              children: [
-                                                const Text('Transactions',
-                                                    style: TextStyle(
-                                                        fontSize: 14,
-                                                        color: Colors.grey)),
-                                                Text(
-                                                  data.transactionCount
-                                                      .toString(),
-                                                  style: const TextStyle(
-                                                            fontSize: 18,
-                                                      fontWeight:
-                                                          FontWeight.bold),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
                                         ),
                                       );
                                     }).toList(),
@@ -904,8 +743,9 @@ class _RevenuePageState extends State<RevenuePage> {
                                 );
                               },
                             ),
-                          ],
-                        ),
-                      ));
+                        ],
+                      ),
+                    ),
+    );
   }
 }
