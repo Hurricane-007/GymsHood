@@ -21,8 +21,6 @@ class _UpdateGymDetailsPageState extends State<UpdateGymDetailsPage>
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   final nameController = TextEditingController();
-  final locationController = TextEditingController();
-  final coordinatesController = TextEditingController();
   final capacityController = TextEditingController();
   final openTimeController = TextEditingController();
   final closeTimeController = TextEditingController();
@@ -60,8 +58,6 @@ class _UpdateGymDetailsPageState extends State<UpdateGymDetailsPage>
 
   void populateFields(Gym gym) {
     nameController.text = gym.name;
-    locationController.text = gym.location.address;
-    coordinatesController.text = gym.location.coordinates.join(",");
     capacityController.text = gym.capacity.toString();
     openTimeController.text = gym.openTime;
     closeTimeController.text = gym.closeTime;
@@ -135,14 +131,6 @@ class _UpdateGymDetailsPageState extends State<UpdateGymDetailsPage>
     final response = await Gymserviceprovider.server().updateGym(
       gymId: _selectedGym!.gymid,
       name: nameController.text,
-      location: {
-        'address': locationController.text,
-        'coordinates':coordinatesController.text
-                      .split(',')
-                      .map((e) => num.tryParse(e.trim()))
-                      .whereType<num>()
-                      .toList(),
-      },
       capacity: num.tryParse(capacityController.text) ?? 0,
       openTime: openTimeController.text,
       closeTime: closeTimeController.text,
@@ -232,24 +220,6 @@ class _UpdateGymDetailsPageState extends State<UpdateGymDetailsPage>
                     const SizedBox(height: 16),
                     
                     buildTextField(nameController, 'Gym Name', (val) => val!.isEmpty ? "Required" : null),
-                    buildTextField(locationController, 'Address', (val) => val!.isEmpty ? "Required" : null),
-                    buildTextField(
-                      coordinatesController, 
-                      'Coordinates (click to pick from map)', 
-                      (val) => val!.isEmpty ? "Required" : null,
-                      readOnly: true,
-                      onTap: () async {
-                        final picked = await Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => const LocationPickerPage(),
-                          ),
-                        );
-
-                        if (picked is LatLng) {
-                          coordinatesController.text = "${picked.longitude},${picked.latitude}";
-                        }
-                      },
-                    ),
                     buildTextField(capacityController, 'Capacity', (val) => val!.isEmpty ? "Required" : null, keyboardType: TextInputType.number),
                     buildTextField(openTimeController, 'Open Time', (val) => val!.isEmpty ? "Required" : null, readOnly: true, onTap: () => pickTime(context, openTimeController)),
                     buildTextField(closeTimeController, 'Close Time', (val) => val!.isEmpty ? "Required" : null, readOnly: true, onTap: () => pickTime(context, closeTimeController)),

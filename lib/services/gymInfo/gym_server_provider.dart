@@ -149,7 +149,6 @@ class GymServerProvider implements GymOwnerInfoProvider {
   Future<bool> updateGym(
       {required String gymId,
       required String name,
-      required Map<String, dynamic> location,
       required num capacity,
       required String openTime,
       required String closeTime,
@@ -163,7 +162,6 @@ class GymServerProvider implements GymOwnerInfoProvider {
         '$baseUrl/gymdb/gym/$gymId',
         data: {
           'name': name,
-          'location': location,
           'capacity': capacity,
           'openTime': openTime,
           'closeTime': closeTime,

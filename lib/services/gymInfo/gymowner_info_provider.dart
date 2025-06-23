@@ -40,7 +40,6 @@ abstract class GymOwnerInfoProvider {
      Future<bool> updateGym({
       required String gymId,
     required String name,
-    required Map<String,dynamic> location,
     required num capacity,
     required String openTime,
     required String closeTime,

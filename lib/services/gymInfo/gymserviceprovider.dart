@@ -30,8 +30,8 @@ class Gymserviceprovider implements GymOwnerInfoProvider{
   }
 
   @override
-  Future<bool> updateGym({required String gymId,required String name, required Map<String,dynamic> location, required num capacity, required String openTime, required String closeTime, required List<String> equipments,required String contactEmail, required String phone, required String about, required List<Map<String,dynamic>> shifts}) {
-   return provider.updateGym(gymId: gymId, name: name, location: location, capacity: capacity, openTime: openTime, closeTime: closeTime, contactEmail: contactEmail, phone: phone,equipments: equipments, about: about, shifts: shifts);
+  Future<bool> updateGym({required String gymId,required String name, required num capacity, required String openTime, required String closeTime, required List<String> equipments,required String contactEmail, required String phone, required String about, required List<Map<String,dynamic>> shifts}) {
+   return provider.updateGym(gymId: gymId, name: name, capacity: capacity, openTime: openTime, closeTime: closeTime, contactEmail: contactEmail, phone: phone,equipments: equipments, about: about, shifts: shifts);
   }
   
   @override

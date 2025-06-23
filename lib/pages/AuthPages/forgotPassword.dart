@@ -40,129 +40,161 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
 
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
-        if(state is AuthStateForgotPassword){
-          if(state.error!=null){
+        if (state is AuthStateForgotPassword) {
+          setState(() => isLoading = false);
+          if (state.error != null) {
+            showErrorDialog(context, state.error!);
+          } else {
+            showInfoDialog(context, "Email has been sent");
+          }
+        } else if (state is AuthStateErrors) {
+          setState(() => isLoading = false);
+          showErrorDialog(context, state.error);
+        } else if (state is AuthStateLoggedOut) {
+          setState(() => isLoading = false);
+          if (state.error != null) {
             showErrorDialog(context, state.error!);
           }
-        }
-        if(state is AuthStateForgotPassword){
-          showInfoDialog(context, "Email has been sent");
         }
       },
       child: Scaffold(
         backgroundColor: Colors.white,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: Theme.of(context).primaryColor),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
         body: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: mq.width * 0.2),
+          padding: EdgeInsets.symmetric(horizontal: mq.width * 0.1),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: mq.height * 0.2),
-
+              SizedBox(height: mq.height * 0.05),
+              
               // Title
               Text(
                 "Forgot Password",
-                style: TextStyle(
-                  fontSize: 40,
+                style: GoogleFonts.poppins(
+                  fontSize: 32,
                   fontWeight: FontWeight.bold,
                   color: Theme.of(context).primaryColor,
                 ),
-                textAlign: TextAlign.center,
               ),
               SizedBox(height: 12),
 
               // Subtitle
               Text(
-                "Write your email to reset password.",
-                style: TextStyle(
-                  color: Theme.of(context).primaryColor,
+                "Don't worry! It happens. Please enter the email address associated with your account.",
+                style: GoogleFonts.poppins(
                   fontSize: 16,
+                  color: Colors.grey[600],
+                  height: 1.5,
                 ),
-                textAlign: TextAlign.center,
               ),
-              Text(
-                "We will send you an email to reset it.",
-                style: TextStyle(color: Colors.black87),
-                textAlign: TextAlign.center,
-              ),
-
-              SizedBox(height: mq.height * 0.15),
+              SizedBox(height: mq.height * 0.08),
 
               // Email Field
-              TextField(
-                controller: email,
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide:
-                        BorderSide(color: Theme.of(context).primaryColor),
-                  ),
-                  hintText: "Email",
-                  hintStyle: GoogleFonts.mulish(
-                    fontSize: 18,
-                    color: Colors.grey,
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: TextField(
+                  controller: email,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: InputDecoration(
+                    hintText: "Enter your email",
+                    hintStyle: GoogleFonts.poppins(
+                      fontSize: 16,
+                      color: Colors.grey[400],
+                    ),
+                    prefixIcon: Icon(Icons.email_outlined, color: Theme.of(context).primaryColor),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   ),
                 ),
               ),
 
-              SizedBox(height: mq.height * 0.1),
+              SizedBox(height: mq.height * 0.08),
 
               // Send Email Button
               SizedBox(
                 height: 55,
                 width: double.infinity,
-                child: TextButton(
-                  onPressed: () {
-                    final userEmail = email.text.trim();
-                    if (userEmail.isNotEmpty) {
-                      // setState(() {
-                      //   isLoading = true;
-                      // });
-
-                      context.read<AuthBloc>().add(AuthEventForgotPassword(
-                          email: email.text, context: context));
-                      // ScaffoldMessenger.of(context).showSnackBar(
-                      //   SnackBar(
-                      //     content: Text("Reset link sent to $userEmail"),
-                      //   ),
-                      // );
-
-                      // setState(() {
-                      // isLoading = false;
-                      // }
-                      // );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          backgroundColor:
-                              Theme.of(context).colorScheme.primary,
-                          content: Text(
-                            "Please enter your email.",
-                            style: TextStyle(color: Colors.white),
+                child: ElevatedButton(
+                  onPressed: isLoading
+                      ? null
+                      : () {
+                          final userEmail = email.text.trim();
+                          if (userEmail.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                backgroundColor: Theme.of(context).primaryColor,
+                                content: Text(
+                                  "Please enter your email",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                            );
+                            return;
+                          }
+                          setState(() => isLoading = true);
+                          context.read<AuthBloc>().add(
+                                AuthEventForgotPassword(
+                                  email: email.text,
+                                  context: context,
+                                ),
+                              );
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).primaryColor,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: isLoading
+                      ? SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : Text(
+                          "Send Reset Link",
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                      );
-                    }
-                  },
-                  style: TextButton.styleFrom(
-                    overlayColor: Colors.white,
-                    backgroundColor: Theme.of(context).primaryColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    side: const BorderSide(color: Colors.black),
-                  ),
-                  child: Text(
-                    "Send Email",
-                    style: GoogleFonts.openSans(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
                 ),
               ),
 
               SizedBox(height: mq.height * 0.05),
+
+              // Back to Login
+              Center(
+                child: TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(
+                    "Back to Login",
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      color: Theme.of(context).primaryColor,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
