@@ -102,7 +102,12 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
           if (state.email != null) {
             email = state.email;
           }
-        } else if (state is AuthStateErrors) {
+        } else if(state is AuthStateVerifyOtp){
+          if(state.error!=null){
+            showErrorDialog(context, 'Invalid or Wrong OTP');
+          }
+        }
+         else if (state is AuthStateErrors) {
           developer.log('showing errors');
           showErrorDialog(context, state.error);
         }

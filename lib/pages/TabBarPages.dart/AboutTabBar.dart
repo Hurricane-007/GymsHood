@@ -14,6 +14,19 @@ class AboutTabBar extends StatefulWidget {
 }
 
 class _AboutTabBarState extends State<AboutTabBar> {
+  // Converts a 24-hour time string (e.g., '14:30') to 12-hour format (e.g., '2:30 PM')
+  String to12HourFormat(String time24h) {
+    final regExp = RegExp(r'^(\d{1,2}):(\d{2})');
+    final match = regExp.firstMatch(time24h.trim());
+    if (match == null) return time24h;
+    int hour = int.parse(match.group(1)!);
+    final minute = match.group(2)!;
+    final period = hour >= 12 ? 'PM' : 'AM';
+    hour = hour % 12;
+    if (hour == 0) hour = 12;
+    return '$hour:$minute $period';
+  }
+
   @override
   Widget build(BuildContext context) {
     mq = MediaQuery.of(context).size;
@@ -120,7 +133,7 @@ class _AboutTabBarState extends State<AboutTabBar> {
                           ),
                           const SizedBox(height: 10),
                           Text(
-                            "Open: ${widget.gym.openTime} - Close: ${widget.gym.closeTime}",
+                            "Open: ${to12HourFormat(widget.gym.openTime)} - Close: ${to12HourFormat(widget.gym.closeTime)}",
                             style: const TextStyle(
                               fontSize: 16,
                               color: Colors.black87,
@@ -211,7 +224,7 @@ class _AboutTabBarState extends State<AboutTabBar> {
                                             ),
                                             const SizedBox(width: 4),
                                             Text(
-                                              "${shift['startTime']} - ${shift['endTime']}",
+                                              "${to12HourFormat(shift['startTime'] ?? '')} - ${to12HourFormat(shift['endTime'] ?? '')}",
                                               style: TextStyle(
                                                 color: Colors.grey[600],
                                                 overflow: TextOverflow.ellipsis,

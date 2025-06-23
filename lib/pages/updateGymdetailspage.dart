@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:gymshood/Utilities/Dialogs/error_dialog.dart';
@@ -56,11 +58,24 @@ class _UpdateGymDetailsPageState extends State<UpdateGymDetailsPage>
     });
   }
 
+  // Converts a 24-hour time string (e.g., '14:30') to 12-hour format (e.g., '2:30 PM')
+  String to12HourFormat(String time24h) {
+    final regExp = RegExp(r'^(\d{1,2}):(\d{2})');
+    final match = regExp.firstMatch(time24h.trim());
+    if (match == null) return time24h;
+    int hour = int.parse(match.group(1)!);
+    final minute = match.group(2)!;
+    final period = hour >= 12 ? 'PM' : 'AM';
+    hour = hour % 12;
+    if (hour == 0) hour = 12;
+    return '$hour:$minute $period';
+  }
+
   void populateFields(Gym gym) {
     nameController.text = gym.name;
     capacityController.text = gym.capacity.toString();
-    openTimeController.text = gym.openTime;
-    closeTimeController.text = gym.closeTime;
+    openTimeController.text = to12HourFormat(gym.openTime);
+    closeTimeController.text = to12HourFormat(gym.closeTime);
     contactEmailController.text = gym.contactEmail;
     phoneController.text = gym.phone;
     aboutController.text = gym.about;
@@ -79,8 +94,8 @@ class _UpdateGymDetailsPageState extends State<UpdateGymDetailsPage>
       if (index != -1) {
         weeklyShiftControllers[index].add({
           'name': TextEditingController(text: shift['name'] ?? ''),
-          'startTime': TextEditingController(text: shift['startTime'] ?? ''),
-          'endTime': TextEditingController(text: shift['endTime'] ?? ''),
+          'startTime': TextEditingController(text: to12HourFormat(shift['startTime'] ?? '')),
+          'endTime': TextEditingController(text: to12HourFormat(shift['endTime'] ?? '')),
           'capacity': TextEditingController(text: shift['capacity']?.toString() ?? '0'),
         });
       }
@@ -104,10 +119,33 @@ class _UpdateGymDetailsPageState extends State<UpdateGymDetailsPage>
     setState(() {});
   }
 
+  String formatTimeOfDay(TimeOfDay time) {
+    final hour = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
+    final minute = time.minute.toString().padLeft(2, '0');
+    final period = time.period == DayPeriod.am ? 'AM' : 'PM';
+    return '$hour:$minute $period';
+  }
+
+  // Converts a 12-hour time string (e.g., '2:30 PM') to 24-hour format (e.g., '14:30')
+  String parseTo24Hour(String time12h) {
+    final regExp = RegExp(r'^(\d{1,2}):(\d{2}) ?([AP]M)', caseSensitive: false);
+    final match = regExp.firstMatch(time12h.trim());
+    if (match == null) return time12h; // fallback
+    int hour = int.parse(match.group(1)!);
+    final minute = match.group(2)!;
+    final period = match.group(3)!.toUpperCase();
+    if (period == 'PM' && hour != 12) hour += 12;
+    if (period == 'AM' && hour == 12) hour = 0;
+    return '${hour.toString().padLeft(2, '0')}:$minute';
+  }
+
   Future<void> pickTime(BuildContext context, TextEditingController controller) async {
     final picked = await showTimePicker(context: context, initialTime: TimeOfDay.now());
     if (picked != null) {
-      controller.text = '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
+      setState(() {
+        controller.text = formatTimeOfDay(picked);
+      });
+      developer.log(controller.text);
     }
   }
 
@@ -121,8 +159,8 @@ class _UpdateGymDetailsPageState extends State<UpdateGymDetailsPage>
         allShifts.add({
           'day': weekdays[i].toLowerCase(),
           'name': shift['name']!.text,
-          'startTime': shift['startTime']!.text,
-          'endTime': shift['endTime']!.text,
+          'startTime': parseTo24Hour(shift['startTime']!.text),
+          'endTime': parseTo24Hour(shift['endTime']!.text),
           'capacity': int.tryParse(shift['capacity']!.text) ?? 0,
         });
       }
@@ -132,8 +170,8 @@ class _UpdateGymDetailsPageState extends State<UpdateGymDetailsPage>
       gymId: _selectedGym!.gymid,
       name: nameController.text,
       capacity: num.tryParse(capacityController.text) ?? 0,
-      openTime: openTimeController.text,
-      closeTime: closeTimeController.text,
+      openTime: parseTo24Hour(openTimeController.text),
+      closeTime: parseTo24Hour(closeTimeController.text),
       contactEmail: contactEmailController.text,
       phone: phoneController.text,
       about: aboutController.text,
