@@ -10,6 +10,7 @@ import 'package:gymshood/services/Models/ActiveUsersModel.dart';
 import 'package:gymshood/services/Models/AuthUser.dart';
 import 'package:gymshood/services/Models/announcementModel.dart';
 import 'package:gymshood/services/Models/gym.dart';
+import 'package:gymshood/services/Models/memberGrowthModel.dart';
 import 'package:gymshood/services/Models/planModel.dart';
 import 'package:gymshood/services/Models/gymDashboardStats.dart';
 import 'package:gymshood/services/Models/ratingsModel.dart';
@@ -361,6 +362,7 @@ class GymServerProvider implements GymOwnerInfoProvider {
   Future<GymDashboardStats> getgymDashBoardStatus(String gymId) async {
     try {
       final response = await dio.get('$baseUrl/gymdb/dashboard/stats/$gymId');
+      developer.log("gymPotentialUsers ${response.toString()}");
       if (response.statusCode == 200 && response.data['success'] == true) {
         return GymDashboardStats.fromJson(response.data['stats']);
       } else {
@@ -394,14 +396,15 @@ class GymServerProvider implements GymOwnerInfoProvider {
   Future<bool> toggleGymstatus() async {
     try {
       final response = await dio.put("$baseUrl/gymdb/gyms/status");
+      
       if (response.statusCode == 200) {
         return true;
       } else {
-        developer.log("error in verifying docs ${response.data['message']}");
+        developer.log("error in toggle stats ${response.data['message']}");
         return false;
       }
     } catch (e) {
-      developer.log("error response in verifying docs${e.toString()}");
+      developer.log("error response in toggle status${e.toString()}");
       return false;
     }
   }
@@ -482,6 +485,7 @@ class GymServerProvider implements GymOwnerInfoProvider {
   Future<ActiveUsersResponse> getactiveUserResponse(String gymId) async {
     try {
       final response = await dio.get("$baseUrl/gymdb/gym/$gymId/active-users");
+      developer.log(response.toString());
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = {
           'activeUsers': (response.data['activeUsers'] as List)
@@ -515,7 +519,7 @@ Future<RevenueAnalytics?> fetchRevenueData(String gymId, {String period = 'month
     if (res.statusCode == 200 && res.data['success'] == true) {
       // final revenueData = res.data['data'];
       final revenueData = res.data['data'];
-
+        developer.log(revenueData.toString());
       if (revenueData != null && revenueData[period] != null) {
         developer.log(revenueData[period].toString());
         return RevenueAnalytics.fromJson(revenueData[period]);
@@ -614,4 +618,37 @@ Future<RevenueAnalytics?> fetchRevenueData(String gymId, {String period = 'month
       rethrow;
     }
   }
+
+@override
+Future<DashboardResponse> fetchMemberResponse(String gymId) async {
+  try {
+    final res = await dio.get("$baseUrl/gymdb/dashboard/members/$gymId");
+
+    developer.log("Raw response data: ${res.data}");
+
+    if (res.statusCode == 200 && res.data != null) {
+      // if response is already a map
+      if (res.data is Map<String, dynamic>) {
+        return DashboardResponse.fromJson(res.data as Map<String, dynamic>);
+      }
+
+      // if response is a String, try decoding it
+      if (res.data is String) {
+        final Map<String, dynamic> data = json.decode(res.data);
+        return DashboardResponse.fromJson(data);
+      }
+
+      developer.log("Unexpected response format: ${res.data.runtimeType}");
+      throw Exception("Unexpected response format from API.");
+    } else {
+      developer.log("Non-200 or null response: status=${res.statusCode}, data=${res.data}");
+      throw Exception("Cannot fulfill your request");
+    }
+  } catch (e, stack) {
+    developer.log("Error in fetchMemberResponse: $e", stackTrace: stack);
+    rethrow;
+  }
+}
+
+
 }

@@ -1,6 +1,7 @@
 import 'package:gymshood/services/Models/ActiveUsersModel.dart';
 import 'package:gymshood/services/Models/announcementModel.dart';
 import 'package:gymshood/services/Models/gym.dart';
+import 'package:gymshood/services/Models/memberGrowthModel.dart';
 import 'package:gymshood/services/Models/planModel.dart';
 import 'package:gymshood/services/Models/gymDashboardStats.dart';
 import 'package:gymshood/services/Models/ratingsModel.dart';
@@ -92,4 +93,5 @@ Future<bool> deleteAnnouncement(String announcementId);
 Future<bool> createFundaccount(String upiId, String accountNumber , String ifscCode , String accountHolder );
 Future<bool> recreateFundaccount(String upiId, String accountNumber , String ifscCode , String accountHolder );
 Future<List<GymRating>> getratings(String gymId);
+Future<DashboardResponse> fetchMemberResponse(String gymId);
 }

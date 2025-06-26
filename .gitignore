@@ -43,3 +43,5 @@ app.*.map.json
 /android/app/.cxx/[Dd]ebug
 /android/app/profile
 /android/app/release
+
+.env

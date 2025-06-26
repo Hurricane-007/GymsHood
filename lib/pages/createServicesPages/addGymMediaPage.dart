@@ -164,7 +164,8 @@ class _UploadMultipleImagesPageState extends State<UploadMultipleImagesPage> {
                     ),
                     SizedBox(height: 8),
                     Text(
-                      'Upload photos or videos to showcase your gym',
+                      'show case your gym with photos and videos. The media should be below 10MB',
+                      textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.white.withAlpha(500),
                         fontSize: 14,

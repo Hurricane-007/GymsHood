@@ -14,16 +14,6 @@ class MemberRegisterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).primaryColor,
-        leading: BackButton(color: Colors.white,),
-        title: Text(
-          'Member Register',
-          style: TextStyle(color: Colors.white),
-        ),
-        centerTitle: true,
-        elevation: 0,
-      ),
       body: Column(
         children: [
           Container(

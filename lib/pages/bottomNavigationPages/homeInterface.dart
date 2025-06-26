@@ -3,6 +3,7 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:gymshood/main.dart';
 import 'package:gymshood/pages/announcementPage.dart';
+import 'package:gymshood/pages/bottomNavigationPages/mergedDashboardPage.dart';
 import 'package:gymshood/pages/createServicesPages/Gyminfopage.dart';
 import 'package:gymshood/pages/fullScreenVideoandImage/FullScreenPage.dart';
 import 'package:gymshood/pages/memberRegisterPage.dart';
@@ -42,8 +43,10 @@ class _HomeInterfaceState extends State<HomeInterface> {
           name = user.name ?? '';
           gym = gyms[0];
           isLoading = false;
+          loadActiveUsers(gym!.gymid);
         });
       }
+
     } catch (e) {
       developer.log('Error loading user data: $e');
       if (mounted) {
@@ -64,6 +67,7 @@ class _HomeInterfaceState extends State<HomeInterface> {
           expiredUsers = response.expiredUsers;
         });
       }
+      developer.log("number of active users ${activeUsers.length}");
     } catch (e) {
       developer.log('Error loading active users: $e');
     }
@@ -73,6 +77,7 @@ class _HomeInterfaceState extends State<HomeInterface> {
   void initState() {
     super.initState();
     initializeData();
+    
   }
 
   @override
@@ -398,10 +403,10 @@ class _HomeInterfaceState extends State<HomeInterface> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => MemberRegisterPage(
-                                  activeUsers: activeUsers,
-                                  expiredUsers: expiredUsers,
-                                ),
+                                builder: (context) => MergedDashboardPage(
+                                  gymId: gym!.gymid,
+                                   activeUsers: activeUsers,
+                                    expiredUsers: expiredUsers)
                               ),
                             );
                           },

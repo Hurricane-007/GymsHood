@@ -2,6 +2,7 @@
 import 'package:gymshood/services/Models/ActiveUsersModel.dart';
 import 'package:gymshood/services/Models/announcementModel.dart';
 import 'package:gymshood/services/Models/gym.dart';
+import 'package:gymshood/services/Models/memberGrowthModel.dart';
 import 'package:gymshood/services/Models/planModel.dart';
 import 'package:gymshood/services/Models/gymDashboardStats.dart';
 import 'package:gymshood/services/Models/ratingsModel.dart';
@@ -127,5 +128,10 @@ return provider.toggleGymstatus();
   @override
   Future<List<GymRating>> getratings(String gymId) {
     return provider.getratings(gymId);
+  }
+
+  @override
+  Future<DashboardResponse> fetchMemberResponse(String gymId) {
+    return provider.fetchMemberResponse(gymId);
   }
 }

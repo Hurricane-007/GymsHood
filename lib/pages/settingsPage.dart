@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gymshood/Utilities/Dialogs/error_dialog.dart';
+import 'package:gymshood/Utilities/Dialogs/info_dialog.dart';
 import 'package:gymshood/Utilities/Dialogs/showLogout_dialog.dart';
 import 'package:gymshood/pages/announcementPage.dart';
 import 'package:gymshood/pages/bankDetailsPage.dart';
@@ -12,12 +14,12 @@ import 'package:gymshood/pages/updateGymdetailspage.dart';
 import 'package:gymshood/services/Auth/bloc/auth_bloc.dart';
 import 'package:gymshood/services/Auth/bloc/auth_event.dart';
 import 'package:gymshood/services/Models/gym.dart';
+import 'package:gymshood/services/gymInfo/gymserviceprovider.dart';
 
 class SettingsPage extends StatelessWidget {
   final Gym? selectedGym;
 
   const SettingsPage({Key? key, this.selectedGym}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -65,6 +67,10 @@ class SettingsPage extends StatelessWidget {
               MaterialPageRoute(builder: (context) => CreatePlansPage()),
             ),
           ),
+
+          // Gym Status Section
+          // _buildSectionHeader(context, "Gym Status"),
+          // if (selectedGym != null) _GymStatusToggle(gymId: selectedGym!.gymid),
 
           // Account Section
           _buildSectionHeader(context, "Account"),
@@ -168,6 +174,72 @@ class SettingsPage extends StatelessWidget {
         color: textColor ?? Colors.grey,
       ),
       onTap: onTap,
+    );
+  }
+}
+
+class _GymStatusToggle extends StatefulWidget {
+  final String gymId;
+  const _GymStatusToggle({required this.gymId});
+
+  @override
+  State<_GymStatusToggle> createState() => _GymStatusToggleState();
+}
+
+class _GymStatusToggleState extends State<_GymStatusToggle> {
+  bool? isOpen;
+  bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchStatus();
+  }
+
+  Future<void> _fetchStatus() async {
+    setState(() => isLoading = true);
+    try {
+      final gym = await Gymserviceprovider.server().getGymDetails(id: widget.gymId);
+      setState(() {
+        isOpen = gym.status.toString().split('.').last == 'open';
+      });
+    } catch (e) {
+      showErrorDialog(context, 'Failed to fetch gym status');
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
+
+  Future<void> _toggleStatus() async {
+    setState(() => isLoading = true);
+    final res = await Gymserviceprovider.server().toggleGymstatus();
+    if (res) {
+      setState(() {
+        isOpen = !(isOpen ?? true);
+      });
+      showInfoDialog(context, 'Your gym status is now changed');
+    } else {
+      showErrorDialog(context, 'Error occurred');
+    }
+    setState(() => isLoading = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (isOpen == null || isLoading) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 16),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+    return SwitchListTile(
+      title: Text('Gym Status: ${isOpen! ? 'Open' : 'Closed'}'),
+      value: isOpen!,
+      activeColor: Colors.white,
+      activeTrackColor: Theme.of(context).primaryColor,
+      inactiveThumbColor: Theme.of(context).primaryColor,
+      inactiveTrackColor: Colors.white,
+      onChanged: (_) => _toggleStatus(),
     );
   }
 } 
