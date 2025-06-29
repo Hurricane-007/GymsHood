@@ -97,6 +97,7 @@ class _UpdateGymDetailsPageState extends State<UpdateGymDetailsPage>
           'startTime': TextEditingController(text: to12HourFormat(shift['startTime'] ?? '')),
           'endTime': TextEditingController(text: to12HourFormat(shift['endTime'] ?? '')),
           'capacity': TextEditingController(text: shift['capacity']?.toString() ?? '0'),
+          'gender': TextEditingController(text: shift['gender'] ?? 'unisex'),
         });
       }
     }
@@ -109,6 +110,7 @@ class _UpdateGymDetailsPageState extends State<UpdateGymDetailsPage>
       'startTime': TextEditingController(),
       'endTime': TextEditingController(),
       'capacity': TextEditingController(),
+      'gender': TextEditingController(text: 'unisex'), // Default to unisex
     });
     setState(() {});
   }
@@ -162,6 +164,7 @@ class _UpdateGymDetailsPageState extends State<UpdateGymDetailsPage>
           'startTime': parseTo24Hour(shift['startTime']!.text),
           'endTime': parseTo24Hour(shift['endTime']!.text),
           'capacity': int.tryParse(shift['capacity']!.text) ?? 0,
+          'gender': shift['gender']!.text,
         });
       }
     }
@@ -185,7 +188,7 @@ class _UpdateGymDetailsPageState extends State<UpdateGymDetailsPage>
     if (!mounted) return;
 
     if(response){
-      showInfoDialog(context, "Successfully updated your gym details");
+      showInfoDialog(context, "Successfully updated your gym details!. You can announce the changes too through the announcement");
     }
     else{
       showErrorDialog(context, "Your details are not updated");
@@ -205,6 +208,35 @@ class _UpdateGymDetailsPageState extends State<UpdateGymDetailsPage>
         keyboardType: keyboardType,
         readOnly: readOnly,
         onTap: onTap,
+      ),
+    );
+  }
+
+  Widget buildGenderDropdown(TextEditingController controller) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: DropdownButtonFormField<String>(
+        value: controller.text.isEmpty ? 'unisex' : controller.text,
+        decoration: const InputDecoration(
+          labelText: 'Gender',
+        
+        ),
+        onChanged: (newValue) {
+          setState(() {
+            controller.text = newValue!;
+          });
+        },
+        items: ['unisex', 'male', 'female'].map((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(value),
+          );
+        }).toList(),
+        validator: (value) {
+          return value == null || value.trim().isEmpty
+              ? 'Please select a gender'
+              : null;
+        },
       ),
     );
   }
@@ -335,6 +367,7 @@ class _UpdateGymDetailsPageState extends State<UpdateGymDetailsPage>
                                                                         'startTime': TextEditingController(text: shift['startTime']!.text),
                                                                         'endTime': TextEditingController(text: shift['endTime']!.text),
                                                                         'capacity': TextEditingController(text: shift['capacity']!.text),
+                                                                        'gender': TextEditingController(text: shift['gender']!.text),
                                                                       });
                                                                     }
                                                                   }
@@ -359,6 +392,7 @@ class _UpdateGymDetailsPageState extends State<UpdateGymDetailsPage>
                                               buildTextField(shift['startTime']!, 'Start Time', null, readOnly: true, onTap: () => pickTime(context, shift['startTime']!)),
                                               buildTextField(shift['endTime']!, 'End Time', null, readOnly: true, onTap: () => pickTime(context, shift['endTime']!)),
                                               buildTextField(shift['capacity']!, 'Shift Capacity', null, keyboardType: TextInputType.number),
+                                              buildGenderDropdown(shift['gender']!),
                                             ],
                                           ),
                                         ),

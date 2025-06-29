@@ -6,6 +6,7 @@ import 'package:gymshood/services/Models/planModel.dart';
 import 'package:gymshood/services/Models/gymDashboardStats.dart';
 import 'package:gymshood/services/Models/ratingsModel.dart';
 import 'package:gymshood/services/Models/revenueDataModel.dart';
+import 'package:gymshood/services/Models/walletTransactionModel.dart';
 
 abstract class GymOwnerInfoProvider {
   Future<Map<String,dynamic>> registerGym({
@@ -94,4 +95,7 @@ Future<bool> createFundaccount(String upiId, String accountNumber , String ifscC
 Future<bool> recreateFundaccount(String upiId, String accountNumber , String ifscCode , String accountHolder );
 Future<List<GymRating>> getratings(String gymId);
 Future<DashboardResponse> fetchMemberResponse(String gymId);
+Future<String> getPlanNameById(String planId);
+Future<List<WalletTransaction>> getPaymentHistory(String gymId);
+
 }

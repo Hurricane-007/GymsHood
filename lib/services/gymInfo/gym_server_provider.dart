@@ -16,6 +16,7 @@ import 'package:gymshood/services/Models/gymDashboardStats.dart';
 import 'package:gymshood/services/Models/ratingsModel.dart';
 import 'package:gymshood/services/Models/registerModel.dart';
 import 'package:gymshood/services/Models/revenueDataModel.dart';
+import 'package:gymshood/services/Models/walletTransactionModel.dart';
 import 'package:gymshood/services/gymInfo/gymowner_info_provider.dart';
 import 'package:gymshood/services/gymInfo/gymserviceprovider.dart';
 
@@ -650,5 +651,42 @@ Future<DashboardResponse> fetchMemberResponse(String gymId) async {
   }
 }
 
+  @override
+  Future<String> getPlanNameById(String planId) async{
+    try{
+      final res = await dio.get("$baseUrl/gymdb//name/$planId");
+      if(res.statusCode==200){
+        return res.data['planName'];
+      }
+      else{
+        throw(Exception("cannot be fetched properly"));
+      }
+    }
+    catch(e){
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<WalletTransaction>> getPaymentHistory(String gymId) async {
+    try {
+      final response = await dio.get("$baseUrl/payment/history/$gymId");
+      
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        developer.log("raw data of transaction ${response.data}");
+        final List<dynamic> transactionsData = response.data['data'];
+        return transactionsData
+            .map((json) => WalletTransaction.fromJson(json))
+            .toList();
+      } else {
+        
+        developer.log("Error response: ${response.data}");
+        throw Exception("Failed to fetch payment history");
+      }
+    } catch (e) {
+      developer.log("Error in getPaymentHistory: $e");
+      rethrow;
+    }
+  }
 
 }

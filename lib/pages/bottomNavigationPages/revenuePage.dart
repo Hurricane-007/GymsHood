@@ -27,11 +27,28 @@ class _RevenuePageState extends State<RevenuePage> {
   String selectedChartType = 'bar'; // 'bar' or 'pie'
   String? selectedPeriodData;
   late Size mq;
+  Map<String, String> planNameCache = {}; // Cache for plan names
 
   @override
   void initState() {
     super.initState();
     fetchRevenueData();
+  }
+
+  Future<String> getPlanName(String id) async {
+    try {
+      // Check cache first
+      if (planNameCache.containsKey(id)) {
+        return planNameCache[id]!;
+      }
+      
+      String name = await Gymserviceprovider.server().getPlanNameById(id);
+      // Cache the result
+      planNameCache[id] = name;
+      return name;
+    } catch (e) {
+      return "Unknown Plan";
+    }
   }
 
   Future<void> fetchRevenueData() async {
@@ -55,6 +72,14 @@ class _RevenuePageState extends State<RevenuePage> {
       final gymId = gyms[0].gymid;
       final data = await Gymserviceprovider.server()
           .fetchRevenueData(gymId, period: selectedPeriod);
+      
+      // Populate plan name cache
+      if (data != null && data.planSeries.isNotEmpty) {
+        for (String planId in data.planSeries.keys) {
+          await getPlanName(planId);
+        }
+      }
+      
       setState(() {
         revenueData = data;
         isLoading = false;
@@ -70,21 +95,53 @@ class _RevenuePageState extends State<RevenuePage> {
   }
 
   String formatPeriod(String period) {
-    final parts = period.split('-');
-    if (parts.length == 3) {
-      // Daily format: YYYY-MM-DD
-      return DateFormat('MMM dd, yyyy').format(DateTime(
-        int.parse(parts[0]),
-        int.parse(parts[1]),
-        int.parse(parts[2])
-      ));
-    } else if (parts.length == 2) {
-      // Monthly format: YYYY-MM
-      return DateFormat('MMMM yyyy').format(DateTime(
-        int.parse(parts[0]),
-        int.parse(parts[1])
-      ));
-    } else {
+    try {
+      // Handle weekly format like "W26" or "2024-W26"
+      if (period.startsWith('W') || period.contains('-W')) {
+        if (period.startsWith('W')) {
+          // Format: W26
+          return 'Week ${period.substring(1)}';
+        } else {
+          // Format: 2024-W26
+          final parts = period.split('-W');
+          if (parts.length == 2) {
+            return 'Week ${parts[1]}, ${parts[0]}';
+          }
+        }
+      }
+      
+      // Handle daily format: YYYY-MM-DD
+      if (period.contains('-') && period.split('-').length == 3) {
+        final parts = period.split('-');
+        if (parts.length == 3) {
+          return DateFormat('MMM dd, yyyy').format(DateTime(
+            int.parse(parts[0]),
+            int.parse(parts[1]),
+            int.parse(parts[2])
+          ));
+        }
+      }
+      
+      // Handle monthly format: YYYY-MM
+      if (period.contains('-') && period.split('-').length == 2) {
+        final parts = period.split('-');
+        if (parts.length == 2) {
+          return DateFormat('MMMM yyyy').format(DateTime(
+            int.parse(parts[0]),
+            int.parse(parts[1])
+          ));
+        }
+      }
+      
+      // Handle yearly format: YYYY
+      if (period.length == 4 && int.tryParse(period) != null) {
+        return period;
+      }
+      
+      // If none of the above formats match, return the original string
+      return period;
+    } catch (e) {
+      // If any parsing fails, return the original string
       return period;
     }
   }
@@ -199,20 +256,26 @@ class _RevenuePageState extends State<RevenuePage> {
           alignment: WrapAlignment.center,
           children: planSeries.keys.map((planId) {
             final index = planSeries.keys.toList().indexOf(planId);
-            return Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 12,
-                  height: 12,
-                  decoration: BoxDecoration(
-                    color: _getColorForIndex(index),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                Text(planId, style: const TextStyle(fontSize: 12)),
-              ],
+            return FutureBuilder<String>(
+              future: getPlanName(planId),
+              builder: (context, snapshot) {
+                final planName = snapshot.data ?? planId;
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 12,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: _getColorForIndex(index),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(planName, style: const TextStyle(fontSize: 12)),
+                  ],
+                );
+              },
             );
           }).toList(),
         ),
@@ -381,29 +444,35 @@ class _RevenuePageState extends State<RevenuePage> {
           ...planRevenues.entries.map((entry) {
             final index = planRevenues.keys.toList().indexOf(entry.key);
             final percentage = (entry.value / totalRevenue * 100);
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: _getColorForIndex(index),
-                      shape: BoxShape.circle,
-                    ),
+            return FutureBuilder<String>(
+              future: getPlanName(entry.key),
+              builder: (context, snapshot) {
+                final planName = snapshot.data ?? entry.key;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: _getColorForIndex(index),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          '$planName: ₹${entry.value.toStringAsFixed(2)} (${percentage.toStringAsFixed(1)}%)',
+                          style: const TextStyle(fontSize: 14),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: Text(
-                      '${entry.key}: ₹${entry.value.toStringAsFixed(2)} (${percentage.toStringAsFixed(1)}%)',
-                      style: const TextStyle(fontSize: 14),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ],
-              ),
+                );
+              },
             );
           }).toList(),
           const SizedBox(height: 16),
@@ -694,49 +763,55 @@ class _RevenuePageState extends State<RevenuePage> {
                                       final revenues = entry.value;
                                       final revenue = index < revenues.length ? revenues[index] : 0.0;
                                       
-                                      return Card(
-                                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(16),
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                'Plan: $planId',
-                                                style: const TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 8),
-                                              Row(
-                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      return FutureBuilder<String>(
+                                        future: getPlanName(planId),
+                                        builder: (context, snapshot) {
+                                          final planName = snapshot.data ?? planId;
+                                          return Card(
+                                            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(16),
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
-                                                  Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                  Text(
+                                                    'Plan: $planName',
+                                                    style: const TextStyle(
+                                                      fontSize: 16,
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 8),
+                                                  Row(
+                                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                     children: [
-                                                      const Text(
-                                                        'Revenue',
-                                                        style: TextStyle(
-                                                          fontSize: 14,
-                                                          color: Colors.grey,
-                                                        ),
-                                                      ),
-                                                      Text(
-                                                        '₹${revenue.toStringAsFixed(2)}',
-                                                        style: const TextStyle(
-                                                          fontSize: 18,
-                                                          fontWeight: FontWeight.bold,
-                                                          color: Colors.green,
-                                                        ),
+                                                      Column(
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        children: [
+                                                          const Text(
+                                                            'Revenue',
+                                                            style: TextStyle(
+                                                              fontSize: 14,
+                                                              color: Colors.grey,
+                                                            ),
+                                                          ),
+                                                          Text(
+                                                            '₹${revenue.toStringAsFixed(2)}',
+                                                            style: const TextStyle(
+                                                              fontSize: 18,
+                                                              fontWeight: FontWeight.bold,
+                                                              color: Colors.green,
+                                                            ),
+                                                          ),
+                                                        ],
                                                       ),
                                                     ],
                                                   ),
                                                 ],
                                               ),
-                                            ],
-                                          ),
-                                        ),
+                                            ),
+                                          );
+                                        },
                                       );
                                     }).toList(),
                                   ),

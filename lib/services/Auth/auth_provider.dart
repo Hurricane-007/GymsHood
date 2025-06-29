@@ -5,7 +5,7 @@ abstract class AuthProvider {
   Future<String> register(String name, String email, String password , String role);
   Future<void> sendverificationemail({required String email});
   Future<String> verifyOTP({required String otp, required String email});
-  Future<String> login({required String email, required String password});
+  Future<String> login({required String email, required String password ,required String role});
   Future<String> googleLogIn({required token});
   Future<String> signInWithGoogle();
   Future<String> logOut();

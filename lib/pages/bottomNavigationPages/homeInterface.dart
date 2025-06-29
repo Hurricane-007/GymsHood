@@ -6,7 +6,7 @@ import 'package:gymshood/pages/announcementPage.dart';
 import 'package:gymshood/pages/bottomNavigationPages/mergedDashboardPage.dart';
 import 'package:gymshood/pages/createServicesPages/Gyminfopage.dart';
 import 'package:gymshood/pages/fullScreenVideoandImage/FullScreenPage.dart';
-import 'package:gymshood/pages/memberRegisterPage.dart';
+import 'package:gymshood/pages/generateQrPage.dart';
 import 'package:gymshood/pages/verifydocumentPage.dart';
 import 'package:gymshood/services/Auth/auth_service.dart';
 import 'package:gymshood/services/Models/AuthUser.dart';
@@ -14,7 +14,6 @@ import 'package:gymshood/services/Models/gym.dart';
 import 'package:gymshood/services/Models/gymDashboardStats.dart';
 import 'package:gymshood/services/Models/registerModel.dart';
 import 'package:gymshood/services/gymInfo/gymserviceprovider.dart';
-import 'package:gymshood/pages/bottomNavigationPages/potentialCustomersPage.dart';
 import 'package:gymshood/services/Models/announcementModel.dart';
 import 'package:intl/intl.dart';
 
@@ -629,42 +628,76 @@ class _HomeInterfaceState extends State<HomeInterface> {
                                                     color: Colors.white),
                                               ),
                                               SizedBox(height: 12),
-                                              SizedBox(
-                                                width: double.infinity,
-                                                child: ElevatedButton.icon(
-                                                  onPressed: () {
-                                                    Navigator.push(
-                                                      context,
-                                                      MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            PotentialCustomersPage(
-                                                          potentialCustomers: stats
-                                                              .potentialCustomers,
+                                              // QR Code Reminder Message
+                                              Container(
+                                                padding: EdgeInsets.all(12),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.blue[50],
+                                                  borderRadius: BorderRadius.circular(8),
+                                                  border: Border.all(color: Colors.blue[200]!),
+                                                ),
+                                                child: Row(
+                                                  children: [
+                                                    Icon(
+                                                      Icons.qr_code,
+                                                      color: Colors.blue[700],
+                                                      size: 24,
+                                                    ),
+                                                    SizedBox(width: 12),
+                                                    Expanded(
+                                                      child: Column(
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        children: [
+                                                          Text(
+                                                            'QR Code Setup Reminder',
+                                                            style: TextStyle(
+                                                              fontWeight: FontWeight.bold,
+                                                              color: Colors.blue[700],
+                                                              fontSize: 14,
+                                                            ),
+                                                          ),
+                                                          SizedBox(height: 4),
+                                                          Text(
+                                                            'If you haven\'t created QR codes yet, please generate them and place them strategically in your gym for member access.',
+                                                            style: TextStyle(
+                                                              color: Colors.blue[600],
+                                                              fontSize: 12,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              SizedBox(height: 8),
+                                              Row(
+                                                children: [
+                                                  Expanded(
+                                                    child: ElevatedButton.icon(
+                                                      onPressed: () {
+                                                        Navigator.push(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                            builder: (context) => QrPage(),
+                                                          ),
+                                                        );
+                                                      },
+                                                      icon: Icon(Icons.qr_code, color: Colors.white),
+                                                      label: Text(
+                                                        'Generate QR Codes',
+                                                        style: TextStyle(color: Colors.white),
+                                                      ),
+                                                      style: ElevatedButton.styleFrom(
+                                                        backgroundColor: Theme.of(context).primaryColor,
+                                                        padding: EdgeInsets.symmetric(vertical: 8),
+                                                        shape: RoundedRectangleBorder(
+                                                          borderRadius: BorderRadius.circular(8),
                                                         ),
                                                       ),
-                                                    );
-                                                  },
-                                                  icon: Icon(Icons.people,
-                                                      color: Colors.white),
-                                                  label: Text(
-                                                    'View Potential Customers',
-                                                    style: TextStyle(
-                                                        color: Colors.white),
-                                                  ),
-                                                  style:
-                                                      ElevatedButton.styleFrom(
-                                                    backgroundColor: Theme.of(context).primaryColor.withAlpha(450),
-                                                    padding:
-                                                        EdgeInsets.symmetric(
-                                                            vertical: 12),
-                                                    shape:
-                                                        RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              12),
                                                     ),
                                                   ),
-                                                ),
+                                                ],
                                               ),
                                             ],
                                           ),

@@ -98,7 +98,7 @@ on<AuthEventInitialize>((event, emit) async {
       // developer.log('called');
       final String response = 
       await provider.
-      login(email: email, password: password);
+      login(email: email, password: password , role: 'GymOwner');
       
       if(response == 'Successfull'){
         emit(AuthStateLoggedIn());

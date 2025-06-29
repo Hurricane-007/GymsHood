@@ -28,14 +28,41 @@ class DashboardData {
 
 class PlanDistribution {
   final int totalActiveUsers;
-  final Map<String, dynamic> byPlan;
+  final Map<String, PlanInfo> byPlan;
 
   PlanDistribution({required this.totalActiveUsers, required this.byPlan});
 
   factory PlanDistribution.fromJson(Map<String, dynamic> json) {
+    Map<String, PlanInfo> planMap = {};
+    Map<String, dynamic> byPlanData = json['byPlan'];
+    
+    byPlanData.forEach((key, value) {
+      planMap[key] = PlanInfo.fromJson(value);
+    });
+    
     return PlanDistribution(
       totalActiveUsers: json['totalActiveUsers'],
-      byPlan: Map<String, dynamic>.from(json['byPlan']),
+      byPlan: planMap,
+    );
+  }
+}
+
+class PlanInfo {
+  final int count;
+  final String planName;
+  final String planType;
+
+  PlanInfo({
+    required this.count,
+    required this.planName,
+    required this.planType,
+  });
+
+  factory PlanInfo.fromJson(Map<String, dynamic> json) {
+    return PlanInfo(
+      count: json['count'],
+      planName: json['planName'],
+      planType: json['planType'],
     );
   }
 }

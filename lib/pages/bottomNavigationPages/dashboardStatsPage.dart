@@ -73,18 +73,81 @@ class _DashboardStatsPageState extends State<DashboardStatsPage> {
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Column(
-                    children: data.planDistribution.byPlan.entries.map((e) => ListTile(
-                          leading: Icon(Icons.fitness_center, color: primaryColor),
-                          title: Text(e.key, style: TextStyle(fontWeight: FontWeight.w500)),
-                          trailing: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    children: data.planDistribution.byPlan.entries.map((entry) {
+                      final planInfo = entry.value;
+                      return Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
                               color: accentColor,
                               borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: primaryColor.withOpacity(0.1)),
                             ),
-                            child: Text(e.value.toString(), style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold)),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: primaryColor.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(
+                                _getPlanIcon(planInfo.planType),
+                                color: primaryColor,
+                                size: 20,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    planInfo.planName,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: _getPlanTypeColor(planInfo.planType).withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      planInfo.planType.toUpperCase(),
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: _getPlanTypeColor(planInfo.planType),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: primaryColor,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                '${planInfo.count}',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
                           ),
-                        )).toList(),
+                          ],
+                        ),
+                      );
+                    }).toList(),
                   ),
                 ),
                 const Divider(height: 40, thickness: 1.2),
@@ -135,5 +198,35 @@ class _DashboardStatsPageState extends State<DashboardStatsPage> {
         ],
       ),
     );
+  }
+
+  IconData _getPlanIcon(String planType) {
+    switch (planType.toLowerCase()) {
+      case 'monthly':
+        return Icons.calendar_month;
+      case 'weekly':
+        return Icons.calendar_view_week;
+      case 'daily':
+        return Icons.today;
+      case 'yearly':
+        return Icons.calendar_today;
+      default:
+        return Icons.fitness_center;
+    }
+  }
+
+  Color _getPlanTypeColor(String planType) {
+    switch (planType.toLowerCase()) {
+      case 'monthly':
+        return Colors.blue;
+      case 'weekly':
+        return Colors.green;
+      case 'daily':
+        return Colors.orange;
+      case 'yearly':
+        return Colors.purple;
+      default:
+        return Colors.grey;
+    }
   }
 } 

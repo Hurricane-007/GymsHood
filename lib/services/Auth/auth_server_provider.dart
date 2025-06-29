@@ -132,13 +132,14 @@ PersistCookieJar get cookieJar => _cookieJar;
 
   @override
   Future<String> login(
-      {required String email, required String password}) async {
+      {required String email, required String password,required String role}) async {
     try {
       // developer.log('login pressed');
       final response = await _dio.post("$baseUrl/auth/login",
           data: {
             'email': email,
             'password': password,
+            'role':role
           },
           options: Options(
               headers: {'Content-Type': 'application/json'},

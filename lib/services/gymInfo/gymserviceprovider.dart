@@ -7,6 +7,7 @@ import 'package:gymshood/services/Models/planModel.dart';
 import 'package:gymshood/services/Models/gymDashboardStats.dart';
 import 'package:gymshood/services/Models/ratingsModel.dart';
 import 'package:gymshood/services/Models/revenueDataModel.dart';
+import 'package:gymshood/services/Models/walletTransactionModel.dart';
 import 'package:gymshood/services/gymInfo/gym_server_provider.dart';
 import 'package:gymshood/services/gymInfo/gymowner_info_provider.dart';
 
@@ -133,5 +134,15 @@ return provider.toggleGymstatus();
   @override
   Future<DashboardResponse> fetchMemberResponse(String gymId) {
     return provider.fetchMemberResponse(gymId);
+  }
+  
+  @override
+  Future<String> getPlanNameById(String planId) {
+   return provider.getPlanNameById(planId);
+  }
+  
+  @override
+  Future<List<WalletTransaction>> getPaymentHistory(String gymId) {
+    return provider.getPaymentHistory(gymId);
   }
 }

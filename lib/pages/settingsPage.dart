@@ -8,7 +8,10 @@ import 'package:gymshood/pages/bankDetailsPage.dart';
 import 'package:gymshood/pages/createServicesPages/Gyminfopage.dart';
 import 'package:gymshood/pages/createServicesPages/addGymMediaPage.dart';
 import 'package:gymshood/pages/createServicesPages/createplansPage.dart';
+import 'package:gymshood/pages/generateQrPage.dart';
 import 'package:gymshood/pages/helpAndSupportPage.dart';
+import 'package:gymshood/pages/paymentHistory.dart';
+
 import 'package:gymshood/pages/privacyPolicyPage.dart';
 import 'package:gymshood/pages/updateGymdetailspage.dart';
 import 'package:gymshood/services/Auth/bloc/auth_bloc.dart';
@@ -74,14 +77,19 @@ class SettingsPage extends StatelessWidget {
 
           // Account Section
           _buildSectionHeader(context, "Account"),
+          // _buildSettingsTile(
+          //   context,
+          //   icon: Icons.account_balance,
+          //   title: "Payment contact info",
+          //   onTap: () {
+          //     Navigator.push(context, MaterialPageRoute(builder: (context) => BankDetailsPage(),));
+          //   },
+          // ),
+          _buildSettingsTile(context, icon: Icons.payment, title: "Payment history", onTap: ()=>Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentHistoryPage(),))),
           _buildSettingsTile(
-            context,
-            icon: Icons.account_balance,
-            title: "Payment contact info",
-            onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => BankDetailsPage(),));
-            },
-          ),
+            context, icon: Icons.qr_code, title: "Create Gym Qr", onTap: (){
+              Navigator.push(context, MaterialPageRoute(builder: (context)=> QrPage()));
+            }),
           _buildSettingsTile(
             context,
             icon: Icons.notifications,
